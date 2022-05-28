@@ -1,0 +1,48 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "rich_argparse"
+version = "0.1.0"
+description = "A rich help formatter for argparse"
+authors = [
+  {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
+]
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+keywords = ["argparse", "rich", "help-formatter"]
+dependencies = [
+  "rich >= 11.0.0",
+]
+requires-python = ">=3.7"
+
+[project.urls]
+Home = "https://github.com/hamdanal/rich-argparse"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37,py38,py39,py310
+isolated_build = true
+skip_missing_interpreters = true
+
+[testenv]
+deps =
+  pytest
+commands =
+  pytest {posargs}
+"""
+
+[tool.black]
+line_length = 100
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+strict = true
+show_error_codes = true

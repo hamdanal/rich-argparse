@@ -1,6 +1,6 @@
 # rich_argparse.py
 #
-#     https://github.com/hamdanal/rich_argparse
+#     https://github.com/hamdanal/rich-argparse
 #
 # Author: Ali Hamdan (ali.hamdan.dev@gmail.com).
 #
@@ -12,14 +12,14 @@
 # greater good.
 
 import argparse
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Optional
+from typing import TYPE_CHECKING, Callable, Dict, Generator, Iterable, List, Optional, cast
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
     from rich.console import RenderableType
+    from rich.padding import Padding
     from rich.style import StyleType
-    from rich.syntax import Syntax
     from rich.table import Table
 
 __all__ = ["RichHelpFormatter"]
@@ -28,61 +28,37 @@ __all__ = ["RichHelpFormatter"]
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
-    first_column_min_width: int = 18
-    first_column_max_width: int = 38
-    second_column_max_width: int = 78
-    insert_empty_lines_between_args: bool = False
-    highlight_help: bool = False
+    group_name_formatter: Callable[[str], str] = str.upper
     styles: Dict[str, "StyleType"] = {
         "argparse.args": "italic cyan",
         "argparse.groups": "bold italic dark_orange",
+        "argparse.help": "default",
+        "argparse.text": "italic",
     }
+    highlights: List[str] = [r"\W(?P<args>-{1,2}[\w]+[\w-]*)"]
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._width = min(self._width, self.first_column_max_width + self.second_column_max_width)
-        self._renderables: list[RenderableType] = []
+    def __init__(
+        self,
+        prog: str,
+        indent_increment: int = 2,
+        max_help_position: int = 38,
+        width: Optional[int] = None,
+    ) -> None:
+        super().__init__(prog, indent_increment, max_help_position, width)
+        self._root_section.renderables = []
 
-    def _rich_table_factory(self, heading: Optional[str]) -> "Table":
-        from rich.table import Table
+    @property
+    def renderables(self) -> List["RenderableType"]:
+        return cast(List["RenderableType"], self._current_section.renderables)
 
-        if heading is None or heading is argparse.SUPPRESS:
-            title = ""
-        else:
-            title = heading.upper()
-        table = Table(
-            title=title,
-            box=None,
-            title_justify="left",
-            title_style="argparse.groups",
-            show_header=False,
-            show_footer=False,
-            show_edge=False,
-            show_lines=False,
-            highlight=self.highlight_help,
-            leading=self.insert_empty_lines_between_args,
-        )
-        table.add_column(
-            "args",
-            style="argparse.args",
-            min_width=self.first_column_min_width,
-            max_width=self.first_column_max_width,
-            overflow="fold",
-        )
-        table.add_column("help", style="none", max_width=self.second_column_max_width)
-        self._renderables.append(table)
-        return table
+    @property
+    def _table(self) -> "Table":
+        return cast("Table", self._current_section.table)
 
-    def _create_usage_renderable(self, usage: str) -> "Syntax":
-        from rich.syntax import Syntax
+    def _pad(self, renderable: "RenderableType") -> "Padding":
+        from rich.padding import Padding
 
-        return Syntax(
-            usage.strip(),
-            lexer="awk",
-            theme="one-dark",
-            code_width=self._width,
-            background_color="default",
-        )
+        return Padding(renderable, pad=(0, 0, 0, self._current_indent))
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         if not action.option_strings or action.nargs == 0:
@@ -94,19 +70,20 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             args_string = self._format_args(action, default)
             action_invocation = f"{', '.join(action.option_strings)} {args_string}"
 
-        # add a row to the current section's table
         if self._current_section != self._root_section:
-            self._current_section.table.add_row(action_invocation, self._get_help_string(action))
+            col1 = self._pad(action_invocation)
+            col2 = self._expand_help(action) if action.help else ""
+            self._table.add_row(col1, col2)
 
         return action_invocation
 
-    def _add_item(self, func: Callable[..., str], args: Iterable[Any]) -> None:
-        # disable _add_item, self._renderables handles all necessary data
-        pass
-
     def add_text(self, text: Optional[str]) -> None:
+        from rich.text import Text
+
+        super().add_text(text)
+
         if text is not argparse.SUPPRESS and text is not None:
-            self._renderables.append(text)
+            self.renderables.append(self._pad(Text.from_markup(text + "\n", style="argparse.text")))
 
     def add_usage(
         self,
@@ -115,41 +92,93 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         groups: Iterable[argparse._ArgumentGroup],
         prefix: Optional[str] = None,
     ) -> None:
+        from rich.syntax import Syntax
+
+        super().add_usage(usage, actions, groups, prefix)
+
         if usage is not argparse.SUPPRESS:
-            usage = self._format_usage(usage, actions, groups, prefix)  # type: ignore[arg-type]
-            self._renderables.append(self._create_usage_renderable(usage))
+            usage_text = self._format_usage(usage, actions, groups, prefix)  # type: ignore[arg-type]
+            self.renderables.append(
+                Syntax(
+                    usage_text.strip() + "\n",
+                    lexer="awk",
+                    theme="one-dark",
+                    code_width=self._width,
+                    background_color="default",
+                    word_wrap=True,
+                )
+            )
 
     def start_section(self, heading: Optional[str]) -> None:
+        from rich.table import Table
+
         super().start_section(heading)
-        # create a table and attach it to the new section (except for the root section)
-        if self._current_section != self._root_section:
-            self._current_section.table = self._rich_table_factory(heading)
+
+        self._current_section.renderables = []
+        self._current_section.table = Table(
+            box=None, pad_edge=False, show_header=False, show_edge=False, highlight=True
+        )
+        self._table.add_column(
+            style="argparse.args", max_width=self._max_help_position, overflow="fold"
+        )
+        self._table.add_column(
+            style="argparse.help", min_width=self._width - self._max_help_position
+        )
+
+    def end_section(self) -> None:
+        from rich.console import Group
+
+        if self.renderables or self._table.row_count:
+            title = type(self).group_name_formatter(self._current_section.heading or "")
+            self.renderables.insert(0, f"[argparse.groups]{title}")
+            if self._table.row_count:
+                self._table.add_row(end_section=True)
+                self.renderables.append(self._table)
+            self._current_section.parent.renderables.append(Group(*self.renderables))
+
+        super().end_section()
 
     def format_help(self) -> str:
-        from rich.console import Console
+        from rich.console import Console, Group
+        from rich.highlighter import RegexHighlighter
+        from rich.measure import Measurement
         from rich.table import Table
         from rich.theme import Theme
 
-        # call the parent class method, it will create the renderables
-        super().format_help()
+        out = super().format_help()
 
-        # compute a unified width of the first column of all tables
-        col1_width = self.first_column_min_width
-        for renderable in self._renderables:
-            if not isinstance(renderable, Table):
-                continue
-            col1_width = max(col1_width, len(max(renderable.columns[0].cells, key=len, default="")))
-        col1_width = min(col1_width, self.first_column_max_width)
+        all_items = self._root_section.items
+        if len(all_items) == 1 and all_items[0][0] == self._format_usage:
+            # format_help called from ArgumentParser.add_subparsers() to get the program name
+            return out
 
-        # print renderables
-        console = Console(theme=Theme(self.styles))
-        for renderable in self._renderables:
-            if isinstance(renderable, Table):
-                if not renderable.row_count:
-                    continue
-                renderable.columns[0].width = col1_width
-            console.print(renderable, highlight=True)
-            console.print()
+        class ArgparseHighlighter(RegexHighlighter):
+            base_style = "argparse."
+            highlights = self.highlights
+
+        console = Console(highlighter=ArgparseHighlighter(), theme=Theme(self.styles))
+        renderables = Group(*self.renderables)
+
+        def iter_tables(group: Group) -> Generator[Table, None, None]:
+            for renderable in group.renderables:
+                if isinstance(renderable, Table):
+                    yield renderable
+                elif isinstance(renderable, Group):
+                    yield from iter_tables(renderable)
+
+        col1_width = 0
+        for table in iter_tables(renderables):  # compute a unified width of all tables
+            get = Measurement.get
+            cells = table.columns[0].cells
+            table_col1_width = max(get(console, console.options, c).maximum for c in cells)
+            col1_width = max(col1_width, table_col1_width)
+        col1_width = min(col1_width, self._max_help_position)
+        col2_width = self._width - col1_width
+        for table in iter_tables(renderables):  # apply the unified width
+            table.columns[0].width = col1_width
+            table.columns[1].width = col2_width
+
+        console.print(renderables, highlight=True)
         return ""
 
 
@@ -158,34 +187,46 @@ if __name__ == "__main__":
 
     from rich import get_console
 
-    RichHelpFormatter.highlight_help = True
-
     parser = argparse.ArgumentParser(
         formatter_class=RichHelpFormatter,
         description=(
             "This is a [link https://pypi.org/project/rich]rich[/]-based formatter for "
-            "[link https://docs.python.org/3/library/argparse.html#formatter-class]argparse[/]'s "
-            "help output."
+            "[link https://docs.python.org/3/library/argparse.html#formatter-class]"
+            "argparse's help output[/]."
         ),
-        epilog="An epilog :sparkles: at the end :hourglass_done:",
+        epilog="An epilog :sparkles: at the end ⌛",
     )
     parser.add_argument("-V", "--version", action="version", version="version 0.1.0")
     parser.add_argument(
-        "pos-args",
-        nargs="*",
-        help="This is a positional argument that expects zero or more args",
+        "pos-args", nargs="*", help="This is a positional argument that expects zero or more args"
     )
-    if sys.version_info > (3, 9):
+    if sys.version_info[:2] >= (3, 9):
         parser.add_argument(
             "--bool",
             action=argparse.BooleanOptionalAction,
             default=True,
             help=(
-                "This is a boolean optional action. It automatically adds an option with a "
-                "[italic red]--no-[/red italic] prefix to negate the action of this options. "
-                "You can see how this really log line is clearly printed even if you resize "
-                "your window."
+                "This is a boolean optional action. It automatically adds an option with a --no- "
+                "prefix to negate the action of this option. You can see how this really long "
+                "line is clearly printed even if you resize your window."
             ),
+        )
+    else:
+        bool_mutex = parser.add_mutually_exclusive_group()
+        bool_mutex.add_argument(
+            "--bool, --no-bool",
+            action="store_true",
+            dest="bool",
+            default=True,
+            help=(
+                "This is an implementation of a boolean optional action before python 3.9. The "
+                "--no- prefix that negates the action of this option must be added manually. You "
+                "can see how this really long line is clearly printed even if you resize your "
+                "window."
+            ),
+        )
+        bool_mutex.add_argument(
+            "--no-bool", action="store_false", dest="bool", help=argparse.SUPPRESS
         )
     parser.add_argument(
         "-l",
@@ -200,8 +241,8 @@ if __name__ == "__main__":
         "-s",
         "--syntax",
         help=(
-            "Highlighting the help text is off by default. You have to set "
-            "RichHelpFormatter.highlight_help=True to see highlighting in the text"
+            "Highlighting the help text is managed by the list of regular expressions "
+            "RichHelpFormatter.highlights. Set to empty list to turn off highlighting."
         ),
     )
     group = parser.add_argument_group("my group")
@@ -213,13 +254,11 @@ if __name__ == "__main__":
         help="Rich and poor are mutually exclusive. Choose either one but not both.",
     )
     mutex.add_argument(
-        "--poor",
-        action="store_false",
-        dest="rich",
-        help="Does poor mean [argparse.args]--not-rich[/] :wink:?",
+        "--poor", action="store_false", dest="rich", help="Does poor mean --not-rich 😉?"
     )
     mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
 
     console = get_console()
     args = parser.parse_args()
+    console.print("Got the following arguments on the command line:")
     console.print(vars(args))

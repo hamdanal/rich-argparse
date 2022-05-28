@@ -1,0 +1,19 @@
+{
+    // Python
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportInvalidStringEscapeSequence": "warning",
+        "reportImportCycles": "warning",
+        "reportUnusedImport": "warning",
+    },
+    "python.formatting.provider": "black",
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        },
+    },
+    "[json][yaml][toml]": {
+        "editor.tabSize": 2
+    }
+}
