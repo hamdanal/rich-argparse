@@ -2,7 +2,9 @@
 
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
-Run `python -m rich_argparse --help` for a preview.
+![python -m rich_argparse --help](
+https://user-images.githubusercontent.com/93259987/172022148-a6a1dc93-9d25-47da-8b7c-e04a828d50f9.png)
+
 
 ## Installation
 
@@ -103,6 +105,7 @@ the following styles:
 {'argparse.args': 'italic cyan',
  'argparse.groups': 'bold italic dark_orange',
  'argparse.help': 'default',
+ 'argparse.syntax': '#E06C75',
  'argparse.text': 'italic'}
 ```
 The following example highlights all occurrences of `pyproject.toml` in green.

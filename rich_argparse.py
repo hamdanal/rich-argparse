@@ -34,8 +34,12 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         "argparse.groups": "bold italic dark_orange",
         "argparse.help": "default",
         "argparse.text": "italic",
+        "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
     }
-    highlights: List[str] = [r"\W(?P<args>-{1,2}[\w]+[\w-]*)"]
+    highlights: List[str] = [
+        r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
+        r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
+    ]
 
     def __init__(
         self,
@@ -187,7 +191,9 @@ if __name__ == "__main__":
 
     from rich import get_console
 
+    RichHelpFormatter.highlights.append(r"'(?P<help>[^']*)'")  # disable colors inside single quotes
     parser = argparse.ArgumentParser(
+        prog="python -m rich_argparse",
         formatter_class=RichHelpFormatter,
         description=(
             "This is a [link https://pypi.org/project/rich]rich[/]-based formatter for "
@@ -206,9 +212,11 @@ if __name__ == "__main__":
             action=argparse.BooleanOptionalAction,
             default=True,
             help=(
-                "This is a boolean optional action. It automatically adds an option with a --no- "
-                "prefix to negate the action of this option. You can see how this really long "
-                "line is clearly printed even if you resize your window."
+                "Starting with python 3.9, you can use `action=argparse.BooleanOptionalAction`. "
+                "This action automatically adds an option with a --no- prefix to negate the "
+                "action of this flag."
+                " This is a very long help text in one line. The formatter takes care of wrapping "
+                "the text based on the size of the terminal window."
             ),
         )
     else:
@@ -219,30 +227,30 @@ if __name__ == "__main__":
             dest="bool",
             default=True,
             help=(
-                "This is an implementation of a boolean optional action before python 3.9. The "
-                "--no- prefix that negates the action of this option must be added manually. You "
-                "can see how this really long line is clearly printed even if you resize your "
-                "window."
+                "Before python 3.9, you had to implement your own version of a boolean optional "
+                "action. The --no- prefix that negates the action of this flag must be added "
+                "manually."
+                " This is a very long help text in one line. The formatter takes care of wrapping "
+                "the text based on the size of the terminal window."
             ),
         )
         bool_mutex.add_argument(
             "--no-bool", action="store_false", dest="bool", help=argparse.SUPPRESS
         )
     parser.add_argument(
-        "-l",
+        "-s",
         "--long-option",
-        metavar="HINT",
+        metavar="METAVAR",
         help=(
-            "If an option takes a value and has short and long options, it is printed "
-            "as [argparse.args]-l, --long-option HINT[/]"
+            "If an option takes a value and has short and long options, it is printed as "
+            "'-s, --long-option METAVAR' instead of '-s METAVAR, --long-option METAVAR'"
         ),
     )
     parser.add_argument(
-        "-s",
         "--syntax",
         help=(
             "Highlighting the help text is managed by the list of regular expressions "
-            "RichHelpFormatter.highlights. Set to empty list to turn off highlighting."
+            "`RichHelpFormatter.highlights`. Set to empty list to turn off highlighting."
         ),
     )
     group = parser.add_argument_group("my group")
