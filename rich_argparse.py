@@ -12,7 +12,7 @@
 # greater good.
 
 import argparse
-from typing import TYPE_CHECKING, Callable, Dict, Generator, Iterable, List, Optional, cast
+from typing import TYPE_CHECKING, Callable, Dict, Generator, Iterable, List, Optional
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -53,11 +53,11 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     @property
     def renderables(self) -> List["RenderableType"]:
-        return cast(List["RenderableType"], self._current_section.renderables)
+        return self._current_section.renderables  # type: ignore[no-any-return]
 
     @property
     def _table(self) -> "Table":
-        return cast("Table", self._current_section.table)
+        return self._current_section.table  # type: ignore[no-any-return]
 
     def _pad(self, renderable: "RenderableType") -> "Padding":
         from rich.padding import Padding
@@ -101,7 +101,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         super().add_usage(usage, actions, groups, prefix)
 
         if usage is not argparse.SUPPRESS:
-            usage_text = self._format_usage(usage, actions, groups, prefix)  # type: ignore[arg-type]
+            usage_text = self._format_usage(usage, actions, groups, prefix)
             self.renderables.append(
                 Syntax(
                     usage_text.strip() + "\n",
@@ -116,7 +116,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     def start_section(self, heading: Optional[str]) -> None:
         from rich.table import Table
 
-        super().start_section(heading)
+        super().start_section(heading)  # sets self._current_section to child section
 
         self._current_section.renderables = []
         self._current_section.table = Table(
@@ -138,23 +138,28 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             if self._table.row_count:
                 self._table.add_row(end_section=True)
                 self.renderables.append(self._table)
-            self._current_section.parent.renderables.append(Group(*self.renderables))
+        # group the renderables of the section
+        group = Group(*self.renderables)
 
-        super().end_section()
+        super().end_section()  # sets self._current_section to parent section
+        # append the group to the parent section
+        self.renderables.append(group)
 
     def format_help(self) -> str:
         from rich.console import Console, Group
         from rich.highlighter import RegexHighlighter
-        from rich.measure import Measurement
+        from rich.measure import measure_renderables
         from rich.table import Table
         from rich.theme import Theme
 
         out = super().format_help()
 
+        # Handle ArgumentParser.add_subparsers() call to get the program name
         all_items = self._root_section.items
-        if len(all_items) == 1 and all_items[0][0] == self._format_usage:
-            # format_help called from ArgumentParser.add_subparsers() to get the program name
-            return out
+        if len(all_items) == 1:
+            func, args = all_items[0]
+            if func == self._format_usage and args[-1] == "":
+                return out  # return the program name instead of printing it
 
         class ArgparseHighlighter(RegexHighlighter):
             base_style = "argparse."
@@ -172,9 +177,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         col1_width = 0
         for table in iter_tables(renderables):  # compute a unified width of all tables
-            get = Measurement.get
             cells = table.columns[0].cells
-            table_col1_width = max(get(console, console.options, c).maximum for c in cells)
+            table_col1_width = measure_renderables(console, console.options, tuple(cells)).maximum
             col1_width = max(col1_width, table_col1_width)
         col1_width = min(col1_width, self._max_help_position)
         col2_width = self._width - col1_width

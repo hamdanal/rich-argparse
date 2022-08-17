@@ -46,3 +46,9 @@ line_length = 100
 [tool.mypy]
 strict = true
 show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false

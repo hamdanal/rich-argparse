@@ -1,7 +1,5 @@
 import argparse
-import os
-import sys
-from unittest import mock
+from typing import Sequence
 
 import pytest
 
@@ -66,13 +64,9 @@ GLOBAL OPTIONS
   -n, --no-interaction  Do not ask any interactive question
 
 """
-if sys.version_info[:2] >= (3, 10):
-    _POETRY_CLONE_HELP_HELP = _POETRY_CLONE_HELP_HELP.replace(
-        "\nOPTIONAL ARGUMENTS\n", "\nOPTIONS\n"
-    )
 
 
-def _poetry_clone_parser():
+def _poetry_clone_parser() -> argparse.ArgumentParser:
     RichHelpFormatter.styles["argparse.pyproject"] = "green"
     RichHelpFormatter.highlights.append(r"\W(?P<pyproject>pyproject\.toml)\W")
 
@@ -122,102 +116,81 @@ def _poetry_clone_parser():
         metavar="<command>",
         help="The command to execute",
         required=True,
-        parser_class=lambda **k: type(parser)(
-            **k, formatter_class=parser.formatter_class, add_help=False
-        ),
     )
-    original_add_parser = subparsers.add_parser
+    commands = []  # store commands for the `help` command options
 
-    def add_parser(*a, **k):
-        sp = original_add_parser(*a, **k)
-        add_global_options(sp)
-        return sp
+    def add_subparser(name: str, **kwds) -> argparse.ArgumentParser:
+        kwds.setdefault("formatter_class", parser.formatter_class)
+        kwds.setdefault("add_help", False)
+        sub_parser = subparsers.add_parser(name, **kwds)
+        add_global_options(sub_parser)
+        commands.append(name)
+        return sub_parser
 
-    subparsers.add_parser = add_parser
-
-    about_parser = subparsers.add_parser("about", help="Shows information about Poetry.")
-    add_parser = subparsers.add_parser("add", help="Adds a new dependency to pyproject.toml.")
-    build_parser = subparsers.add_parser(
+    about_parser = add_subparser("about", help="Shows information about Poetry.")
+    add_parser = add_subparser("add", help="Adds a new dependency to pyproject.toml.")
+    build_parser = add_subparser(
         "build", help="Builds a package, as a tarball and a wheel by default."
     )
-    cache_parser = subparsers.add_parser("cache", help="Interact with Poetry's cache")
-    check_parser = subparsers.add_parser(
-        "check", help="Checks the validity of the pyproject.toml file."
-    )
-    config_parser = subparsers.add_parser("config", help="Manages configuration settings.")
-    debug_parser = subparsers.add_parser("debug", help="Debug various elements of Poetry.")
-    env_parser = subparsers.add_parser("env", help="Interact with Poetry's project environments.")
-    export_parser = subparsers.add_parser(
-        "export", help="Exports the lock file to alternative formats."
-    )
-    help_parser = subparsers.add_parser("help", help="Display the manual of a command")
+    cache_parser = add_subparser("cache", help="Interact with Poetry's cache")
+    check_parser = add_subparser("check", help="Checks the validity of the pyproject.toml file.")
+    config_parser = add_subparser("config", help="Manages configuration settings.")
+    debug_parser = add_subparser("debug", help="Debug various elements of Poetry.")
+    env_parser = add_subparser("env", help="Interact with Poetry's project environments.")
+    export_parser = add_subparser("export", help="Exports the lock file to alternative formats.")
+    help_parser = add_subparser("help", help="Display the manual of a command")
     help_parser.add_argument(
-        "help_command",
-        metavar="<command>",
-        choices=subparsers._name_parser_map,
-        nargs="?",
-        help="The command name",
+        "help_command", metavar="<command>", choices=commands, nargs="?", help="The command name"
     )
-    init_parser = subparsers.add_parser(
+    init_parser = add_subparser(
         "init", help="Creates a basic pyproject.toml file in the current directory."
     )
-    install_parser = subparsers.add_parser("install", help="Installs the project dependencies.")
+    install_parser = add_subparser("install", help="Installs the project dependencies.")
     install_parser.add_argument(
         "--no-dev", action="store_true", help="Do not install the development dependencies."
     )
-    lock_parser = subparsers.add_parser("lock", help="Locks the project dependencies.")
-    new_parser = subparsers.add_parser("new", help="Creates a new Python project at <path>.")
-    publish_parser = subparsers.add_parser(
-        "publish", help="Publishes a package to a remote repository."
+    lock_parser = add_subparser("lock", help="Locks the project dependencies.")
+    new_parser = add_subparser("new", help="Creates a new Python project at <path>.")
+    publish_parser = add_subparser("publish", help="Publishes a package to a remote repository.")
+    remove_parser = add_subparser("remove", help="Removes a package from the project dependencies.")
+    run_parser = add_subparser("run", help="Runs a command in the appropriate environment.")
+    search_parser = add_subparser("search", help="Searches for packages on remote repositories.")
+    self_parser = add_subparser("self", help="Interact with Poetry directly.")
+    shell_parser = add_subparser("shell", help="Spawns a shell within the virtual environment.")
+    show_parser = add_subparser("show", help="Shows information about packages.")
+    update_parser = add_subparser(
+        "update", help="Update the dependencies as according to the pyproject.toml file."
     )
-    remove_parser = subparsers.add_parser(
-        "remove", help="Removes a package from the project dependencies."
-    )
-    run_parser = subparsers.add_parser("run", help="Runs a command in the appropriate environment.")
-    search_parser = subparsers.add_parser(
-        "search", help="Searches for packages on remote repositories."
-    )
-    self_parser = subparsers.add_parser("self", help="Interact with Poetry directly.")
-    shell_parser = subparsers.add_parser(
-        "shell", help="Spawns a shell within the virtual environment."
-    )
-    show_parser = subparsers.add_parser("show", help="Shows information about packages.")
-    update_parser = subparsers.add_parser(
-        "update",
-        help="Update the dependencies as according to the pyproject.toml file.",
-    )
-    version_parser = subparsers.add_parser(
+    version_parser = add_subparser(
         "version",
         help="Shows the version of the project or bumps it when a valid bump rule is provided.",
     )
     return parser
 
 
-def test_poetry_help(capsys):
+def _assert_help_output(
+    cmd: Sequence[str], expected_output: str, capsys: pytest.CaptureFixture
+) -> None:
     parser = _poetry_clone_parser()
-    with mock.patch.dict(os.environ, {"COLUMNS": "100"}), pytest.raises(SystemExit):
-        parser.parse_args(["--help"])
+    with pytest.raises(SystemExit):
+        parser.parse_args(cmd)
     out, err = capsys.readouterr()
+    assert isinstance(out, str)
 
     out_lines = out.splitlines()
-    expected_out_lines = _POETRY_CLONE_HELP.splitlines()
+    expected_out_lines = expected_output.splitlines()
     assert len(out_lines) == len(expected_out_lines)
 
     for line, expected_line in zip(out_lines, expected_out_lines):
         assert line.rstrip() == expected_line.rstrip()
     assert err == ""
+
+
+def test_poetry_help(capsys):
+    _assert_help_output(cmd=["--help"], expected_output=_POETRY_CLONE_HELP, capsys=capsys)
 
 
 def test_poetry_help_subparser(capsys):
-    parser = _poetry_clone_parser()
-    with mock.patch.dict(os.environ, {"COLUMNS": "100"}), pytest.raises(SystemExit):
-        parser.parse_args(["help", "--help"])
-    out, err = capsys.readouterr()
-
-    out_lines = out.splitlines()
-    expected_out_lines = _POETRY_CLONE_HELP_HELP.splitlines()
-    assert len(out_lines) == len(expected_out_lines)
-
-    for line, expected_line in zip(out_lines, expected_out_lines):
-        assert line.rstrip() == expected_line.rstrip()
-    assert err == ""
+    _assert_help_output(
+        cmd=["help", "--help"], expected_output=_POETRY_CLONE_HELP_HELP, capsys=capsys
+    )
