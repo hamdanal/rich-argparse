@@ -11,8 +11,10 @@
 # the source code.  There is no warranty.  Try to use the code for the
 # greater good.
 
+from __future__ import annotations
+
 import argparse
-from typing import TYPE_CHECKING, Callable, Dict, Generator, Iterable, List, Optional, cast
+from typing import TYPE_CHECKING, Callable, Generator, Iterable
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -29,14 +31,14 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
-    styles: Dict[str, "StyleType"] = {
+    styles: dict[str, StyleType] = {
         "argparse.args": "italic cyan",
         "argparse.groups": "bold italic dark_orange",
         "argparse.help": "default",
         "argparse.text": "italic",
         "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
     }
-    highlights: List[str] = [
+    highlights: list[str] = [
         r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
@@ -46,20 +48,20 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         prog: str,
         indent_increment: int = 2,
         max_help_position: int = 38,
-        width: Optional[int] = None,
+        width: int | None = None,
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._root_section.renderables = []
 
     @property
-    def renderables(self) -> List["RenderableType"]:
-        return cast(List["RenderableType"], self._current_section.renderables)
+    def renderables(self) -> list[RenderableType]:
+        return self._current_section.renderables  # type: ignore[no-any-return]
 
     @property
-    def _table(self) -> "Table":
-        return cast("Table", self._current_section.table)
+    def _table(self) -> Table:
+        return self._current_section.table  # type: ignore[no-any-return]
 
-    def _pad(self, renderable: "RenderableType") -> "Padding":
+    def _pad(self, renderable: RenderableType) -> Padding:
         from rich.padding import Padding
 
         return Padding(renderable, pad=(0, 0, 0, self._current_indent))
@@ -81,7 +83,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         return action_invocation
 
-    def add_text(self, text: Optional[str]) -> None:
+    def add_text(self, text: str | None) -> None:
         from rich.text import Text
 
         super().add_text(text)
@@ -91,17 +93,17 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def add_usage(
         self,
-        usage: Optional[str],
+        usage: str | None,
         actions: Iterable[argparse.Action],
         groups: Iterable[argparse._ArgumentGroup],
-        prefix: Optional[str] = None,
+        prefix: str | None = None,
     ) -> None:
         from rich.syntax import Syntax
 
         super().add_usage(usage, actions, groups, prefix)
 
         if usage is not argparse.SUPPRESS:
-            usage_text = self._format_usage(usage, actions, groups, prefix)  # type: ignore[arg-type]
+            usage_text = self._format_usage(usage, actions, groups, prefix)
             self.renderables.append(
                 Syntax(
                     usage_text.strip() + "\n",
@@ -113,10 +115,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                 )
             )
 
-    def start_section(self, heading: Optional[str]) -> None:
+    def start_section(self, heading: str | None) -> None:
         from rich.table import Table
 
-        super().start_section(heading)
+        super().start_section(heading)  # sets self._current_section to child section
 
         self._current_section.renderables = []
         self._current_section.table = Table(
@@ -138,23 +140,28 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             if self._table.row_count:
                 self._table.add_row(end_section=True)
                 self.renderables.append(self._table)
-            self._current_section.parent.renderables.append(Group(*self.renderables))
+        # group the renderables of the section
+        group = Group(*self.renderables)
 
-        super().end_section()
+        super().end_section()  # sets self._current_section to parent section
+        # append the group to the parent section
+        self.renderables.append(group)
 
     def format_help(self) -> str:
         from rich.console import Console, Group
         from rich.highlighter import RegexHighlighter
-        from rich.measure import Measurement
+        from rich.measure import measure_renderables
         from rich.table import Table
         from rich.theme import Theme
 
         out = super().format_help()
 
+        # Handle ArgumentParser.add_subparsers() call to get the program name
         all_items = self._root_section.items
-        if len(all_items) == 1 and all_items[0][0] == self._format_usage:
-            # format_help called from ArgumentParser.add_subparsers() to get the program name
-            return out
+        if len(all_items) == 1:
+            func, args = all_items[0]
+            if func == self._format_usage and args[-1] == "":
+                return out  # return the program name instead of printing it
 
         class ArgparseHighlighter(RegexHighlighter):
             base_style = "argparse."
@@ -172,9 +179,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         col1_width = 0
         for table in iter_tables(renderables):  # compute a unified width of all tables
-            get = Measurement.get
             cells = table.columns[0].cells
-            table_col1_width = max(get(console, console.options, c).maximum for c in cells)
+            table_col1_width = measure_renderables(console, console.options, tuple(cells)).maximum
             col1_width = max(col1_width, table_col1_width)
         col1_width = min(col1_width, self._max_help_position)
         col2_width = self._width - col1_width

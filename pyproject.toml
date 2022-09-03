@@ -11,7 +11,16 @@ authors = [
 ]
 readme = "README.md"
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 keywords = ["argparse", "rich", "help-formatter"]
 dependencies = [
@@ -25,7 +34,7 @@ Home = "https://github.com/hamdanal/rich-argparse"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37,py38,py39,py310
+envlist = py37,py38,py39,py310,py311
 isolated_build = true
 skip_missing_interpreters = true
 
@@ -46,3 +55,9 @@ line_length = 100
 [tool.mypy]
 strict = true
 show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
