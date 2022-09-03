@@ -1,4 +1,10 @@
-# `rich-argparse`
+# rich-argparse
+[![tests](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml/badge.svg)
+](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)
+[![pre-commit](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml/badge.svg)
+](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml)
+[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+](https://github.com/psf/black)
 
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 

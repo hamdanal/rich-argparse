@@ -1,0 +1,28 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - ".vscode/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11-dev"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install tox
+        run: |
+          pip install --upgrade pip tox
+      - name: Run the test suite
+        run: tox -e py
