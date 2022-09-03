@@ -14,7 +14,13 @@ https://user-images.githubusercontent.com/93259987/172022148-a6a1dc93-9d25-47da-
 
 ## Installation
 
-Copy the file `rich_argparse.py` to your project.
+Install from PyPI with pip or your favorite tool.
+
+```sh
+pip install rich-argparse
+```
+
+Or copy the file `rich_argparse.py` to your project provided you have `rich` already installed.
 
 ## Usage
 
