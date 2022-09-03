@@ -11,8 +11,10 @@
 # the source code.  There is no warranty.  Try to use the code for the
 # greater good.
 
+from __future__ import annotations
+
 import argparse
-from typing import TYPE_CHECKING, Callable, Dict, Generator, Iterable, List, Optional
+from typing import TYPE_CHECKING, Callable, Generator, Iterable
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -29,14 +31,14 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
-    styles: Dict[str, "StyleType"] = {
+    styles: dict[str, StyleType] = {
         "argparse.args": "italic cyan",
         "argparse.groups": "bold italic dark_orange",
         "argparse.help": "default",
         "argparse.text": "italic",
         "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
     }
-    highlights: List[str] = [
+    highlights: list[str] = [
         r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
@@ -46,20 +48,20 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         prog: str,
         indent_increment: int = 2,
         max_help_position: int = 38,
-        width: Optional[int] = None,
+        width: int | None = None,
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._root_section.renderables = []
 
     @property
-    def renderables(self) -> List["RenderableType"]:
+    def renderables(self) -> list[RenderableType]:
         return self._current_section.renderables  # type: ignore[no-any-return]
 
     @property
-    def _table(self) -> "Table":
+    def _table(self) -> Table:
         return self._current_section.table  # type: ignore[no-any-return]
 
-    def _pad(self, renderable: "RenderableType") -> "Padding":
+    def _pad(self, renderable: RenderableType) -> Padding:
         from rich.padding import Padding
 
         return Padding(renderable, pad=(0, 0, 0, self._current_indent))
@@ -81,7 +83,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         return action_invocation
 
-    def add_text(self, text: Optional[str]) -> None:
+    def add_text(self, text: str | None) -> None:
         from rich.text import Text
 
         super().add_text(text)
@@ -91,10 +93,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def add_usage(
         self,
-        usage: Optional[str],
+        usage: str | None,
         actions: Iterable[argparse.Action],
         groups: Iterable[argparse._ArgumentGroup],
-        prefix: Optional[str] = None,
+        prefix: str | None = None,
     ) -> None:
         from rich.syntax import Syntax
 
@@ -113,7 +115,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                 )
             )
 
-    def start_section(self, heading: Optional[str]) -> None:
+    def start_section(self, heading: str | None) -> None:
         from rich.table import Table
 
         super().start_section(heading)  # sets self._current_section to child section
