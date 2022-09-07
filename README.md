@@ -131,3 +131,13 @@ RichHelpFormatter.highlights.append(r"\W(?P<pyproject>pyproject\.toml)\W")
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
 ...
 ```
+
+### Custom group name formatting
+
+You can change the formatting of the group name (like `'positional arguments'` and `'options'`) by
+setting the `RichHelpFormatter.group_name_formatter` to any function that takes the group name as
+an input and returns a str. By default, `RichHelpFormatter` sets the function to `str.upper`.
+
+```python
+RichHelpFormatter.group_name_formatter = lambda name: name.title() + ':'
+```
