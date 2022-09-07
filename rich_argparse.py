@@ -89,6 +89,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         super().add_text(text)
 
         if text is not argparse.SUPPRESS and text is not None:
+            if "%(prog)" in text:
+                text = text % {"prog": self._prog}
             self.renderables.append(self._pad(Text.from_markup(text + "\n", style="argparse.text")))
 
     def add_usage(
