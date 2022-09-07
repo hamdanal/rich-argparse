@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import argparse
-from typing import Sequence
-
-import pytest
 
 from rich_argparse import RichHelpFormatter
+from tests.conftest import assert_help_output
 
 _POETRY_CLONE_HELP = """\
 usage: poetry [-h] [-q] [-v] [-V] [--ansi] [--no-ansi] [-n] <command> ...
@@ -170,29 +168,15 @@ def _poetry_clone_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _assert_help_output(
-    cmd: Sequence[str], expected_output: str, capsys: pytest.CaptureFixture
-) -> None:
-    parser = _poetry_clone_parser()
-    with pytest.raises(SystemExit):
-        parser.parse_args(cmd)
-    out, err = capsys.readouterr()
-    assert isinstance(out, str)
-
-    out_lines = out.splitlines()
-    expected_out_lines = expected_output.splitlines()
-    assert len(out_lines) == len(expected_out_lines)
-
-    for line, expected_line in zip(out_lines, expected_out_lines):
-        assert line.rstrip() == expected_line.rstrip()
-    assert err == ""
+def test_poetry_help():
+    assert_help_output(
+        parser=_poetry_clone_parser(), cmd=["--help"], expected_output=_POETRY_CLONE_HELP
+    )
 
 
-def test_poetry_help(capsys):
-    _assert_help_output(cmd=["--help"], expected_output=_POETRY_CLONE_HELP, capsys=capsys)
-
-
-def test_poetry_help_subparser(capsys):
-    _assert_help_output(
-        cmd=["help", "--help"], expected_output=_POETRY_CLONE_HELP_HELP, capsys=capsys
+def test_poetry_help_subparser():
+    assert_help_output(
+        parser=_poetry_clone_parser(),
+        cmd=["help", "--help"],
+        expected_output=_POETRY_CLONE_HELP_HELP,
     )
