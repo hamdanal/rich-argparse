@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Callable, Generator, Iterable
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
     from rich.console import RenderableType
-    from rich.padding import Padding
     from rich.style import StyleType
     from rich.table import Table
 
@@ -35,6 +34,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         "argparse.args": "italic cyan",
         "argparse.groups": "bold italic dark_orange",
         "argparse.help": "default",
+        "argparse.metavar": "bold cyan",
         "argparse.text": "italic",
         "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
     }
@@ -61,37 +61,40 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     def _table(self) -> Table:
         return self._current_section.table  # type: ignore[no-any-return]
 
-    def _pad(self, renderable: RenderableType) -> Padding:
-        from rich.padding import Padding
-
-        return Padding(renderable, pad=(0, 0, 0, self._current_indent))
-
     def _format_action_invocation(self, action: argparse.Action) -> str:
-        if not action.option_strings or action.nargs == 0:
-            action_invocation = super()._format_action_invocation(action)
-        else:
-            # The default format: `-s ARGS, --long-option ARGS` is very ugly with long
-            # option names so I change it to `-s, --long-option ARG` similar to click
-            default = self._get_default_metavar_for_optional(action)
-            args_string = self._format_args(action, default)
-            action_invocation = f"{', '.join(action.option_strings)} {args_string}"
+        action_invocation = super()._format_action_invocation(action)
 
         if self._current_section != self._root_section:
-            col1 = self._pad(action_invocation)
-            col2 = self._expand_help(action) if action.help else ""
-            self._table.add_row(col1, col2)
+            from rich.text import Text
+
+            if not action.option_strings:
+                rich_action_invocation = Text(action_invocation, style="argparse.args")
+            else:
+                styled_options = (Text(opt, style="argparse.args") for opt in action.option_strings)
+                rich_action_invocation = Text(", ").join(styled_options)
+                if action.nargs != 0:
+                    # The default format: `-s ARGS, --long-option ARGS` is very ugly with long
+                    # option names so I change it to `-s, --long-option ARG` similar to click
+                    default = self._get_default_metavar_for_optional(action)
+                    args_string = self._format_args(action, default)
+                    rich_action_invocation.append(f" {args_string}", style="argparse.metavar")
+
+            rich_action_invocation.pad_left(self._current_indent)
+            help_string = self._expand_help(action) if action.help else ""
+            self._table.add_row(rich_action_invocation, help_string)
 
         return action_invocation
 
     def add_text(self, text: str | None) -> None:
-        from rich.text import Text
-
         super().add_text(text)
-
         if text is not argparse.SUPPRESS and text is not None:
+            from rich.text import Text
+
             if "%(prog)" in text:
                 text = text % {"prog": self._prog}
-            self.renderables.append(self._pad(Text.from_markup(text, style="argparse.text")))
+            rich_text = Text.from_markup(text, style="argparse.text")
+            rich_text.pad_left(self._current_indent)
+            self.renderables.append(rich_text)
 
     def add_usage(
         self,
@@ -100,11 +103,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         groups: Iterable[argparse._ArgumentGroup],
         prefix: str | None = None,
     ) -> None:
-        from rich.syntax import Syntax
-
         super().add_usage(usage, actions, groups, prefix)
-
         if usage is not argparse.SUPPRESS:
+            from rich.syntax import Syntax
+
             usage_text = self._format_usage(usage, actions, groups, prefix)
             self.renderables.append(
                 Syntax(
@@ -126,9 +128,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         self._current_section.table = Table(
             box=None, pad_edge=False, show_header=False, show_edge=False, highlight=True
         )
-        self._table.add_column(
-            style="argparse.args", max_width=self._max_help_position, overflow="fold"
-        )
+        self._table.add_column(max_width=self._max_help_position, overflow="fold")
         self._table.add_column(
             style="argparse.help", min_width=self._width - self._max_help_position
         )
