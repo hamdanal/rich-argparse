@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.1 - 2022-09-10
+
 ### Fixes
 - Fix `RichHelpFormatter` does not replace `%(prog)s` in text
   * Issue #5, PR #6
