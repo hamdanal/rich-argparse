@@ -91,7 +91,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         if text is not argparse.SUPPRESS and text is not None:
             if "%(prog)" in text:
                 text = text % {"prog": self._prog}
-            self.renderables.append(self._pad(Text.from_markup(text + "\n", style="argparse.text")))
+            self.renderables.append(self._pad(Text.from_markup(text, style="argparse.text")))
 
     def add_usage(
         self,
@@ -108,7 +108,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             usage_text = self._format_usage(usage, actions, groups, prefix)
             self.renderables.append(
                 Syntax(
-                    usage_text.strip() + "\n",
+                    usage_text.strip(),
                     lexer="awk",
                     theme="one-dark",
                     code_width=self._width,
@@ -140,14 +140,13 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             title = type(self).group_name_formatter(self._current_section.heading or "")
             self.renderables.insert(0, f"[argparse.groups]{title}")
             if self._table.row_count:
-                self._table.add_row(end_section=True)
                 self.renderables.append(self._table)
-        # group the renderables of the section
-        group = Group(*self.renderables)
+        renderables = self.renderables
 
         super().end_section()  # sets self._current_section to parent section
-        # append the group to the parent section
-        self.renderables.append(group)
+        if renderables:
+            # append the group to the parent section
+            self.renderables.append(Group(*renderables))
 
     def format_help(self) -> str:
         from rich.console import Console, Group
@@ -170,7 +169,13 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             highlights = self.highlights
 
         console = Console(highlighter=ArgparseHighlighter(), theme=Theme(self.styles))
-        renderables = Group(*self.renderables)
+        renderables_list = []
+        for r in self.renderables:
+            renderables_list.append(r)
+            renderables_list.append("")
+        if renderables_list:
+            renderables_list.pop()
+        renderables = Group(*renderables_list)
 
         def iter_tables(group: Group) -> Generator[Table, None, None]:
             for renderable in group.renderables:

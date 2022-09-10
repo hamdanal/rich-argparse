@@ -24,11 +24,9 @@ def test_text_replaces_prog():
     {"OPTIONS" if sys.version_info >= (3, 10) else "OPTIONAL ARGUMENTS"}
       -h, --help  show this help message and exit
       --version   show program's version number and exit
-
     """
     expected_version_output = """\
     awesome_program 1.0.0
-
     """
     assert_help_output(parser, cmd=["--version"], expected_output=expected_version_output)
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
