@@ -44,7 +44,6 @@ AVAILABLE COMMANDS
     update              Update the dependencies as according to the pyproject.toml file.
     version             Shows the version of the project or bumps it when a valid bump rule is
                         provided.
-
 """
 
 _POETRY_CLONE_HELP_HELP = """\
@@ -62,7 +61,6 @@ GLOBAL OPTIONS
   --ansi                Force ANSI output
   --no-ansi             Disable ANSI output
   -n, --no-interaction  Do not ask any interactive question
-
 """
 
 
