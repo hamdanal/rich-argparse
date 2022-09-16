@@ -144,7 +144,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         if self.renderables or self._table.row_count:
             title = type(self).group_name_formatter(self._current_section.heading or "")
-            self.renderables.insert(0, f"[argparse.groups]{title}")
+            self.renderables.insert(0, f"[argparse.groups]{title}:")
             if self._table.row_count:
                 self.renderables.append(self._table)
         renderables = self.renderables
