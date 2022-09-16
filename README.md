@@ -117,6 +117,7 @@ the following styles:
 {'argparse.args': 'italic cyan',
  'argparse.groups': 'bold italic dark_orange',
  'argparse.help': 'default',
+ 'argparse.metavar': 'bold cyan',
  'argparse.syntax': '#E06C75',
  'argparse.text': 'italic'}
 ```
