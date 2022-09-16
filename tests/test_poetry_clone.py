@@ -8,7 +8,7 @@ from tests.conftest import assert_help_output
 _POETRY_CLONE_HELP = """\
 usage: poetry [-h] [-q] [-v] [-V] [--ansi] [--no-ansi] [-n] <command> ...
 
-GLOBAL OPTIONS
+GLOBAL OPTIONS:
   -h, --help            Display this help message
   -q, --quiet           Do not output any message
   -v, --verbose         Increase the verbosity of messages: "-v" for normal output, "-vv" for more
@@ -18,7 +18,7 @@ GLOBAL OPTIONS
   --no-ansi             Disable ANSI output
   -n, --no-interaction  Do not ask any interactive question
 
-AVAILABLE COMMANDS
+AVAILABLE COMMANDS:
   <command>             The command to execute
     about               Shows information about Poetry.
     add                 Adds a new dependency to pyproject.toml.
@@ -49,10 +49,10 @@ AVAILABLE COMMANDS
 _POETRY_CLONE_HELP_HELP = """\
 usage: poetry help [-h] [-q] [-v] [-V] [--ansi] [--no-ansi] [-n] [<command>]
 
-POSITIONAL ARGUMENTS
+POSITIONAL ARGUMENTS:
   <command>             The command name
 
-GLOBAL OPTIONS
+GLOBAL OPTIONS:
   -h, --help            Display this help message
   -q, --quiet           Do not output any message
   -v, --verbose         Increase the verbosity of messages: "-v" for normal output, "-vv" for more

@@ -20,7 +20,7 @@ def test_text_replaces_prog():
 
     This is the awesome_program program.
 
-    {OPTIONS_GROUP_NAME}
+    {OPTIONS_GROUP_NAME}:
       -h, --help  show this help message and exit
       --version   show program's version number and exit
     """
@@ -47,10 +47,10 @@ def test_spans():
     expected_help_output += f"""\
 
 
-    \x1b[1;3;38;5;208mPOSITIONAL ARGUMENTS\x1b[0m
+    \x1b[1;3;38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
       \x1b[3;36mfile\x1b[0m
 
-    \x1b[1;3;38;5;208m{OPTIONS_GROUP_NAME}\x1b[0m
+    \x1b[1;3;38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[3;36m-h\x1b[0m, \x1b[3;36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
       \x1b[3;36m--flag\x1b[0m      \x1b[39mIs flag?\x1b[0m
     """
