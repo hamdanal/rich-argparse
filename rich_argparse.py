@@ -82,7 +82,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                     action_invocation.append(args_string, style="argparse.metavar")
 
             action_invocation.pad_left(self._current_indent)
-            help_text = Text.from_markup(self._expand_help(action) if action.help else "")
+            help_text = Text.from_markup(self._escape_params_and_expand_help(action))
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
@@ -91,14 +91,32 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         return orig_str
 
+    def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
+        from rich.markup import escape
+
+        if not action.help:
+            return ""
+        params = dict(vars(action), prog=self._prog)
+        for name in list(params):  # iterate over a copy because del
+            param = params[name]
+            if param is argparse.SUPPRESS:
+                del params[name]
+            elif hasattr(param, "__name__"):
+                params[name] = param.__name__
+            elif name == "choices" and param is not None:
+                params[name] = ", ".join([str(c) for c in param])
+        params = {k: escape(str(v)) for k, v in params.items()}
+        return action.help % params
+
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
         if text is not argparse.SUPPRESS and text is not None:
+            from rich.markup import escape
             from rich.padding import Padding
             from rich.text import Text
 
             if "%(prog)" in text:
-                text = text % {"prog": self._prog}
+                text = text % {"prog": escape(self._prog)}
             rich_text = Text.from_markup(text, style="argparse.text")
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")

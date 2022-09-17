@@ -161,6 +161,52 @@ def test_subparsers(
     assert rich_help_out_no_trailing_ws == orig_help_out
 
 
+def test_escape_params():
+    # params such as %(prog)s and %(default)s must be escaped when substituted
+    parser = argparse.ArgumentParser(
+        "[underline]",
+        description="%(prog)s description.",
+        epilog="%(prog)s epilog.",
+        formatter_class=RichHelpFormatter,
+    )
+
+    class SpecialType(str):
+        ...
+
+    SpecialType.__name__ = "[link]"
+
+    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument("pos-arg", metavar="[italic]", help="help of pos arg with special metavar")
+    parser.add_argument(
+        "--default", default="[default]", help="help with special default: %(default)s"
+    )
+    parser.add_argument("--type", type=SpecialType, help="help with special type: %(type)s")
+    parser.add_argument(
+        "--metavar", metavar="[bold]", help="help with special metavar: %(metavar)s"
+    )
+
+    expected_help_output = f"""\
+    usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
+
+    [underline] description.
+
+    POSITIONAL ARGUMENTS:
+      [italic]           help of pos arg with special metavar
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help         show this help message and exit
+      --version          show program's version number and exit
+      --default DEFAULT  help with special default: [default]
+      --type TYPE        help with special type: [link]
+      --metavar [bold]   help with special metavar: [bold]
+
+    [underline] epilog.
+    """
+    expected_version_output = "[underline] 1.0.0\n"
+    assert_help_output(parser, cmd=["--version"], expected_output=expected_version_output)
+    assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
+
+
 def test_spans():
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("file")
