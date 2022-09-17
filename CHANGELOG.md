@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 - 2022-09-17
+
 ### Features
 - Metavars now have their own style `argparse.metavar` which defaults to `'bold cyan'`
   * Issue #4, PR #9
