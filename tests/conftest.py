@@ -18,16 +18,22 @@ def set_terminal_columns():
         yield
 
 
-def assert_help_output(
-    parser: argparse.ArgumentParser, cmd: list[str], expected_output: str, with_ansi: bool = False
-) -> None:
+def get_help_output(
+    parser: argparse.ArgumentParser, cmd: list[str], with_ansi: bool = False
+) -> str:
     __tracebackhide__ = True
     stdout = io.StringIO()
     stdout.isatty = lambda: with_ansi  # type: ignore[assignment]
     with pytest.raises(SystemExit), patch.object(sys, "stdout", stdout):
         parser.parse_args(cmd)
-    out = stdout.getvalue()
+    return stdout.getvalue()
 
+
+def assert_help_output(
+    parser: argparse.ArgumentParser, cmd: list[str], expected_output: str, with_ansi: bool = False
+) -> None:
+    __tracebackhide__ = True
+    out = get_help_output(parser, cmd, with_ansi)
     out_lines = out.splitlines()
     expected_out_lines = textwrap.dedent(expected_output).splitlines()
     assert len(out_lines) == len(expected_out_lines)

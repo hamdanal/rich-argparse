@@ -41,8 +41,12 @@ skip_missing_interpreters = true
 [testenv]
 deps =
   pytest
+  coverage[toml]
+  covdefaults
 commands =
-  pytest {posargs}
+  coverage erase
+  coverage run -m pytest {posargs}
+  coverage report
 """
 
 [tool.black]
@@ -61,3 +65,15 @@ module = ["tests.*"]
 check_untyped_defs = false
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+plugins = ["covdefaults"]
+source = ["rich_argparse"]
+
+[tool.coverage.report]
+ignore_errors = true
+fail_under = 100

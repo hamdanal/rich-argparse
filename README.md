@@ -9,7 +9,7 @@
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/172022148-a6a1dc93-9d25-47da-8b7c-e04a828d50f9.png)
+https://user-images.githubusercontent.com/93259987/190869857-963968f4-b273-4c93-a301-958fef487624.png)
 
 
 ## Installation
@@ -140,5 +140,5 @@ setting the `RichHelpFormatter.group_name_formatter` to any function that takes 
 an input and returns a str. By default, `RichHelpFormatter` sets the function to `str.upper`.
 
 ```python
-RichHelpFormatter.group_name_formatter = lambda name: name.title() + ':'
+RichHelpFormatter.group_name_formatter = str.title
 ```
