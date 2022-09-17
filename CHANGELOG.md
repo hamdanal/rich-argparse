@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Features
+- Metavars now have their own style `argparse.metavar` which defaults to `'bold cyan'`
+  * Issue #4, PR #9
+
+### Fixes
+- Add missing ":" after the group name similar to the default HelpFormatter
+  * Issue #4, PR #10
+- Fix padding of long options or metavars
+  * PR #11
+- Fix overflow of text in help that was truncated
+  * PR #11
+- Escape parameters that get substituted with % such as %(prog)s and %(default)s
+  * PR #11
+- Fix flaky wrapping of long lines
+  * PR #11
+
 ## 0.1.1 - 2022-09-10
 
 ### Fixes

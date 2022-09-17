@@ -22,7 +22,12 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install tox
-        run: |
-          pip install --upgrade pip tox
+        run: pip install --upgrade pip tox
       - name: Run the test suite
         run: tox -e py
+      - name: Upload coverage report if tests fail.
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report-${{ runner.os }}-python-${{ matrix.python }}
+          path: htmlcov
+        if: ${{ failure() }}

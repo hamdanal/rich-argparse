@@ -231,3 +231,10 @@ def test_spans():
       \x1b[3;36m--flag\x1b[0m      \x1b[39mIs flag?\x1b[0m
     """
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output, with_ansi=True)
+
+
+def test_no_help():
+    formatter = RichHelpFormatter("prog")
+    formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
+    out = formatter.format_help()
+    assert not out
