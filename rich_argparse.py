@@ -86,7 +86,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
-            self._max_col1_width = max(self._max_col1_width, len(action_invocation))
+            self._max_col1_width = max(self._max_col1_width, len(action_invocation) + 1)
             self._table.add_row(action_invocation, help_text)
 
         return orig_str
@@ -94,6 +94,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
         if text is not argparse.SUPPRESS and text is not None:
+            from rich.padding import Padding
             from rich.text import Text
 
             if "%(prog)" in text:
@@ -101,8 +102,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             rich_text = Text.from_markup(text, style="argparse.text")
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
-            rich_text.pad_left(self._current_indent)
-            self.renderables.append(rich_text)
+            self.renderables.append(Padding.indent(rich_text, self._current_indent))
 
     def add_usage(
         self,
@@ -133,25 +133,28 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         super().start_section(heading)  # sets self._current_section to child section
 
         self._current_section.renderables = []
+        if heading is not None:
+            self.renderables.append(f"[argparse.groups]{type(self).group_name_formatter(heading)}:")
         self._current_section.table = Table(
             box=None, pad_edge=False, show_header=False, show_edge=False
         )
-        self._table.add_column(max_width=self._max_help_position, overflow="fold")
-        self._table.add_column(min_width=self._width - self._max_help_position)
+        self._table.add_column("argparse.args", overflow="fold")
+        self._table.add_column("argparse.help", overflow="fold")
 
     def end_section(self) -> None:
         from rich.console import Group
 
-        if self.renderables or self._table.row_count:
-            title = type(self).group_name_formatter(self._current_section.heading or "")
-            self.renderables.insert(0, f"[argparse.groups]{title}:")
-            if self._table.row_count:
-                self.renderables.append(self._table)
-        renderables = self.renderables
+        has_text = len(self.renderables) > (self._current_section.heading is not None)
+        has_args = self._table.row_count
+        if has_args:
+            if has_text:  # add empty line between the description and the arguments
+                self.renderables.append("")
+            self.renderables.append(self._table)
+        group_renderables = self.renderables
 
         super().end_section()  # sets self._current_section to parent section
-        if renderables:
-            self.renderables.append(Group(*renderables))
+        if has_text or has_args:  # only add the group if it is not empty
+            self.renderables.append(Group(*group_renderables))
 
     def format_help(self) -> str:
         from rich.console import Console, Group
@@ -167,7 +170,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             if func == self._format_usage and args[-1] == "":
                 return out  # return the program name instead of printing it
 
-        console = Console(theme=Theme(self.styles))
+        console = Console(theme=Theme(self.styles), width=self._width)
         renderables_list = []
         for r in self.renderables:
             renderables_list.append(r)
