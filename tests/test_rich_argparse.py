@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -45,9 +44,7 @@ def test_params_substitution():
 @pytest.mark.parametrize("usage", (None, "USAGE"))
 @pytest.mark.parametrize("description", (None, "This is the program's description."))
 @pytest.mark.parametrize("epilog", (None, "This is the program's epilog."))
-def test_overall_structure(
-    prog: str | None, usage: str | None, description: str | None, epilog: str | None
-):
+def test_overall_structure(prog, usage, description, epilog):
     # The output must be consistent with the original HelpFormatter in these cases:
     # 1. all names and help text are short to avoid special wrapping
     # 2. no short and long options with args are used
@@ -126,17 +123,8 @@ def test_padding_and_wrapping():
 @pytest.mark.parametrize("metavar", (None, "<command>"))
 @pytest.mark.parametrize("help", (None, "The subcommand to execute"))
 @pytest.mark.parametrize("required", (False, True))
-def test_subparsers(
-    title: str | None,
-    description: str | None,
-    dest: str | None,
-    metavar: str | None,
-    help: str | None,
-    required: bool,
-):
-    parser = argparse.ArgumentParser()
-
-    kwargs: dict[str, Any] = {
+def test_subparsers(title, description, dest, metavar, help, required):
+    subparsers_kwargs = {
         "title": title,
         "description": description,
         "dest": dest,
@@ -144,21 +132,25 @@ def test_subparsers(
         "help": help,
         "required": required,
     }
-    kwargs = {k: v for k, v in kwargs.items() if v is not None}
-    subparsers = parser.add_subparsers(**kwargs)
-    help_subparser = subparsers.add_parser("help", help="help subcommand.")
+    subparsers_kwargs = {k: v for k, v in subparsers_kwargs.items() if v is not None}
 
-    orig_out = get_help_output(parser, cmd=["--help"])
-    orig_help_out = get_help_output(parser, cmd=["help", "--help"])
-    parser.formatter_class = RichHelpFormatter
-    help_subparser.formatter_class = RichHelpFormatter
+    def create_parsers_and_generate_help(formatter_class):
+        parser = argparse.ArgumentParser(formatter_class=formatter_class)
+        subparsers = parser.add_subparsers(**subparsers_kwargs)
+        subparsers.add_parser("help", formatter_class=formatter_class, help="help subcommand.")
+        base_out = get_help_output(parser, cmd=["--help"])  # base parser
+        help_cmd_out = get_help_output(parser, cmd=["help", "--help"])  # help command subparser
+        return base_out, help_cmd_out
+
+    orig_base_out, orig_help_cmd_out = create_parsers_and_generate_help(argparse.HelpFormatter)
     with patch.object(RichHelpFormatter, "group_name_formatter", str):
-        rich_out = get_help_output(parser, cmd=["--help"])
-        rich_help_out = get_help_output(parser, cmd=["help", "--help"])
-    rich_out_no_trailing_ws = "\n".join(line.rstrip(" ") for line in rich_out.split("\n"))
-    rich_help_out_no_trailing_ws = "\n".join(line.rstrip(" ") for line in rich_help_out.split("\n"))
-    assert rich_out_no_trailing_ws == orig_out
-    assert rich_help_out_no_trailing_ws == orig_help_out
+        rich_base_out, rich_help_cmd_out = create_parsers_and_generate_help(RichHelpFormatter)
+
+    # strip trailing whitespace from rich outputs
+    rich_base_out = "\n".join(line.rstrip(" ") for line in rich_base_out.split("\n"))
+    rich_help_cmd_out = "\n".join(line.rstrip(" ") for line in rich_help_cmd_out.split("\n"))
+    assert rich_base_out == orig_base_out
+    assert rich_help_cmd_out == orig_help_cmd_out
 
 
 def test_escape_params():

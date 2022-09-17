@@ -2,5 +2,3 @@
 max_line_length = 100
 select = C,E,F,W,B,B950
 extend-ignore = E203, E501
-per-file-ignores =
-    tests/test_poetry_clone.py:F841

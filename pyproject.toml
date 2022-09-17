@@ -65,7 +65,6 @@ module = ["tests.*"]
 check_untyped_defs = false
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
-disallow_untyped_decorators = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
