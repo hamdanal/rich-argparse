@@ -247,3 +247,76 @@ def test_with_argument_default_help_formatter():
       --option OPTION  help of option (default: def)
     """
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
+
+
+def test_with_metavar_type_help_formatter():
+    class Fmt(RichHelpFormatter, argparse.MetavarTypeHelpFormatter):
+        ...
+
+    parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
+    parser.add_argument("--count", type=int, default=0, help="how many?")
+
+    expected_help_output = f"""\
+    usage: PROG [-h] [--count int]
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help   show this help message and exit
+      --count int  how many?
+    """
+    assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
+
+
+def test_with_django_help_formatter():
+    # https://github.com/django/django/blob/8eed30aec606ff70eee920af84e880ea19da481b/django/core/management/base.py#L105-L131
+    class DjangoHelpFormatter(argparse.HelpFormatter):
+        """
+        Customized formatter so that command-specific arguments appear in the
+        --help output before arguments common to all commands.
+        """
+
+        show_last = {
+            "--version",
+            "--verbosity",
+            "--traceback",
+            "--settings",
+            "--pythonpath",
+            "--no-color",
+            "--force-color",
+            "--skip-checks",
+        }
+
+        def _reordered_actions(self, actions):
+            return sorted(actions, key=lambda a: set(a.option_strings) & self.show_last != set())
+
+        def add_usage(self, usage, actions, *args, **kwargs):
+            super().add_usage(usage, self._reordered_actions(actions), *args, **kwargs)
+
+        def add_arguments(self, actions):
+            super().add_arguments(self._reordered_actions(actions))
+
+    class Fmt(DjangoHelpFormatter, RichHelpFormatter):
+        ...
+
+    parser = argparse.ArgumentParser("command", formatter_class=Fmt)
+    parser.add_argument("--version", action="version", version="1.0.0")
+    parser.add_argument("--traceback", action="store_true", help="show traceback")
+    parser.add_argument("my-arg", help="custom argument.")
+    parser.add_argument("--my-option", action="store_true", help="custom option")
+    parser.add_argument("--verbosity", action="count", help="verbosity level")
+    parser.add_argument("-a", "--an-option", action="store_true", help="another custom option")
+
+    expected_help_output = f"""\
+    usage: command [-h] [--my-option] [-a] [--version] [--traceback] [--verbosity] my-arg
+
+    POSITIONAL ARGUMENTS:
+      my-arg           custom argument.
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help       show this help message and exit
+      --my-option      custom option
+      -a, --an-option  another custom option
+      --version        show program's version number and exit
+      --traceback      show traceback
+      --verbosity      verbosity level
+    """
+    assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
