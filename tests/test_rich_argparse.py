@@ -40,10 +40,10 @@ def test_params_substitution():
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
 
 
-@pytest.mark.parametrize("prog", (None, "PROG"))
-@pytest.mark.parametrize("usage", (None, "USAGE"))
-@pytest.mark.parametrize("description", (None, "This is the program's description."))
-@pytest.mark.parametrize("epilog", (None, "This is the program's epilog."))
+@pytest.mark.parametrize("prog", (None, "PROG"), ids=("no_prog", "prog"))
+@pytest.mark.parametrize("usage", (None, "USAGE"), ids=("no_usage", "usage"))
+@pytest.mark.parametrize("description", (None, "A description."), ids=("no_desc", "desc"))
+@pytest.mark.parametrize("epilog", (None, "An epilog."), ids=("no_epilog", "epilog"))
 def test_overall_structure(prog, usage, description, epilog):
     # The output must be consistent with the original HelpFormatter in these cases:
     # 1. all names and help text are short to avoid special wrapping
@@ -66,7 +66,7 @@ def test_overall_structure(prog, usage, description, epilog):
     group.add_argument("arg", help="help inside group")
     no_desc_group = parser.add_argument_group("no description group name")
     no_desc_group.add_argument("arg", help="agr help inside no_desc_group")
-    empty_name_group = parser.add_argument_group(description="empty_name_group description")
+    empty_name_group = parser.add_argument_group("", description="empty_name_group description")
     empty_name_group.add_argument("arg", help="arg help inside empty_name_group")
     no_name_group = parser.add_argument_group(description="no_name_group description")
     no_name_group.add_argument("arg", help="arg help inside no_name_group")
@@ -117,12 +117,12 @@ def test_padding_and_wrapping():
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
 
 
-@pytest.mark.parametrize("title", (None, "available commands"))
-@pytest.mark.parametrize("description", (None, "subparsers description"))
-@pytest.mark.parametrize("dest", (None, "command"))
-@pytest.mark.parametrize("metavar", (None, "<command>"))
-@pytest.mark.parametrize("help", (None, "The subcommand to execute"))
-@pytest.mark.parametrize("required", (False, True))
+@pytest.mark.parametrize("title", (None, "available commands"), ids=("no_title", "title"))
+@pytest.mark.parametrize("description", (None, "subparsers description"), ids=("no_desc", "desc"))
+@pytest.mark.parametrize("dest", (None, "command"), ids=("no_dest", "dest"))
+@pytest.mark.parametrize("metavar", (None, "<command>"), ids=("no_mv", "mv"))
+@pytest.mark.parametrize("help", (None, "The subcommand to execute"), ids=("no_help", "help"))
+@pytest.mark.parametrize("required", (False, True), ids=("opt", "req"))
 def test_subparsers(title, description, dest, metavar, help, required):
     subparsers_kwargs = {
         "title": title,
