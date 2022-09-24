@@ -87,7 +87,7 @@ index 7fb6855..5e5d48a 100755
 +    from django.core.management.base import BaseCommand, DjangoHelpFormatter
 +    from rich_argparse import RichHelpFormatter
 +
-+    class RichDjangoHelpFormatter(RichHelpFormatter, DjangoHelpFormatter):  # rich first
++    class RichDjangoHelpFormatter(DjangoHelpFormatter, RichHelpFormatter):  # django first
 +        """A rich-based help formatter for django commands."""
 +
 +    original_create_parser = BaseCommand.create_parser
