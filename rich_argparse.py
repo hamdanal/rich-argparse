@@ -106,7 +106,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             elif name == "choices" and param is not None:
                 params[name] = ", ".join([str(c) for c in param])
         params = {k: escape(str(v)) for k, v in params.items()}
-        return action.help % params
+        return self._get_help_string(action) % params  # type: ignore[operator]
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)

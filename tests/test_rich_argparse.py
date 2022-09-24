@@ -230,3 +230,20 @@ def test_no_help():
     formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
     out = formatter.format_help()
     assert not out
+
+
+def test_with_argument_default_help_formatter():
+    class Fmt(RichHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+        ...
+
+    parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
+    parser.add_argument("--option", default="def", help="help of option")
+
+    expected_help_output = f"""\
+    usage: PROG [-h] [--option OPTION]
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help       show this help message and exit
+      --option OPTION  help of option (default: def)
+    """
+    assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
