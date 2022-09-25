@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.1 - 2022-09-25
+
+### Fixes
+- Fix compatibility with `argparse.ArgumentDefaultsHelpFormatter`
+  * Issue #13, PR #14
+
 ## 0.2.0 - 2022-09-17
 
 ### Features
