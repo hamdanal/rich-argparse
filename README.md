@@ -142,3 +142,14 @@ an input and returns a str. By default, `RichHelpFormatter` sets the function to
 ```python
 RichHelpFormatter.group_name_formatter = str.title
 ```
+
+## Contributing
+### Development Environment Setup
+
+```sh
+# Install tox
+pip3 install tox
+
+# Use tox to install requirements
+tox --devenv venv
+```
