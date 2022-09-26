@@ -145,6 +145,7 @@ RichHelpFormatter.group_name_formatter = str.title
 
 ## Contributing
 ### Development Environment Setup
+You can use `tox` to setup a virtual environment and install dependencies.
 
 ```sh
 # Install tox
