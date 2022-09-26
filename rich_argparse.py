@@ -16,7 +16,10 @@ from __future__ import annotations
 import argparse
 from typing import TYPE_CHECKING, Callable, Generator, Iterable
 
-# rich is only used to display help. It is imported inside the functions in order
+#### TEMP
+from rich.pretty import pprint
+
+# rich is only used to display help. It is imported inside the functions in order to
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
     from rich.console import RenderableType
@@ -30,14 +33,16 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
+
     styles: dict[str, StyleType] = {
         "argparse.args": "italic cyan",
         "argparse.groups": "bold italic dark_orange",
         "argparse.help": "default",
         "argparse.metavar": "bold cyan",
-        "argparse.text": "italic",
+        "argparse.text": "white",
         "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
     }
+
     highlights: list[str] = [
         r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
@@ -64,6 +69,9 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
+        print("\n")
+        pprint("_format_action_invocation()")
+        pprint(locals())
 
         if self._current_section != self._root_section:
             from rich.text import Span, Text
@@ -73,6 +81,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             else:
                 styled_options = (Text(opt, style="argparse.args") for opt in action.option_strings)
                 action_invocation = Text(", ").join(styled_options)
+
                 if action.nargs != 0:
                     # The default format: `-s ARGS, --long-option ARGS` is very ugly with long
                     # option names so I change it to `-s, --long-option ARG` similar to click
@@ -84,8 +93,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             action_invocation.pad_left(self._current_indent)
             help_text = Text.from_markup(self._escape_params_and_expand_help(action))
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
+
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
+
             self._max_col1_width = max(self._max_col1_width, len(action_invocation) + 1)
             self._table.add_row(action_invocation, help_text)
 
@@ -110,6 +121,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
+
         if text is not argparse.SUPPRESS and text is not None:
             from rich.markup import escape
             from rich.padding import Padding
@@ -117,9 +129,12 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
             if "%(prog)" in text:
                 text = text % {"prog": escape(self._prog)}
+
             rich_text = Text.from_markup(text, style="argparse.text")
+
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
+
             self.renderables.append(Padding.indent(rich_text, self._current_indent))
 
     def add_usage(
@@ -148,6 +163,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     def start_section(self, heading: str | None) -> None:
         from rich.table import Table
 
+        print(f"STARTINGSECTION with {heading}")
         super().start_section(heading)  # sets self._current_section to child section
 
         self._current_section.renderables = []
