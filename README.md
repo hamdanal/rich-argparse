@@ -114,12 +114,12 @@ You can highlight patterns in the help text of your CLI. By default, `RichHelpFo
 the following styles:
 ```pycon
 >>> pprint(RichHelpFormatter.styles)
-{'argparse.args': 'italic cyan',
- 'argparse.groups': 'bold italic dark_orange',
+{'argparse.args': 'cyan',
+ 'argparse.groups': 'dark_orange',
  'argparse.help': 'default',
- 'argparse.metavar': 'bold cyan',
- 'argparse.syntax': '#E06C75',
- 'argparse.text': 'italic'}
+ 'argparse.metavar': 'dark_cyan',
+ 'argparse.syntax': 'bold',
+ 'argparse.text': 'default'}
 ```
 The following example highlights all occurrences of `pyproject.toml` in green.
 
