@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from typing import TYPE_CHECKING, Callable, Generator, Iterable
 
 # rich is only used to display help. It is imported inside the functions in order
@@ -24,6 +25,9 @@ if TYPE_CHECKING:
     from rich.table import Table
 
 __all__ = ["RichHelpFormatter"]
+_Actions = Iterable[argparse.Action]
+_Groups = Iterable[argparse._ArgumentGroup]
+_UsageSpans = Generator[tuple[int, int, str], None, None]
 
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -31,12 +35,12 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     group_name_formatter: Callable[[str], str] = str.upper
     styles: dict[str, StyleType] = {
-        "argparse.args": "italic cyan",
-        "argparse.groups": "bold italic dark_orange",
+        "argparse.args": "cyan",
+        "argparse.groups": "dark_orange",
         "argparse.help": "default",
-        "argparse.metavar": "bold cyan",
-        "argparse.text": "italic",
-        "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
+        "argparse.metavar": "dark_cyan",
+        "argparse.syntax": "bold",
+        "argparse.text": "default",
     }
     highlights: list[str] = [
         r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
@@ -52,7 +56,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._root_section.renderables = []
-        self._max_col1_width = 0
 
     @property
     def renderables(self) -> list[RenderableType]:
@@ -61,6 +64,23 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     @property
     def _table(self) -> Table:
         return self._current_section.table  # type: ignore[no-any-return]
+
+    def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
+        from rich.markup import escape
+
+        if not action.help:
+            return ""
+        params = dict(vars(action), prog=self._prog)
+        for name in list(params):  # iterate over a copy because del
+            param = params[name]
+            if param is argparse.SUPPRESS:
+                del params[name]
+            elif hasattr(param, "__name__"):
+                params[name] = param.__name__
+            elif name == "choices" and param is not None:
+                params[name] = ", ".join([str(c) for c in param])
+        params = {k: escape(str(v)) for k, v in params.items()}
+        return self._get_help_string(action) % params  # type: ignore[operator]
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
@@ -86,27 +106,116 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
-            self._max_col1_width = max(self._max_col1_width, len(action_invocation) + 1)
             self._table.add_row(action_invocation, help_text)
 
         return orig_str
 
-    def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
-        from rich.markup import escape
+    def _usage_spans(
+        self, text: str, start: int, actions: _Actions, groups: _Groups
+    ) -> _UsageSpans:
+        def split_metavar(__start: int, __end: int) -> _UsageSpans:
+            sep = text.find(" ", __start, __end)
+            if sep > -1:
+                # separate option string from metavar
+                yield __start, sep, "argparse.args"
+                yield sep + 1, __end, "argparse.metavar"
+            else:
+                yield __start, __end, "argparse.args"
 
-        if not action.help:
-            return ""
-        params = dict(vars(action), prog=self._prog)
-        for name in list(params):  # iterate over a copy because del
-            param = params[name]
-            if param is argparse.SUPPRESS:
-                del params[name]
-            elif hasattr(param, "__name__"):
-                params[name] = param.__name__
-            elif name == "choices" and param is not None:
-                params[name] = ", ".join([str(c) for c in param])
-        params = {k: escape(str(v)) for k, v in params.items()}
-        return self._get_help_string(action) % params  # type: ignore[operator]
+        optionals: list[argparse.Action] = []
+        positionals: list[argparse.Action] = []
+        group_actions = set()
+        num_groups = 0
+        for group in groups:
+            ga = {action for action in group._group_actions if action.help is not argparse.SUPPRESS}
+            if ga:
+                num_groups += 1  # this group will be included in usage
+                group_actions.update(ga)
+        num_options = 0
+        for action in actions:
+            if action.option_strings:
+                optionals.append(action)
+                if action.help is not argparse.SUPPRESS and action not in group_actions:
+                    num_options += 1
+            else:
+                positionals.append(action)
+        num_top_level = num_options + num_groups
+        found = 0
+        matching_delim = {"[": "]", "(": ")"}
+        stack = []
+        pos = start
+        for match in re.finditer(r"[\[(\])]", text[start:], re.MULTILINE):
+            if found == num_top_level:
+                break  # found all options, break of the loop
+            pos = match.start() + start
+            char = text[pos]
+            if char in "([":
+                stack.append(pos + 1)
+            elif char in "])":
+                if not stack:
+                    raise ValueError(
+                        f"usage error: encountered extraneous '{char}' at pos {pos}: '{text[pos:]}'"
+                    )
+                if char == matching_delim[text[stack[-1] - 1]]:
+                    opening_pos = stack.pop()
+                else:
+                    continue
+                if stack:
+                    continue  # ignore inner bracket matches
+                # divide the option usage on '|' as well
+                option_start_pos = opening_pos
+                for pipe_match in re.finditer(r"\s\|\s", text[option_start_pos:pos], re.MULTILINE):
+                    yield from split_metavar(opening_pos, pipe_match.start() + option_start_pos)
+                    opening_pos = pipe_match.end() + option_start_pos
+                yield from split_metavar(opening_pos, pos)
+                found += 1
+            else:
+                raise AssertionError(char)
+        if stack:
+            opening = text[stack[0] - 1]
+            raise ValueError(
+                f"usage error: expecting '{matching_delim[opening]}' to match '{opening}' "
+                f"starting at: '{text[stack[0]-1:]}'"
+            )
+        for positional in positionals:
+            if positional.help is argparse.SUPPRESS:
+                continue
+            default = self._get_default_metavar_for_positional(positional)
+            part = self._format_args(positional, default)
+            start = text[pos:].find(part) + pos
+            end = start + len(part)
+            yield start, end, "argparse.args"
+            pos = end
+
+    def add_usage(
+        self, usage: str | None, actions: _Actions, groups: _Groups, prefix: str | None = None
+    ) -> None:
+        super().add_usage(usage, actions, groups, prefix)
+        if usage is argparse.SUPPRESS:
+            return
+        from rich.text import Span, Text
+
+        if prefix is None:
+            prefix = self._format_usage(usage="", actions=(), groups=(), prefix=None).rstrip("\n")
+        prefix_end = ": " if prefix.endswith(": ") else ""
+        prefix = prefix[: len(prefix) - len(prefix_end)]
+        prefix = type(self).group_name_formatter(prefix) + prefix_end
+
+        spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
+        usage_text = self._format_usage(usage, actions, groups, prefix=prefix).rstrip()
+        if usage is None:  # only auto generated usage is coloured
+            actions_start = len(prefix) + len(self._prog) + 1
+            try:
+                actions_spans = [
+                    Span(start, end, style)
+                    for start, end, style in self._usage_spans(
+                        usage_text, start=actions_start, actions=actions, groups=groups
+                    )
+                ]
+            except ValueError:
+                actions_spans = []
+            spans.extend(actions_spans)
+        self.renderables.append(Text(usage_text, spans=spans))
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
@@ -121,29 +230,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
             self.renderables.append(Padding.indent(rich_text, self._current_indent))
-
-    def add_usage(
-        self,
-        usage: str | None,
-        actions: Iterable[argparse.Action],
-        groups: Iterable[argparse._ArgumentGroup],
-        prefix: str | None = None,
-    ) -> None:
-        super().add_usage(usage, actions, groups, prefix)
-        if usage is not argparse.SUPPRESS:
-            from rich.syntax import Syntax
-
-            usage_text = self._format_usage(usage, actions, groups, prefix)
-            self.renderables.append(
-                Syntax(
-                    usage_text.strip(),
-                    lexer="awk",
-                    theme="one-dark",
-                    code_width=self._width,
-                    background_color="default",
-                    word_wrap=True,
-                )
-            )
 
     def start_section(self, heading: str | None) -> None:
         from rich.table import Table
@@ -204,7 +290,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                 elif isinstance(renderable, Group):
                     yield from iter_tables(renderable)
 
-        col1_width = min(self._max_col1_width, self._max_help_position)
+        col1_width = min(self._action_max_length + 1, self._max_help_position)
         col2_width = self._width - col1_width
         for table in iter_tables(renderables):  # apply the unified width
             table.columns[0].width = col1_width
@@ -217,7 +303,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 if __name__ == "__main__":
     import sys
 
-    from rich import get_console
+    from rich import print
 
     RichHelpFormatter.highlights.append(r"'(?P<help>[^']*)'")  # disable colors inside single quotes
     parser = argparse.ArgumentParser(
@@ -294,7 +380,6 @@ if __name__ == "__main__":
     )
     mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
 
-    console = get_console()
     args = parser.parse_args()
-    console.print("Got the following arguments on the command line:")
-    console.print(vars(args))
+    print("Got the following arguments on the command line:")
+    print(vars(args))

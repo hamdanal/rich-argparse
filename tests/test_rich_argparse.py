@@ -4,6 +4,7 @@ import argparse
 from unittest.mock import patch
 
 import pytest
+from rich.text import Text
 
 from rich_argparse import RichHelpFormatter
 from tests.conftest import OPTIONS_GROUP_NAME, assert_help_output, get_help_output
@@ -22,7 +23,7 @@ def test_params_substitution():
     parser.add_argument("--option", default="value", help="help of option (default: %(default)s)")
 
     expected_help_output = f"""\
-    usage: awesome_program [-h] [--version] [--option OPTION]
+    USAGE: awesome_program [-h] [--version] [--option OPTION]
 
     This is the awesome_program program.
 
@@ -92,7 +93,7 @@ def test_padding_and_wrapping():
     group_with_description.add_argument("pos-arg", help="#" * 120)
 
     expected_help_output = f"""\
-    usage: PROG [-h] [-o LONG_METAVAR] pos-arg
+    USAGE: PROG [-h] [-o LONG_METAVAR] pos-arg
 
     --------------------------------------------------------------------------------------------------
     ----------------------
@@ -178,7 +179,7 @@ def test_escape_params():
     )
 
     expected_help_output = f"""\
-    usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
+    USAGE: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
 
     [underline] description.
 
@@ -199,36 +200,108 @@ def test_escape_params():
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
 
 
-def test_spans():
-    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+@pytest.mark.parametrize(
+    ("usage", "usage_text"),
+    (
+        pytest.param(
+            None,
+            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--flag\x1b[0m "
+            "| \x1b[36m--not-flag\x1b[0m] (\x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m "
+            "| \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m) \x1b[36mfile\x1b[0m",
+            id="auto_usage",
+        ),
+        pytest.param(
+            "%(prog)s [-h] [--flag | --not-flag] (--path PATH | --url URL) file",
+            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [-h] [--flag | --not-flag] (--path PATH | --url URL) file",
+            id="user_usage",
+        ),
+    ),
+)
+def test_spans(usage, usage_text):
+    parser = argparse.ArgumentParser("PROG", usage=usage, formatter_class=RichHelpFormatter)
     parser.add_argument("file")
-    parser.add_argument("--flag", action="store_true", help="Is flag?")
+    mut_ex = parser.add_mutually_exclusive_group()
+    mut_ex.add_argument("--flag", action="store_true", help="Is flag?")
+    mut_ex.add_argument("--not-flag", action="store_true", help="Is not flag?")
+    req_mut_ex = parser.add_mutually_exclusive_group(required=True)
+    req_mut_ex.add_argument("--path", help="Option path.")
+    req_mut_ex.add_argument("--url", help="Option url.")
 
-    expected_help_output = (
-        "    \x1b[38;5;174;49musage\x1b[0m\x1b[38;5;146;49m:\x1b[0m\x1b[38;5;146;49m \x1b[0m"
-        "\x1b[38;5;174;49mPROG\x1b[0m\x1b[38;5;146;49m \x1b[0m\x1b[38;5;146;49m[\x1b[0m"
-        "\x1b[38;5;116;49m-\x1b[0m\x1b[38;5;174;49mh\x1b[0m\x1b[38;5;146;49m]\x1b[0m"
-        "\x1b[38;5;146;49m \x1b[0m\x1b[38;5;146;49m[\x1b[0m\x1b[38;5;116;49m--\x1b[0m"
-        "\x1b[38;5;174;49mflag\x1b[0m\x1b[38;5;146;49m]\x1b[0m\x1b[38;5;146;49m \x1b[0m"
-        "\x1b[38;5;174;49mfile\x1b[0m"
-    )  # usage as syntax
-    expected_help_output += f"""\
+    expected_help_output = f"""\
+    {usage_text}
 
+    \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
+      \x1b[36mfile\x1b[0m
 
-    \x1b[1;3;38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-      \x1b[3;36mfile\x1b[0m
-
-    \x1b[1;3;38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
-      \x1b[3;36m-h\x1b[0m, \x1b[3;36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
-      \x1b[3;36m--flag\x1b[0m      \x1b[39mIs flag?\x1b[0m
+    \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m   \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--flag\x1b[0m       \x1b[39mIs flag?\x1b[0m
+      \x1b[36m--not-flag\x1b[0m   \x1b[39mIs not flag?\x1b[0m
+      \x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m  \x1b[39mOption path.\x1b[0m
+      \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m    \x1b[39mOption url.\x1b[0m
     """
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output, with_ansi=True)
+
+
+def test_actions_spans_in_usage():
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    parser.add_argument("arg", nargs="*")
+    mut_ex = parser.add_mutually_exclusive_group()
+    mut_ex.add_argument("--opt", nargs="?")
+    mut_ex.add_argument("--opts", nargs="+")
+
+    usage_text = (
+        "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
+        "[OPT]\x1b[0m | \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] \x1b[36m[arg "
+        "...]\x1b[0m"
+    )
+    expected_help_output = f"""\
+    {usage_text}
+
+    \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
+      \x1b[36marg\x1b[0m
+
+    \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m              \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--opt\x1b[0m \x1b[38;5;36m[OPT]\x1b[0m
+      \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m
+    """
+    assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output, with_ansi=True)
+
+
+def test_usage_spans_errors():
+    parser = argparse.ArgumentParser()
+    parser._optionals.required = False
+    actions = parser._actions
+    groups = [parser._optionals]
+
+    formatter = RichHelpFormatter("PROG")
+    with pytest.raises(
+        ValueError, match=r"usage error: encountered extraneous '\]' at pos 2: '\]'"
+    ):
+        list(formatter._usage_spans("xx]", start=0, actions=actions, groups=groups))
+
+    with pytest.raises(
+        ValueError, match=r"usage error: expecting '\]' to match '\[' starting at: '\[xx'"
+    ):
+        list(formatter._usage_spans("[xx", start=0, actions=actions, groups=groups))
+
+    with patch.object(RichHelpFormatter, "_usage_spans", side_effect=ValueError):
+        formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
+    (usage,) = formatter.renderables
+    assert isinstance(usage, Text)
+    assert str(usage) == "USAGE: PROG [-h]"
+    (prefix_span,) = usage.spans
+    assert prefix_span.start == 0
+    assert prefix_span.end == len("usage:")
+    assert prefix_span.style == "argparse.groups"
 
 
 def test_no_help():
     formatter = RichHelpFormatter("prog")
     formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
     out = formatter.format_help()
+    assert not formatter.renderables
     assert not out
 
 
@@ -240,7 +313,7 @@ def test_with_argument_default_help_formatter():
     parser.add_argument("--option", default="def", help="help of option")
 
     expected_help_output = f"""\
-    usage: PROG [-h] [--option OPTION]
+    USAGE: PROG [-h] [--option OPTION]
 
     {OPTIONS_GROUP_NAME}:
       -h, --help       show this help message and exit
@@ -257,7 +330,7 @@ def test_with_metavar_type_help_formatter():
     parser.add_argument("--count", type=int, default=0, help="how many?")
 
     expected_help_output = f"""\
-    usage: PROG [-h] [--count int]
+    USAGE: PROG [-h] [--count int]
 
     {OPTIONS_GROUP_NAME}:
       -h, --help   show this help message and exit
@@ -306,7 +379,7 @@ def test_with_django_help_formatter():
     parser.add_argument("-a", "--an-option", action="store_true", help="another custom option")
 
     expected_help_output = f"""\
-    usage: command [-h] [--my-option] [-a] [--version] [--traceback] [--verbosity] my-arg
+    USAGE: command [-h] [--my-option] [-a] [--version] [--traceback] [--verbosity] my-arg
 
     POSITIONAL ARGUMENTS:
       my-arg           custom argument.
