@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import argparse
 import re
-from typing import TYPE_CHECKING, Callable, Generator, Iterable
+from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
-_UsageSpans = Generator[tuple[int, int, str], None, None]
+_UsageSpans = Generator[Tuple[int, int, str], None, None]
 
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -156,10 +156,9 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                     raise ValueError(
                         f"usage error: encountered extraneous '{char}' at pos {pos}: '{text[pos:]}'"
                     )
-                if char == matching_delim[text[stack[-1] - 1]]:
-                    opening_pos = stack.pop()
-                else:
+                if char != matching_delim[text[stack[-1] - 1]]:
                     continue
+                opening_pos = stack.pop()
                 if stack:
                     continue  # ignore inner bracket matches
                 # divide the option usage on '|' as well

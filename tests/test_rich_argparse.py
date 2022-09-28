@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from unittest.mock import patch
 
 import pytest
@@ -205,14 +206,15 @@ def test_escape_params():
     (
         pytest.param(
             None,
-            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--flag\x1b[0m "
+            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] "
+            "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m] [\x1b[36m--flag\x1b[0m "
             "| \x1b[36m--not-flag\x1b[0m] (\x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m "
-            "| \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m) \x1b[36mfile\x1b[0m",
+            "| \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m)  \x1b[36mfile\x1b[0m",
             id="auto_usage",
         ),
         pytest.param(
-            "%(prog)s [-h] [--flag | --not-flag] (--path PATH | --url URL) file",
-            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [-h] [--flag | --not-flag] (--path PATH | --url URL) file",
+            "%(prog)s [-h] [--flag | --not-flag] (--path PATH | --url URL]) file",
+            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [-h] [--flag | --not-flag] (--path PATH | --url URL]) file",
             id="user_usage",
         ),
     ),
@@ -220,12 +222,17 @@ def test_escape_params():
 def test_spans(usage, usage_text):
     parser = argparse.ArgumentParser("PROG", usage=usage, formatter_class=RichHelpFormatter)
     parser.add_argument("file")
+    parser.add_argument("hidden", help=argparse.SUPPRESS)
+    parser.add_argument("--weird", metavar="y)")
     mut_ex = parser.add_mutually_exclusive_group()
     mut_ex.add_argument("--flag", action="store_true", help="Is flag?")
     mut_ex.add_argument("--not-flag", action="store_true", help="Is not flag?")
     req_mut_ex = parser.add_mutually_exclusive_group(required=True)
     req_mut_ex.add_argument("--path", help="Option path.")
     req_mut_ex.add_argument("--url", help="Option url.")
+    hidden_group = parser.add_mutually_exclusive_group()
+    hidden_group.add_argument("--hidden-group-arg1", help=argparse.SUPPRESS)
+    hidden_group.add_argument("--hidden-group-arg2", help=argparse.SUPPRESS)
 
     expected_help_output = f"""\
     {usage_text}
@@ -235,6 +242,7 @@ def test_spans(usage, usage_text):
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m   \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m
       \x1b[36m--flag\x1b[0m       \x1b[39mIs flag?\x1b[0m
       \x1b[36m--not-flag\x1b[0m   \x1b[39mIs not flag?\x1b[0m
       \x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m  \x1b[39mOption path.\x1b[0m
@@ -250,10 +258,16 @@ def test_actions_spans_in_usage():
     mut_ex.add_argument("--opt", nargs="?")
     mut_ex.add_argument("--opts", nargs="+")
 
+    # https://github.com/python/cpython/issues/82619
+    if sys.version_info < (3, 9):
+        arg_metavar = "[arg [arg ...]]"
+    else:
+        arg_metavar = "[arg ...]"
+
     usage_text = (
-        "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
-        "[OPT]\x1b[0m | \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] \x1b[36m[arg "
-        "...]\x1b[0m"
+        f"\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
+        f"[OPT]\x1b[0m | \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] "
+        f"\x1b[36m{arg_metavar}\x1b[0m"
     )
     expected_help_output = f"""\
     {usage_text}
