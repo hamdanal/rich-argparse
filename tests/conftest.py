@@ -13,8 +13,14 @@ OPTIONS_GROUP_NAME = "OPTIONS" if sys.version_info >= (3, 10) else "OPTIONAL ARG
 
 
 @pytest.fixture(scope="session", autouse=True)
-def set_terminal_columns():
+def set_terminal_properties():
     with patch.dict(os.environ, {"COLUMNS": "100", "TERM": "xterm-256color"}):
+        yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def turnoff_legacy_windows():
+    with patch("rich.console.detect_legacy_windows", return_value=False):
         yield
 
 
