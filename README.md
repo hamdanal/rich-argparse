@@ -9,7 +9,7 @@
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/192895487-7772b686-9380-4c5d-8b18-a6243fe02c32.png)
+https://user-images.githubusercontent.com/93259987/193126185-6f7cd2dd-4e74-40ea-a194-a5e045a6f7a1.png)
 
 
 ## Installation

@@ -20,9 +20,9 @@ from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
-    from rich.console import RenderableType
+    from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
     from rich.style import StyleType
-    from rich.table import Table
+    from rich.text import Text
 
 __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
@@ -51,19 +51,56 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         self,
         prog: str,
         indent_increment: int = 2,
-        max_help_position: int = 38,
+        max_help_position: int = 24,
         width: int | None = None,
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
-        self._root_section.renderables = []
+        self._root_section.rich = []
 
-    @property
-    def renderables(self) -> list[RenderableType]:
-        return self._current_section.renderables  # type: ignore[no-any-return]
+    class _RichSection:
+        def __init__(self, formatter: RichHelpFormatter, heading: str | None) -> None:
+            self.formatter = formatter
+            if heading is not None:
+                heading = f"{type(formatter).group_name_formatter(heading)}:"
+            self.heading = heading
+            self.description: Text | None = None
+            self.actions: list[tuple[Text, Text]] = []
 
-    @property
-    def _table(self) -> Table:
-        return self._current_section.table  # type: ignore[no-any-return]
+        def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+            from rich.table import Column, Table
+            from rich.text import Text
+
+            # assert the empty sections are never rendered
+            assert self.description or self.actions
+            help_position = min(
+                self.formatter._action_max_length + 2, self.formatter._max_help_position
+            )
+            if self.heading:
+                yield Text(self.heading, style="argparse.groups")
+            if self.description:
+                yield self.description
+                if self.actions:
+                    yield ""  # add empty line between the description and the arguments
+            table = Table.grid(Column(width=help_position), Column(overflow="fold"))
+            for action_header, action_help in self.actions:
+                if len(action_header) >= help_position - 1:
+                    table.add_row(*action_header.divide([help_position]))
+                    if action_help:
+                        table.add_row(None, action_help)
+                else:
+                    table.add_row(action_header, action_help)
+            yield table
+
+    def _is_root(self) -> bool:
+        return self._current_section == self._root_section  # type: ignore[no-any-return]
+
+    def _rich_append(self, r: RenderableType) -> None:
+        assert self._is_root(), "can only append in root"
+        if isinstance(r, RichHelpFormatter._RichSection) and not r.description and not r.actions:
+            return
+        if self._root_section.rich:
+            self._root_section.rich.append("")
+        self._root_section.rich.append(r)
 
     def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
         from rich.markup import escape
@@ -85,7 +122,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
 
-        if self._current_section != self._root_section:
+        if not self._is_root():
             from rich.text import Span, Text
 
             if not action.option_strings:
@@ -106,7 +143,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
-            self._table.add_row(action_invocation, help_text)
+            self._current_section.rich.actions.append((action_invocation, help_text))
 
         return orig_str
 
@@ -214,7 +251,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             except ValueError:
                 actions_spans = []
             spans.extend(actions_spans)
-        self.renderables.append(Text(usage_text, spans=spans))
+        self._rich_append(Text(usage_text, spans=spans))
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
@@ -228,40 +265,23 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             rich_text = Text.from_markup(text, style="argparse.text")
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
-            self.renderables.append(Padding.indent(rich_text, self._current_indent))
+            padded_text = Padding.indent(rich_text, self._current_indent)
+            if self._is_root():
+                self._rich_append(padded_text)
+            else:
+                self._current_section.rich.description = padded_text
 
     def start_section(self, heading: str | None) -> None:
-        from rich.table import Table
-
         super().start_section(heading)  # sets self._current_section to child section
-
-        self._current_section.renderables = []
-        if heading is not None:
-            self.renderables.append(f"[argparse.groups]{type(self).group_name_formatter(heading)}:")
-        self._current_section.table = Table(
-            box=None, pad_edge=False, show_header=False, show_edge=False
-        )
-        self._table.add_column("argparse.args", overflow="fold")
-        self._table.add_column("argparse.help", overflow="fold")
+        self._current_section.rich = self._RichSection(self, heading)
 
     def end_section(self) -> None:
-        from rich.console import Group
-
-        has_text = len(self.renderables) > (self._current_section.heading is not None)
-        has_args = self._table.row_count
-        if has_args:
-            if has_text:  # add empty line between the description and the arguments
-                self.renderables.append("")
-            self.renderables.append(self._table)
-        group_renderables = self.renderables
-
+        section_renderable = self._current_section.rich
         super().end_section()  # sets self._current_section to parent section
-        if has_text or has_args:  # only add the group if it is not empty
-            self.renderables.append(Group(*group_renderables))
+        self._rich_append(section_renderable)
 
     def format_help(self) -> str:
-        from rich.console import Console, Group
-        from rich.table import Table
+        from rich.console import Console
         from rich.theme import Theme
 
         out = super().format_help()
@@ -274,28 +294,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
                 return out  # return the program name instead of printing it
 
         console = Console(theme=Theme(self.styles), width=self._width)
-        renderables_list = []
-        for r in self.renderables:
-            renderables_list.append(r)
-            renderables_list.append("")
-        if renderables_list:
-            renderables_list.pop()
-        renderables = Group(*renderables_list)
-
-        def iter_tables(group: Group) -> Generator[Table, None, None]:
-            for renderable in group.renderables:
-                if isinstance(renderable, Table):
-                    yield renderable
-                elif isinstance(renderable, Group):
-                    yield from iter_tables(renderable)
-
-        col1_width = min(self._action_max_length + 1, self._max_help_position)
-        col2_width = self._width - col1_width
-        for table in iter_tables(renderables):  # apply the unified width
-            table.columns[0].width = col1_width
-            table.columns[1].width = col2_width
-
-        console.print(renderables, highlight=True)
+        for renderable in self._root_section.rich:
+            console.print(renderable)
         return ""
 
 
@@ -316,9 +316,7 @@ if __name__ == "__main__":
         epilog="An epilog :sparkles: at the end ⌛",
     )
     parser.add_argument("-V", "--version", action="version", version="version 0.1.0")
-    parser.add_argument(
-        "pos-args", nargs="*", help="This is a positional argument that expects zero or more args"
-    )
+    parser.add_argument("pos-args", help="This is a positional argument.")
     if sys.version_info[:2] >= (3, 9):
         parser.add_argument(
             "--bool",

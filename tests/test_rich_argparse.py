@@ -100,18 +100,17 @@ def test_padding_and_wrapping():
     ----------------------
 
     {OPTIONS_GROUP_NAME}:
-      -h, --help                           show this help message and exit
-      -o, --very-long-option-name          ...........................................................
-    LONG_METAVAR                           ...........................................................
-                                           ..
+      -h, --help            show this help message and exit
+      -o, --very-long-option-name LONG_METAVAR
+                            ..........................................................................
+                            ..............................................
 
     GROUP:
       ************************************************************************************************
       ************************
 
-      pos-arg                              ###########################################################
-                                           ###########################################################
-                                           ##
+      pos-arg               ##########################################################################
+                            ##############################################
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%
@@ -276,7 +275,7 @@ def test_actions_spans_in_usage():
       \x1b[36marg\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
-      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m              \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m            \x1b[39mshow this help message and exit\x1b[0m
       \x1b[36m--opt\x1b[0m \x1b[38;5;36m[OPT]\x1b[0m
       \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m
     """
@@ -302,7 +301,7 @@ def test_usage_spans_errors():
 
     with patch.object(RichHelpFormatter, "_usage_spans", side_effect=ValueError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
-    (usage,) = formatter.renderables
+    (usage,) = formatter._root_section.rich
     assert isinstance(usage, Text)
     assert str(usage) == "USAGE: PROG [-h]"
     (prefix_span,) = usage.spans
@@ -315,7 +314,7 @@ def test_no_help():
     formatter = RichHelpFormatter("prog")
     formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
     out = formatter.format_help()
-    assert not formatter.renderables
+    assert not formatter._root_section.rich
     assert not out
 
 
@@ -407,3 +406,32 @@ def test_with_django_help_formatter():
       --verbosity      verbosity level
     """
     assert_help_output(parser, cmd=["--help"], expected_output=expected_help_output)
+
+
+@pytest.mark.parametrize("indent_increment", (1, 3))
+@pytest.mark.parametrize("max_help_position", (25, 26, 27))
+@pytest.mark.parametrize("width", (None, 70))
+@patch("rich_argparse.RichHelpFormatter.group_name_formatter", str)
+def test_help_formatter_args(indent_increment, max_help_position, width):
+    # Note: the length of the option corresponds with the values of max_help_position
+    option = "option-of-certain-length"
+    help_text = "This is the help of the said option"
+    orig_parser = argparse.ArgumentParser(
+        "program",
+        formatter_class=lambda prog: argparse.HelpFormatter(
+            prog, indent_increment, max_help_position, width
+        ),
+    )
+    orig_parser.add_argument(option, help=help_text)
+    rich_parser = argparse.ArgumentParser(
+        "program",
+        formatter_class=lambda prog: RichHelpFormatter(
+            prog, indent_increment, max_help_position, width
+        ),
+    )
+    rich_parser.add_argument(option, help=help_text)
+
+    orig_out = get_help_output(orig_parser, cmd=["--help"])
+    rich_out = get_help_output(rich_parser, cmd=["--help"])
+    rich_out_no_trailing_ws = "\n".join(line.rstrip(" ") for line in rich_out.split("\n"))
+    assert rich_out_no_trailing_ws == orig_out
