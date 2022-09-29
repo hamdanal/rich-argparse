@@ -435,3 +435,9 @@ def test_help_formatter_args(indent_increment, max_help_position, width):
     rich_out = get_help_output(rich_parser, cmd=["--help"])
     rich_out_no_trailing_ws = "\n".join(line.rstrip(" ") for line in rich_out.split("\n"))
     assert rich_out_no_trailing_ws == orig_out
+
+
+def test_return_output():
+    parser = argparse.ArgumentParser("prog", formatter_class=RichHelpFormatter)
+    out = parser.format_help()
+    assert out
