@@ -284,19 +284,12 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         from rich.console import Console
         from rich.theme import Theme
 
-        out = super().format_help()
-
-        # Handle ArgumentParser.add_subparsers() call to get the program name
-        all_items = self._root_section.items
-        if len(all_items) == 1:
-            func, args = all_items[0]
-            if func == self._format_usage and args[-1] == "":
-                return out  # return the program name instead of printing it
-
+        super().format_help()
         console = Console(theme=Theme(self.styles), width=self._width)
-        for renderable in self._root_section.rich:
-            console.print(renderable)
-        return ""
+        with console.capture() as capture:
+            for renderable in self._root_section.rich:
+                console.print(renderable)
+        return capture.get()
 
 
 if __name__ == "__main__":
