@@ -151,6 +151,8 @@ You can use `tox` to setup a virtual environment and install dependencies.
 # Install tox
 pip3 install tox
 
-# Use tox to install requirements
+# Use tox to create a virtual env and install requirements
 tox --devenv venv
 ```
+
+There's [preconfigured settings](.vscode/settings.json) in the repo for those using [VS Code](https://code.visualstudio.com/).

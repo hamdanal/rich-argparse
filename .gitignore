@@ -3,4 +3,3 @@
 /.coverage
 /.tox
 dist/
-.vscode/settings.json
