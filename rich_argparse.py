@@ -21,7 +21,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
-
     styles: dict[str, StyleType] = {
         "argparse.args": "cyan",
         "argparse.groups": "dark_orange",
@@ -30,7 +29,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         "argparse.syntax": "bold",
         "argparse.text": "default",
     }
-
     highlights: list[str] = [
         r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
