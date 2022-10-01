@@ -4,9 +4,6 @@ import argparse
 import re
 from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 
-#### TEMP
-from rich.pretty import pprint
-
 # rich is only used to display help. It is imported inside the functions in order to
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
@@ -113,9 +110,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
-        print("\n")
-        pprint("_format_action_invocation()")
-        pprint(locals())
 
         if not self._is_root():
             from rich.text import Span, Text
@@ -125,7 +119,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             else:
                 styled_options = (Text(opt, style="argparse.args") for opt in action.option_strings)
                 action_invocation = Text(", ").join(styled_options)
-
                 if action.nargs != 0:
                     # The default format: `-s ARGS, --long-option ARGS` is very ugly with long
                     # option names so I change it to `-s, --long-option ARG` similar to click
@@ -137,7 +130,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             action_invocation.pad_left(self._current_indent)
             help_text = Text.from_markup(self._escape_params_and_expand_help(action))
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
-
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
             self._current_section.rich.actions.append((action_invocation, help_text))
@@ -252,7 +244,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
-
         if text is not argparse.SUPPRESS and text is not None:
             from rich.markup import escape
             from rich.padding import Padding
@@ -260,9 +251,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
             if "%(prog)" in text:
                 text = text % {"prog": escape(self._prog)}
-
             rich_text = Text.from_markup(text, style="argparse.text")
-
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
             padded_text = Padding.indent(rich_text, self._current_indent)
