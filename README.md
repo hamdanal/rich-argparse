@@ -144,15 +144,30 @@ RichHelpFormatter.group_name_formatter = str.title
 ```
 
 ## Contributing
-### Development Environment Setup
-You can use `tox` to setup a virtual environment and install dependencies.
+Start by [forking the repo](https://github.com/hamdanal/rich-argparse/fork) and cloning your fork.
+
+For those using [VS Code](https://code.visualstudio.com/) there's [preconfigured settings](.vscode/) in the repo.
+
+
+### Environment Setup
+You can use `tox` to setup a virtual environment for `rich_argparse` and install dependencies.
 
 ```sh
-# Install tox
 pip3 install tox
-
-# Use tox to create a virtual env and install requirements
+cd /path/to/rich_argparse
 tox --devenv venv
 ```
 
-There's [preconfigured settings](.vscode/settings.json) in the repo for those using [VS Code](https://code.visualstudio.com/).
+### Development
+A good way to experiment with changes to this package is to use the local copy of `rich_argparse` as the `argparse` formatter in another project and then running that project's executable with `--help` as you make changes.
+
+To install the local copy of `rich_argparse` as a package in another project called `project_that_uses_argparse`:
+
+#### Using Poetry
+If you are using [poetry](https://python-poetry.org/) to manage `project_that_uses_argparse`'s dependencies you can add this line to the `tool.poetry.dependencies` section of `project_that_uses_argparse/pyproject.toml`:
+
+```toml
+[tool.poetry.dependencies]
+rich_argparse = {path = "/path/to/rich-argparse", develop = true}
+```
+
