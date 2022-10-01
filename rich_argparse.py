@@ -289,7 +289,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         with console.capture() as capture:
             for renderable in self._root_section.rich:
                 console.print(renderable)
-        return capture.get()
+        return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
 
 if __name__ == "__main__":
