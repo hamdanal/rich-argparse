@@ -1,16 +1,3 @@
-# rich_argparse.py
-#
-#     https://github.com/hamdanal/rich-argparse
-#
-# Author: Ali Hamdan (ali.hamdan.dev@gmail.com).
-#
-# Copyright (C) 2022.
-#
-# Permission is granted to use, copy, and modify this code in any
-# manner as long as this copyright message and disclaimer remain in
-# the source code.  There is no warranty.  Try to use the code for the
-# greater good.
-
 from __future__ import annotations
 
 import argparse
