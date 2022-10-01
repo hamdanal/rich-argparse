@@ -9,6 +9,7 @@
         "isort",
         "kwargs",
         "mypy",
+        "positionals",
         "pypi",
         "pyupgrade",
         "yesqa"

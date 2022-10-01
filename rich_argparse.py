@@ -1,20 +1,8 @@
-# rich_argparse.py
-#
-#     https://github.com/hamdanal/rich-argparse
-#
-# Author: Ali Hamdan (ali.hamdan.dev@gmail.com).
-#
-# Copyright (C) 2022.
-#
-# Permission is granted to use, copy, and modify this code in any
-# manner as long as this copyright message and disclaimer remain in
-# the source code.  There is no warranty.  Try to use the code for the
-# greater good.
-
 from __future__ import annotations
 
 import argparse
-from typing import TYPE_CHECKING, Callable, Generator, Iterable
+import re
+from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 
 #### TEMP
 from rich.pretty import pprint
@@ -22,11 +10,14 @@ from rich.pretty import pprint
 # rich is only used to display help. It is imported inside the functions in order to
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
-    from rich.console import RenderableType
+    from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
     from rich.style import StyleType
-    from rich.table import Table
+    from rich.text import Text
 
 __all__ = ["RichHelpFormatter"]
+_Actions = Iterable[argparse.Action]
+_Groups = Iterable[argparse._ArgumentGroup]
+_UsageSpans = Generator[Tuple[int, int, str], None, None]
 
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -35,12 +26,12 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     group_name_formatter: Callable[[str], str] = str.upper
 
     styles: dict[str, StyleType] = {
-        "argparse.args": "italic cyan",
-        "argparse.groups": "bold italic dark_orange",
+        "argparse.args": "cyan",
+        "argparse.groups": "dark_orange",
         "argparse.help": "default",
-        "argparse.metavar": "bold cyan",
-        "argparse.text": "white",
-        "argparse.syntax": "#E06C75",  # Light Red color used by the one-dark theme
+        "argparse.metavar": "dark_cyan",
+        "argparse.syntax": "bold",
+        "argparse.text": "default",
     }
 
     highlights: list[str] = [
@@ -52,20 +43,73 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         self,
         prog: str,
         indent_increment: int = 2,
-        max_help_position: int = 38,
+        max_help_position: int = 24,
         width: int | None = None,
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
-        self._root_section.renderables = []
-        self._max_col1_width = 0
+        self._root_section.rich = []
 
-    @property
-    def renderables(self) -> list[RenderableType]:
-        return self._current_section.renderables  # type: ignore[no-any-return]
+    class _RichSection:
+        def __init__(self, formatter: RichHelpFormatter, heading: str | None) -> None:
+            self.formatter = formatter
+            if heading is not None:
+                heading = f"{type(formatter).group_name_formatter(heading)}:"
+            self.heading = heading
+            self.description: Text | None = None
+            self.actions: list[tuple[Text, Text]] = []
 
-    @property
-    def _table(self) -> Table:
-        return self._current_section.table  # type: ignore[no-any-return]
+        def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+            from rich.table import Column, Table
+            from rich.text import Text
+
+            # assert the empty sections are never rendered
+            assert self.description or self.actions
+            help_position = min(
+                self.formatter._action_max_length + 2, self.formatter._max_help_position
+            )
+            if self.heading:
+                yield Text(self.heading, style="argparse.groups")
+            if self.description:
+                yield self.description
+                if self.actions:
+                    yield ""  # add empty line between the description and the arguments
+            table = Table.grid(Column(width=help_position), Column(overflow="fold"))
+            for action_header, action_help in self.actions:
+                if len(action_header) >= help_position - 1:
+                    table.add_row(*action_header.divide([help_position]))
+                    if action_help:
+                        table.add_row(None, action_help)
+                else:
+                    table.add_row(action_header, action_help)
+            yield table
+
+    def _is_root(self) -> bool:
+        return self._current_section == self._root_section  # type: ignore[no-any-return]
+
+    def _rich_append(self, r: RenderableType) -> None:
+        assert self._is_root(), "can only append in root"
+        if isinstance(r, RichHelpFormatter._RichSection) and not r.description and not r.actions:
+            return
+        if self._root_section.rich:
+            self._root_section.rich.append("")
+        self._root_section.rich.append(r)
+
+    def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
+        from rich.markup import escape
+
+        if not action.help:
+            return ""
+        params = dict(vars(action), prog=self._prog)
+        for name in list(params):  # iterate over a copy because del
+            param = params[name]
+            if param is argparse.SUPPRESS:
+                del params[name]
+            elif hasattr(param, "__name__"):
+                params[name] = param.__name__
+            elif name == "choices" and param is not None:
+                params[name] = ", ".join([str(c) for c in param])
+        params = {k: escape(str(v)) for k, v in params.items()}
+        return self._get_help_string(action) % params  # type: ignore[operator]
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
@@ -73,7 +117,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         pprint("_format_action_invocation()")
         pprint(locals())
 
-        if self._current_section != self._root_section:
+        if not self._is_root():
             from rich.text import Span, Text
 
             if not action.option_strings:
@@ -96,28 +140,115 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
-
-            self._max_col1_width = max(self._max_col1_width, len(action_invocation) + 1)
-            self._table.add_row(action_invocation, help_text)
+            self._current_section.rich.actions.append((action_invocation, help_text))
 
         return orig_str
 
-    def _escape_params_and_expand_help(self, action: argparse.Action) -> str:
-        from rich.markup import escape
+    def _usage_spans(
+        self, text: str, start: int, actions: _Actions, groups: _Groups
+    ) -> _UsageSpans:
+        def split_metavar(__start: int, __end: int) -> _UsageSpans:
+            sep = text.find(" ", __start, __end)
+            if sep > -1:
+                # separate option string from metavar
+                yield __start, sep, "argparse.args"
+                yield sep + 1, __end, "argparse.metavar"
+            else:
+                yield __start, __end, "argparse.args"
 
-        if not action.help:
-            return ""
-        params = dict(vars(action), prog=self._prog)
-        for name in list(params):  # iterate over a copy because del
-            param = params[name]
-            if param is argparse.SUPPRESS:
-                del params[name]
-            elif hasattr(param, "__name__"):
-                params[name] = param.__name__
-            elif name == "choices" and param is not None:
-                params[name] = ", ".join([str(c) for c in param])
-        params = {k: escape(str(v)) for k, v in params.items()}
-        return self._get_help_string(action) % params  # type: ignore[operator]
+        optionals: list[argparse.Action] = []
+        positionals: list[argparse.Action] = []
+        group_actions = set()
+        num_groups = 0
+        for group in groups:
+            ga = {action for action in group._group_actions if action.help is not argparse.SUPPRESS}
+            if ga:
+                num_groups += 1  # this group will be included in usage
+                group_actions.update(ga)
+        num_options = 0
+        for action in actions:
+            if action.option_strings:
+                optionals.append(action)
+                if action.help is not argparse.SUPPRESS and action not in group_actions:
+                    num_options += 1
+            else:
+                positionals.append(action)
+        num_top_level = num_options + num_groups
+        found = 0
+        matching_delim = {"[": "]", "(": ")"}
+        stack = []
+        pos = start
+        for match in re.finditer(r"[\[(\])]", text[start:], re.MULTILINE):
+            if found == num_top_level:
+                break  # found all options, break of the loop
+            pos = match.start() + start
+            char = text[pos]
+            if char in "([":
+                stack.append(pos + 1)
+            elif char in "])":
+                if not stack:
+                    raise ValueError(
+                        f"usage error: encountered extraneous '{char}' at pos {pos}: '{text[pos:]}'"
+                    )
+                if char != matching_delim[text[stack[-1] - 1]]:
+                    continue
+                opening_pos = stack.pop()
+                if stack:
+                    continue  # ignore inner bracket matches
+                # divide the option usage on '|' as well
+                option_start_pos = opening_pos
+                for pipe_match in re.finditer(r"\s\|\s", text[option_start_pos:pos], re.MULTILINE):
+                    yield from split_metavar(opening_pos, pipe_match.start() + option_start_pos)
+                    opening_pos = pipe_match.end() + option_start_pos
+                yield from split_metavar(opening_pos, pos)
+                found += 1
+            else:
+                raise AssertionError(char)
+        if stack:
+            opening = text[stack[0] - 1]
+            raise ValueError(
+                f"usage error: expecting '{matching_delim[opening]}' to match '{opening}' "
+                f"starting at: '{text[stack[0]-1:]}'"
+            )
+        for positional in positionals:
+            if positional.help is argparse.SUPPRESS:
+                continue
+            default = self._get_default_metavar_for_positional(positional)
+            part = self._format_args(positional, default)
+            start = text[pos:].find(part) + pos
+            end = start + len(part)
+            yield start, end, "argparse.args"
+            pos = end
+
+    def add_usage(
+        self, usage: str | None, actions: _Actions, groups: _Groups, prefix: str | None = None
+    ) -> None:
+        super().add_usage(usage, actions, groups, prefix)
+        if usage is argparse.SUPPRESS:
+            return
+        from rich.text import Span, Text
+
+        if prefix is None:
+            prefix = self._format_usage(usage="", actions=(), groups=(), prefix=None).rstrip("\n")
+        prefix_end = ": " if prefix.endswith(": ") else ""
+        prefix = prefix[: len(prefix) - len(prefix_end)]
+        prefix = type(self).group_name_formatter(prefix) + prefix_end
+
+        spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
+        usage_text = self._format_usage(usage, actions, groups, prefix=prefix).rstrip()
+        if usage is None:  # only auto generated usage is coloured
+            actions_start = len(prefix) + len(self._prog) + 1
+            try:
+                actions_spans = [
+                    Span(start, end, style)
+                    for start, end, style in self._usage_spans(
+                        usage_text, start=actions_start, actions=actions, groups=groups
+                    )
+                ]
+            except ValueError:
+                actions_spans = []
+            spans.extend(actions_spans)
+        self._rich_append(Text(usage_text, spans=spans))
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
@@ -134,106 +265,37 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
             for regex in self.highlights:
                 rich_text.highlight_regex(regex, style_prefix="argparse.")
-
-            self.renderables.append(Padding.indent(rich_text, self._current_indent))
-
-    def add_usage(
-        self,
-        usage: str | None,
-        actions: Iterable[argparse.Action],
-        groups: Iterable[argparse._ArgumentGroup],
-        prefix: str | None = None,
-    ) -> None:
-        super().add_usage(usage, actions, groups, prefix)
-        if usage is not argparse.SUPPRESS:
-            from rich.syntax import Syntax
-
-            usage_text = self._format_usage(usage, actions, groups, prefix)
-            self.renderables.append(
-                Syntax(
-                    usage_text.strip(),
-                    lexer="awk",
-                    theme="one-dark",
-                    code_width=self._width,
-                    background_color="default",
-                    word_wrap=True,
-                )
-            )
+            padded_text = Padding.indent(rich_text, self._current_indent)
+            if self._is_root():
+                self._rich_append(padded_text)
+            else:
+                self._current_section.rich.description = padded_text
 
     def start_section(self, heading: str | None) -> None:
-        from rich.table import Table
-
-        print(f"STARTINGSECTION with {heading}")
         super().start_section(heading)  # sets self._current_section to child section
-
-        self._current_section.renderables = []
-        if heading is not None:
-            self.renderables.append(f"[argparse.groups]{type(self).group_name_formatter(heading)}:")
-        self._current_section.table = Table(
-            box=None, pad_edge=False, show_header=False, show_edge=False
-        )
-        self._table.add_column("argparse.args", overflow="fold")
-        self._table.add_column("argparse.help", overflow="fold")
+        self._current_section.rich = self._RichSection(self, heading)
 
     def end_section(self) -> None:
-        from rich.console import Group
-
-        has_text = len(self.renderables) > (self._current_section.heading is not None)
-        has_args = self._table.row_count
-        if has_args:
-            if has_text:  # add empty line between the description and the arguments
-                self.renderables.append("")
-            self.renderables.append(self._table)
-        group_renderables = self.renderables
-
+        section_renderable = self._current_section.rich
         super().end_section()  # sets self._current_section to parent section
-        if has_text or has_args:  # only add the group if it is not empty
-            self.renderables.append(Group(*group_renderables))
+        self._rich_append(section_renderable)
 
     def format_help(self) -> str:
-        from rich.console import Console, Group
-        from rich.table import Table
+        from rich.console import Console
         from rich.theme import Theme
 
-        out = super().format_help()
-
-        # Handle ArgumentParser.add_subparsers() call to get the program name
-        all_items = self._root_section.items
-        if len(all_items) == 1:
-            func, args = all_items[0]
-            if func == self._format_usage and args[-1] == "":
-                return out  # return the program name instead of printing it
-
+        super().format_help()
         console = Console(theme=Theme(self.styles), width=self._width)
-        renderables_list = []
-        for r in self.renderables:
-            renderables_list.append(r)
-            renderables_list.append("")
-        if renderables_list:
-            renderables_list.pop()
-        renderables = Group(*renderables_list)
-
-        def iter_tables(group: Group) -> Generator[Table, None, None]:
-            for renderable in group.renderables:
-                if isinstance(renderable, Table):
-                    yield renderable
-                elif isinstance(renderable, Group):
-                    yield from iter_tables(renderable)
-
-        col1_width = min(self._max_col1_width, self._max_help_position)
-        col2_width = self._width - col1_width
-        for table in iter_tables(renderables):  # apply the unified width
-            table.columns[0].width = col1_width
-            table.columns[1].width = col2_width
-
-        console.print(renderables, highlight=True)
-        return ""
+        with console.capture() as capture:
+            for renderable in self._root_section.rich:
+                console.print(renderable)
+        return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
 
 if __name__ == "__main__":
     import sys
 
-    from rich import get_console
+    from rich import print
 
     RichHelpFormatter.highlights.append(r"'(?P<help>[^']*)'")  # disable colors inside single quotes
     parser = argparse.ArgumentParser(
@@ -247,9 +309,7 @@ if __name__ == "__main__":
         epilog="An epilog :sparkles: at the end ⌛",
     )
     parser.add_argument("-V", "--version", action="version", version="version 0.1.0")
-    parser.add_argument(
-        "pos-args", nargs="*", help="This is a positional argument that expects zero or more args"
-    )
+    parser.add_argument("pos-args", help="This is a positional argument.")
     if sys.version_info[:2] >= (3, 9):
         parser.add_argument(
             "--bool",
@@ -310,7 +370,6 @@ if __name__ == "__main__":
     )
     mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
 
-    console = get_console()
     args = parser.parse_args()
-    console.print("Got the following arguments on the command line:")
-    console.print(vars(args))
+    print("Got the following arguments on the command line:")
+    print(vars(args))

@@ -9,7 +9,7 @@
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/190869857-963968f4-b273-4c93-a301-958fef487624.png)
+https://user-images.githubusercontent.com/93259987/193126185-6f7cd2dd-4e74-40ea-a194-a5e045a6f7a1.png)
 
 
 ## Installation
@@ -114,12 +114,12 @@ You can highlight patterns in the help text of your CLI. By default, `RichHelpFo
 the following styles:
 ```pycon
 >>> pprint(RichHelpFormatter.styles)
-{'argparse.args': 'italic cyan',
- 'argparse.groups': 'bold italic dark_orange',
+{'argparse.args': 'cyan',
+ 'argparse.groups': 'dark_orange',
  'argparse.help': 'default',
- 'argparse.metavar': 'bold cyan',
- 'argparse.syntax': '#E06C75',
- 'argparse.text': 'italic'}
+ 'argparse.metavar': 'dark_cyan',
+ 'argparse.syntax': 'bold',
+ 'argparse.text': 'default'}
 ```
 The following example highlights all occurrences of `pyproject.toml` in green.
 

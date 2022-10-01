@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+## 0.3.0 - 2022-10-01
+
+### Features
+- A new custom usage lexer that is consistent with the formatter styles
+  * Issue #16, PR #17
+
+### Fixes
+- Fix inconsistent coloring of args in the top usage panel
+  * Issue #16, PR #17
+- Fix incorrect line breaks that put metavars on a alone on a new line
+  * Issue #12, PR #20
+- Do not print help output, return it instead
+  * Issue #19, PR #21
+
+### Changes
+- The default styles have been changed to be more in line with the new usage coloring
+  * PR #17
+- The default `max_help_position` is now set to 24 (the default used in argparse) as line breaks
+  are no longer an issue
+  * PR #20
+
+### Removed
+- The `RichHelpFormatter.renderables` property has been removed, it was never documented
+  * PR #20
+
+### Tests
+- Run windows tests in CI
+  * PR #22
+
 ## 0.2.1 - 2022-09-25
 
 ### Fixes
