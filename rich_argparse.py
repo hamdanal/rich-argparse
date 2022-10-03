@@ -397,23 +397,23 @@ if __name__ == "__main__":
     print(vars(args))
 
 
-def _render_help(console_kwargs: dict, renderables) -> None:
-    """Render the contents of the help screen to a file"""
+def _render_help(console_kwargs: dict, renderables: List[RenderableType]) -> None:
+    """Render the contents of the help screen to an HTML, SVG, or colored text file"""
     from rich.console import Console
     from rich.terminal_theme import TerminalTheme
 
     export_format = environ.get("RENDER_HELP_FORMAT")
+    export_method_name = f"save_{export_format}"
     render_console = Console(record=True, **console_kwargs)
 
     for renderable in renderables:
         render_console.print(renderable)
 
-    terminal_theme = TerminalTheme(*RICH_TERMINAL_THEME_ARGS)
-    export_method_name = f"save_{export_format}"
     export_method = getattr(render_console, export_method_name)
     program_name = path.basename(sys.argv[0])
     output_dir = environ.get("RENDER_HELP_DIR", getcwd())
     output_file = path.join(output_dir, f"{program_name}_help.{export_format}")
+    terminal_theme = TerminalTheme(*RICH_TERMINAL_THEME_ARGS)
 
     export_kwargs = {
         "save_html": {"theme": terminal_theme, "inline_styles": True},
