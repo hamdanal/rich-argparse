@@ -301,30 +301,17 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         from rich.theme import Theme
 
         super().format_help()
-        # console_kwargs =
-        console = Console(theme=Theme(self.styles), width=self._width)
+        console_kwargs = {"theme": Theme(self.styles), "width": self._width}
+        console = Console(**console_kwargs)
 
         with console.capture() as capture:
             for renderable in self._root_section.rich:
                 console.print(renderable)
 
-        captured_output = capture.get()
-        help_lines = "\n".join(line.rstrip() for line in captured_output.split("\n"))
-        render_help_to_file_format = environ.get("RENDER_HELP_FORMAT")
+        if environ.get("RENDER_HELP_FORMAT"):
+            _render_help(console_kwargs, self._root_section.rich)
 
-        if render_help_to_file_format:
-            print("RENDING")
-            render_console = Console(
-                theme=Theme(self.styles),
-                width=self._width,
-                record=True,
-            )
-            for renderable in self._root_section.rich:
-                render_console.print(renderable)
-
-            _render_help(render_console, render_help_to_file_format)
-
-        return help_lines
+        return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
 
 if __name__ == "__main__":
@@ -410,18 +397,23 @@ if __name__ == "__main__":
     print(vars(args))
 
 
-def _render_help(console: Console, export_format: str) -> None:
+def _render_help(console_kwargs: dict, renderables) -> None:
     """Render the contents of the help screen to a file"""
+    from rich.console import Console
     from rich.terminal_theme import TerminalTheme
+
+    export_format = environ.get("RENDER_HELP_FORMAT")
+    render_console = Console(record=True, **console_kwargs)
+
+    for renderable in renderables:
+        render_console.print(renderable)
 
     terminal_theme = TerminalTheme(*RICH_TERMINAL_THEME_ARGS)
     export_method_name = f"save_{export_format}"
-    export_method = getattr(console, export_method_name)
+    export_method = getattr(render_console, export_method_name)
     program_name = path.basename(sys.argv[0])
     output_dir = environ.get("RENDER_HELP_DIR", getcwd())
-
     output_file = path.join(output_dir, f"{program_name}_help.{export_format}")
-    print(f"OUTPUTFILE: {output_file}")
 
     export_kwargs = {
         "save_html": {"theme": terminal_theme, "inline_styles": True},
@@ -432,10 +424,9 @@ def _render_help(console: Console, export_format: str) -> None:
     if export_method_name not in export_kwargs:
         raise ValueError(f"export_format '{export_format}' not one of {export_kwargs.keys()}")
 
-    # Invoke it
     print(
         f"\n\n\nInvoking Rich.console.{export_method_name}('{output_file}')\n"
-        + f"kwargs: '{export_kwargs[export_method_name]}'...\n\n"
+        + f"   * kwargs: '{export_kwargs[export_method_name]}'...\n\n"
     )
 
     export_method(output_file, **export_kwargs[export_method_name])
