@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
+from os import environ, getcwd, path
 from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 
 # rich is only used to display help. It is imported inside the functions in order
@@ -15,6 +17,33 @@ __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 _UsageSpans = Generator[Tuple[int, int, str], None, None]
+
+# The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
+# This is a plain black, totally standard ANSI color theme.
+RICH_TERMINAL_THEME_ARGS = [
+    (0, 0, 0),
+    (255, 255, 255),
+    [
+        (0, 0, 0),
+        (128, 0, 0),
+        (0, 128, 0),
+        (128, 128, 0),
+        (0, 0, 128),
+        (128, 0, 128),
+        (0, 128, 128),
+        (192, 192, 192),
+    ],
+    [
+        (128, 128, 128),
+        (255, 0, 0),
+        (0, 255, 0),
+        (255, 255, 0),
+        (0, 0, 255),
+        (255, 0, 255),
+        (0, 255, 255),
+        (255, 255, 255),
+    ],
+]
 
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -272,11 +301,30 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         from rich.theme import Theme
 
         super().format_help()
+        # console_kwargs =
         console = Console(theme=Theme(self.styles), width=self._width)
+
         with console.capture() as capture:
             for renderable in self._root_section.rich:
                 console.print(renderable)
-        return "\n".join(line.rstrip() for line in capture.get().split("\n"))
+
+        captured_output = capture.get()
+        help_lines = "\n".join(line.rstrip() for line in captured_output.split("\n"))
+        render_help_to_file_format = environ.get("RENDER_HELP_FORMAT")
+
+        if render_help_to_file_format:
+            print("RENDING")
+            render_console = Console(
+                theme=Theme(self.styles),
+                width=self._width,
+                record=True,
+            )
+            for renderable in self._root_section.rich:
+                render_console.print(renderable)
+
+            _render_help(render_console, render_help_to_file_format)
+
+        return help_lines
 
 
 if __name__ == "__main__":
@@ -360,3 +408,34 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print("Got the following arguments on the command line:")
     print(vars(args))
+
+
+def _render_help(console: Console, export_format: str) -> None:
+    """Render the contents of the help screen to a file"""
+    from rich.terminal_theme import TerminalTheme
+
+    terminal_theme = TerminalTheme(*RICH_TERMINAL_THEME_ARGS)
+    export_method_name = f"save_{export_format}"
+    export_method = getattr(console, export_method_name)
+    program_name = path.basename(sys.argv[0])
+    output_dir = environ.get("RENDER_HELP_DIR", getcwd())
+
+    output_file = path.join(output_dir, f"{program_name}_help.{export_format}")
+    print(f"OUTPUTFILE: {output_file}")
+
+    export_kwargs = {
+        "save_html": {"theme": terminal_theme, "inline_styles": True},
+        "save_svg": {"theme": terminal_theme, "title": f"{program_name} --help"},
+        "save_text": {"styles": True},
+    }
+
+    if export_method_name not in export_kwargs:
+        raise ValueError(f"export_format '{export_format}' not one of {export_kwargs.keys()}")
+
+    # Invoke it
+    print(
+        f"\n\n\nInvoking Rich.console.{export_method_name}('{output_file}')\n"
+        + f"kwargs: '{export_kwargs[export_method_name]}'...\n\n"
+    )
+
+    export_method(output_file, **export_kwargs[export_method_name])
