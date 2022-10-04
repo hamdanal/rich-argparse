@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
 
 # rich is only used to display help. It is imported inside the functions in order to
-# not to add delays to command line tools that use this formatter.
+# not add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
     from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
     from rich.style import StyleType
