@@ -1,8 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import re
+from os import environ
 from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
+
+from rich.pretty import pprint
+
+log = logging.getLogger("rich_argparse")
+
+if environ.get("RICH_ARGPARSE_DEBUG"):
+    log.addHandler(logging.StreamHandler())
+    log.setLevel('DEBUG')
+
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -16,6 +27,19 @@ _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 _UsageSpans = Generator[Tuple[int, int, str], None, None]
 
+# Style name constants
+STYLE_PREFIX = "argparse"
+
+def style_name(_type: str):
+    return f"{STYLE_PREFIX}.{_type}"
+
+ARGPARSE_ARGS = style_name("args")
+ARGPARSE_GROUPS = style_name("groups")
+ARGPARSE_HELP = style_name("help")
+ARGPARSE_METAVAR = style_name("metavar")
+ARGPARSE_SYNTAX = style_name("syntax")
+ARGPARSE_TEXT = style_name("text")
+
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
@@ -23,6 +47,9 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
     group_name_formatter: Callable[[str], str] = str.upper
     styles: dict[str, StyleType] = {
         "argparse.args": "cyan",
+        "argparse.default": "dark_cyan",
+        "argparse.default_number": "bright_cyan",
+        "argparse.default_string": "color(106)",
         "argparse.groups": "dark_orange",
         "argparse.help": "default",
         "argparse.metavar": "dark_cyan",
@@ -48,7 +75,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         def __init__(self, formatter: RichHelpFormatter, heading: str | None) -> None:
             self.formatter = formatter
             if heading is not None:
-                heading = f"{type(formatter).group_name_formatter(heading)}:"
+                heading = f"{RichHelpFormatter.group_name_formatter(heading)}:"
             self.heading = heading
             self.description: Text | None = None
             self.actions: list[tuple[Text, Text]] = []
@@ -95,15 +122,22 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         if not action.help:
             return ""
         params = dict(vars(action), prog=self._prog)
-        for name in list(params):  # iterate over a copy because del
+        log.debug(f"help string:{self._get_help_string(action)}, params to escape:")
+        pprint(params)
+
+        for name in list(params.keys()):  # iterate over a copy because del
             param = params[name]
+            log.debug(f"  name: {name}: param: {param}")
+            #pprint(param)
             if param is argparse.SUPPRESS:
                 del params[name]
             elif hasattr(param, "__name__"):
                 params[name] = param.__name__
+                log.debug(f"  has_name: {param}")
             elif name == "choices" and param is not None:
                 params[name] = ", ".join([str(c) for c in param])
         params = {k: escape(str(v)) for k, v in params.items()}
+
         return self._get_help_string(action) % params  # type: ignore[operator]
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
@@ -117,19 +151,22 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             else:
                 styled_options = (Text(opt, style="argparse.args") for opt in action.option_strings)
                 action_invocation = Text(", ").join(styled_options)
+
                 if action.nargs != 0:
+                    action_invocation.append(" ")
                     # The default format: `-s ARGS, --long-option ARGS` is very ugly with long
                     # option names so I change it to `-s, --long-option ARG` similar to click
-                    default = self._get_default_metavar_for_optional(action)
-                    args_string = self._format_args(action, default)
-                    action_invocation.append(" ")
-                    action_invocation.append(args_string, style="argparse.metavar")
+                    long_arg = self._get_default_metavar_for_optional(action)
+                    metavar = self._format_args(action, long_arg)
+                    log.debug(f"    long_arg: {long_arg}, formatted metavar: {metavar}")
+                    action_invocation.append(metavar, style="argparse.metavar")
 
             action_invocation.pad_left(self._current_indent)
             help_text = Text.from_markup(self._escape_params_and_expand_help(action))
             help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
             for regex in self.highlights:
                 help_text.highlight_regex(regex, style_prefix="argparse.")
+            log.debug(f"Help text: {help_text.markup}")
             self._current_section.rich.actions.append((action_invocation, help_text))
 
         return orig_str
