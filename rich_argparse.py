@@ -123,10 +123,13 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
     def _rich_append(self, r: RenderableType) -> None:
         assert self._is_root(), "can only append in root"
+
         if isinstance(r, _RichSection) and not r.description and not r.actions:
             return
+
         if self._root_section.rich:
             self._root_section.rich.append("")
+
         self._root_section.rich.append(r)
 
     def _escape_params_and_expand_help(self, action: argparse.Action) -> Text:
@@ -174,7 +177,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         log.debug(f"Help text: {help_text.markup}")
         self._current_section.rich.actions.append((action_invocation, help_text))
         return orig_str
-
 
     def _usage_spans(
         self, text: str, start: int, actions: _Actions, groups: _Groups
@@ -265,7 +267,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             return
 
         if prefix is None:
-            prefix = 'xxxx'
             prefix = self._format_usage(usage="", actions=(), groups=(), prefix=None).rstrip("\n")
 
         prefix_end = ": " if prefix.endswith(": ") else ""
@@ -274,6 +275,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
         usage_text = self._format_usage(usage, actions, groups, prefix=prefix).rstrip()
+        log.debug(f"usage_text: {usage_text}")
+
         if usage is None:  # only auto generated usage is coloured
             actions_start = len(prefix) + len(self._prog) + 1
             try:
