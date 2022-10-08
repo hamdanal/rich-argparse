@@ -16,7 +16,7 @@ _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 
 
-class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
+class RichHelpFormatter(argparse.RawTextHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
