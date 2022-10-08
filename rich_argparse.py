@@ -21,11 +21,10 @@ __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 
-# Style name constants
-STYLE_PREFIX = "argparse"
 
-def style_name(_type: str):
-    return f"{STYLE_PREFIX}.{_type}"
+# Style name constants
+STYLE_PREFIX = "argparse."
+style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
 ARGPARSE_ARGS = style_name("args")
 ARGPARSE_GROUPS = style_name("groups")
@@ -36,6 +35,7 @@ ARGPARSE_TEXT = style_name("text")
 
 DEFAULT_INDENT_INCREMENT = 2
 DEFAULT_MAX_HELP_INDENT = 24
+
 
 # Debug logging
 log = logging.getLogger("rich_argparse")
@@ -97,11 +97,11 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         "argparse.default": "dark_cyan",
         "argparse.default_number": "bright_cyan",
         "argparse.default_string": "color(106)",
-        "argparse.groups": "dark_orange",
+        ARGPARSE_GROUPS: "dark_orange",
         "argparse.help": "default",
-        "argparse.metavar": "dark_cyan",
+        ARGPARSE_METAVAR: "dark_cyan",
         "argparse.syntax": "bold",
-        "argparse.text": "default",
+        ARGPARSE_TEXT: "default",
     }
 
     highlights: list[str] = [
@@ -166,7 +166,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
                 action_invocation.append(" ")
                 long_arg_no_prefix = self._get_default_metavar_for_optional(action)
                 metavar = self._format_args(action, long_arg_no_prefix)
-                action_invocation.append(metavar, style="argparse.metavar")
+                action_invocation.append(metavar, style=ARGPARSE_METAVAR)
                 log.debug(f"    long_arg: {long_arg_no_prefix}, formatted metavar: {metavar}")
 
         action_invocation.pad_left(self._current_indent)
@@ -174,7 +174,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
 
         for regex in self.highlights:
-            help_text.highlight_regex(regex, style_prefix="argparse.")
+            help_text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
 
         log.debug(f"Help text: {help_text.markup}\n\n")
         self._current_section.rich.actions.append((action_invocation, help_text))
@@ -199,25 +199,25 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
                     for option_string in action.option_strings:
                         start = text.index(option_string, pos)
                         end = start + len(option_string)
-                        yield Span(start, end, "argparse.args")
+                        yield Span(start, end, ARGPARSE_ARGS)
                         pos = end + 1
                     continue
             else:  # pragma: <3.9 cover
                 usage = action.option_strings[0]
             start = text.index(usage, pos)
             end = start + len(usage)
-            yield Span(start, end, "argparse.args")
+            yield Span(start, end, ARGPARSE_ARGS)
             if action.nargs != 0:
                 metavar = self._format_args(action, self._get_default_metavar_for_optional(action))
                 start = text.index(metavar, end)
                 end = start + len(metavar)
-                yield Span(start, end, "argparse.metavar")
+                yield Span(start, end, ARGPARSE_METAVAR)
             pos = end + 1
         for action in positionals:  # positionals come at the end
             usage = self._format_args(action, self._get_default_metavar_for_positional(action))
             start = text.index(usage, pos)
             end = start + len(usage)
-            yield Span(start, end, "argparse.args")
+            yield Span(start, end, ARGPARSE_ARGS)
             pos = end + 1
 
     def add_usage(
@@ -239,7 +239,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         prefix = prefix[: len(prefix) - len(prefix_end)]
         prefix = type(self).group_name_formatter(prefix) + prefix_end
 
-        spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
+        spans = [Span(0, len(prefix.rstrip()), ARGPARSE_GROUPS)]
         usage_text = self._format_usage(usage, actions, groups, prefix=prefix).rstrip()
         log.debug(f"usage_text: {usage_text}")
 
@@ -258,10 +258,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
             if "%(prog)" in text:
                 text = text % {"prog": escape(self._prog)}
 
-            rich_text = Text.from_markup(text, style="argparse.text")
+            rich_text = Text.from_markup(text, style=ARGPARSE_TEXT)
 
             for regex in self.highlights:
-                rich_text.highlight_regex(regex, style_prefix="argparse.")
+                rich_text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
 
             padded_text = Padding.indent(rich_text, self._current_indent)
 
