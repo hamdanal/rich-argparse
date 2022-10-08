@@ -1,16 +1,15 @@
 # rich-argparse
-[![tests](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml/badge.svg)
-](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)
-[![pre-commit](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml/badge.svg)
-](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml)
-[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
-](https://github.com/psf/black)
+![Tests](https://img.shields.io/github/workflow/status/hamdanal/rich-argparse/tests?label=tests)
+![pre-commit](https://img.shields.io/github/workflow/status/hamdanal/rich-argparse/pre-commit?label=pre-commit)
+![Python Version](https://img.shields.io/pypi/pyversions/rich-argparse)
+![Release](https://img.shields.io/github/v/release/hamdanal/rich-argparse?sort=semver)
+![Status](https://img.shields.io/pypi/status/rich-argparse)
+![Downloads](https://img.shields.io/pypi/dm/rich-argparse)
 
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/193126185-6f7cd2dd-4e74-40ea-a194-a5e045a6f7a1.png)
-
+https://user-images.githubusercontent.com/93259987/194706255-caf3e987-9853-41f5-85d9-1150c7c8ac31.png)
 
 ## Installation
 
@@ -127,7 +126,7 @@ The following example highlights all occurrences of `pyproject.toml` in green.
 # add a style called `pyproject` which applies a green style (any rich style works)
 RichHelpFormatter.styles["argparse.pyproject"] = "green"
 # add the highlight regex (the regex group name must match an existing style name)
-RichHelpFormatter.highlights.append(r"\W(?P<pyproject>pyproject\.toml)\W")
+RichHelpFormatter.highlights.append(r"\b(?P<pyproject>pyproject\.toml)\b")
 # pass the formatter class to argparse
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
 ...
