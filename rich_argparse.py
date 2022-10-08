@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import re
 import sys
 from os import environ
 from pprint import PrettyPrinter
@@ -11,7 +10,6 @@ from typing import Callable, Generator, Iterable, List, Tuple
 from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
 from rich.markup import escape
 from rich.padding import Padding
-from rich.pretty import pprint
 from rich.style import StyleType
 from rich.table import Column, Table
 from rich.text import Span, Text
@@ -20,7 +18,6 @@ from rich.theme import Theme
 __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
-
 
 # Style name constants
 STYLE_PREFIX = "argparse."
@@ -33,6 +30,7 @@ ARGPARSE_METAVAR = style_name("metavar")
 ARGPARSE_SYNTAX = style_name("syntax")
 ARGPARSE_TEXT = style_name("text")
 
+# Formatting constants
 DEFAULT_INDENT_INCREMENT = 2
 DEFAULT_MAX_HELP_INDENT = 24
 
@@ -83,7 +81,8 @@ class _RichSection:
             else:
                 table.add_row(action_header, action_help)
 
-        log.debug(f"Help pos: {help_position}, action max len: {self.formatter._action_max_length}, max help position: {self.formatter._max_help_position}")
+        log.debug(f"Help pos: {help_position}, action max len: {self.formatter._action_max_length}, " \
+            "max help position: {self.formatter._max_help_position}")
         yield table
 
 
@@ -98,7 +97,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         "argparse.default_number": "bright_cyan",
         "argparse.default_string": "color(106)",
         ARGPARSE_GROUPS: "dark_orange",
-        "argparse.help": "default",
+        ARGPARSE_HELP: "default",
         ARGPARSE_METAVAR: "dark_cyan",
         "argparse.syntax": "bold",
         ARGPARSE_TEXT: "default",
@@ -171,11 +170,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
 
         action_invocation.pad_left(self._current_indent)
         help_text = self._escape_params_and_expand_help(action)
-        help_text.spans.insert(0, Span(0, len(help_text), style="argparse.help"))
-
-        for regex in self.highlights:
-            help_text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
-
+        help_text.spans.insert(0, Span(0, len(help_text), style=ARGPARSE_HELP))
+        self._highlight_text(help_text)
         log.debug(f"Help text: {help_text.markup}\n\n")
         self._current_section.rich.actions.append((action_invocation, help_text))
         return orig_str
@@ -259,10 +255,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
                 text = text % {"prog": escape(self._prog)}
 
             rich_text = Text.from_markup(text, style=ARGPARSE_TEXT)
-
-            for regex in self.highlights:
-                rich_text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
-
+            self._highlight_text(rich_text)
             padded_text = Padding.indent(rich_text, self._current_indent)
 
             if self._is_root():
@@ -287,6 +280,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
             for renderable in self._root_section.rich:
                 console.print(renderable)
         return "\n".join(line.rstrip() for line in capture.get().split("\n"))
+
+    def _highlight_text(self, text: Text) -> None:
+        for regex in self.highlights:
+            text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
 
 
 if __name__ == "__main__":
