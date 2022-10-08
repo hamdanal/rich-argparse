@@ -579,3 +579,15 @@ def test_escape_params_and_expand_help():
 
     output = formatter._escape_params_and_expand_help(action)
     assert output == Text('help with special metavar: [bold]')
+
+    choice_action = argparse._StoreAction(
+        dest='arg_name',
+        help='help with a choice',
+        metavar='CHOICE',
+        choices=range(101),
+        option_strings=['--arg-name'],
+        required=False
+    )
+    output = formatter._escape_params_and_expand_help(choice_action)
+    assert output == Text('help with a choice (range: 0-100)')
+

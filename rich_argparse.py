@@ -137,22 +137,25 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         if not action.help:
             return Text()
 
+        action_vars = vars(action)
+
         params = {
             k: escape(str(v.__name__ if hasattr(v, "__name__") else v))
-            for k, v in vars(action).items()
+            for k, v in action_vars.items()
             if v != argparse.SUPPRESS
         }
 
         print(f"params: {params}")
         params['prog'] = escape(str(self._prog))
         help_string = (self._get_help_string(action) or '') % params
-        choices = params.get('choices')
-        default_value = params.get('default')
+        default_value = action_vars.get('default')
+        choices = action_vars.get('choices')
 
-        if default_value and vars(action)['default']:
+        #import pdb;pdb.set_trace()
+        if default_value and action_vars['default']:
             help_string += f" (default: {default_value})"
         if choices and isinstance(choices, range):
-            help_string += f" (range: {min(choices)}-{max(choices)}"
+            help_string += f" (range: {min(choices)}-{max(choices)})"
 
         return Text.from_markup(help_string)
 
