@@ -21,14 +21,14 @@ _Groups = Iterable[argparse._ArgumentGroup]
 
 # Style name constants
 STYLE_PREFIX = "argparse."
-style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
+build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
-ARGPARSE_ARGS = style_name("args")
-ARGPARSE_GROUPS = style_name("groups")
-ARGPARSE_HELP = style_name("help")
-ARGPARSE_METAVAR = style_name("metavar")
-ARGPARSE_SYNTAX = style_name("syntax")
-ARGPARSE_TEXT = style_name("text")
+ARGPARSE_ARGS = build_style_name("args")
+ARGPARSE_GROUPS = build_style_name("groups")
+ARGPARSE_HELP = build_style_name("help")
+ARGPARSE_METAVAR = build_style_name("metavar")
+ARGPARSE_SYNTAX = build_style_name("syntax")
+ARGPARSE_TEXT = build_style_name("text")
 
 # Formatting constants
 DEFAULT_INDENT_INCREMENT = 2
@@ -41,6 +41,7 @@ pp = PrettyPrinter(indent=4, sort_dicts=True)
 
 if environ.get("RICH_ARGPARSE_DEBUG"):
     log.addHandler(logging.StreamHandler())
+    log.setLevel('DEBUG')
 
 
 class _RichSection:
@@ -99,7 +100,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         ARGPARSE_GROUPS: "dark_orange",
         ARGPARSE_HELP: "default",
         ARGPARSE_METAVAR: "dark_cyan",
-        "argparse.syntax": "bold",
+        ARGPARSE_SYNTAX: "bold",
         ARGPARSE_TEXT: "default",
     }
 
@@ -143,8 +144,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         }
 
         params['prog'] = escape(str(self._prog))
-        return Text.from_markup(self._get_help_string(action) % params)
-
+        return Text.from_markup(self._get_help_string(action) % params)  # type: ignore[operator]
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
@@ -250,18 +250,20 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
 
     def add_text(self, text: str | None) -> None:
         super().add_text(text)
-        if text is not argparse.SUPPRESS and text is not None:
-            if "%(prog)" in text:
-                text = text % {"prog": escape(self._prog)}
 
-            rich_text = Text.from_markup(text, style=ARGPARSE_TEXT)
-            self._highlight_text(rich_text)
-            padded_text = Padding.indent(rich_text, self._current_indent)
+        if text is argparse.SUPPRESS or text is None:
+            return
+        if "%(prog)" in text:
+            text = text % {"prog": escape(self._prog)}
 
-            if self._is_root():
-                self._rich_append(padded_text)
-            else:
-                self._current_section.rich.description = padded_text
+        rich_text = Text.from_markup(text, style=ARGPARSE_TEXT)
+        self._highlight_text(rich_text)
+        padded_text = Padding.indent(rich_text, self._current_indent)
+
+        if self._is_root():
+            self._rich_append(padded_text)
+        else:
+            self._current_section.rich.description = padded_text
 
     def start_section(self, heading: str | None) -> None:
         super().start_section(heading)  # sets self._current_section to child section
@@ -329,7 +331,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--syntax",
-        default=RichHelpFormatter.styles["argparse.syntax"],
+        default=RichHelpFormatter.styles[ARGPARSE_SYNTAX],
         help="Text inside backtics is highlighted using the `argparse.syntax` style (default: '%(default)s')",
     )
     parser.add_argument(
