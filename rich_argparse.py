@@ -289,6 +289,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
             except ValueError:
                 actions_spans = []
             spans.extend(actions_spans)
+
         self._rich_append(Text(usage_text, spans=spans))
 
     def add_text(self, text: str | None) -> None:
