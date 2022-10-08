@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import re
+import sys
 from os import environ
 from typing import Callable, Generator, Iterable, List, Tuple
 

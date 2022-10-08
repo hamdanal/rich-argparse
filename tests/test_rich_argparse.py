@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import io
 import os
+import re
 import sys
 from textwrap import dedent
 from unittest.mock import patch
@@ -116,6 +117,8 @@ def test_overall_structure(prog, usage, description, epilog):
     no_name_no_desc_group.add_argument("arg", help="arg help inside no_name_no_desc_group")
 
     orig_out = parser.format_help()
+    # Strip out lines that consist just of a colon
+    orig_out = '\n'.join([line for line in orig_out.split("\n") if not re.match('^:$', line)])
     parser.formatter_class = RichHelpFormatter
     rich_out = parser.format_help()
     assert rich_out == orig_out
