@@ -127,7 +127,7 @@ The following example highlights all occurrences of `pyproject.toml` in green.
 # add a style called `pyproject` which applies a green style (any rich style works)
 RichHelpFormatter.styles["argparse.pyproject"] = "green"
 # add the highlight regex (the regex group name must match an existing style name)
-RichHelpFormatter.highlights.append(r"\W(?P<pyproject>pyproject\.toml)\W")
+RichHelpFormatter.highlights.append(r"\b(?P<pyproject>pyproject\.toml)\b")
 # pass the formatter class to argparse
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
 ...
