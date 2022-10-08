@@ -275,7 +275,7 @@ def test_spans(usage, usage_text):
     {usage_text}
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-      \x1b[36mfile         \x1b[0m
+    \x1b[36m  file         \x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m   \x1b[39mshow this help message and exit\x1b[0m
@@ -312,13 +312,16 @@ def test_actions_spans_in_usage():
     {usage_text}
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-      \x1b[36marg\x1b[0m
+    \x1b[36m  arg                   \x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m            \x1b[39mshow this help message and exit\x1b[0m
       \x1b[36m--opt\x1b[0m \x1b[38;5;36m[OPT]\x1b[0m
       \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m
     """
+
+    if parser.format_help() != dedent(expected_help_output):
+        _compare_lines(parser.format_help(), dedent(expected_help_output))
     assert parser.format_help() == dedent(expected_help_output)
 
 
@@ -545,3 +548,17 @@ def test_default_highlights():
 
 def _strip_trailing_whitespace(_string: str) -> str:
     return "\n".join([line.rstrip() for line in _string.split("\n")])
+
+
+def _compare_lines(_string1, _string2) -> None:
+    lines1 = _string1.split("\n")
+    lines2 = _string2.split("\n")
+
+    for i, line in enumerate(lines1):
+        if line != lines2[i]:
+            print(f"\nLINE1.{i}: {_insert_spaces_between_chars(line)}")
+            print(f"LINE2.{i}: {_insert_spaces_between_chars(lines2[i])}\n")
+
+
+def _insert_spaces_between_chars(_string: str):
+    return '_'.join([c for c in _string])
