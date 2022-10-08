@@ -1,20 +1,19 @@
 from __future__ import annotations
 
 import argparse
-import re
-from typing import TYPE_CHECKING, Callable, Generator, Iterable, Tuple
+import sys
+from typing import TYPE_CHECKING, Callable, Generator, Iterable
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
     from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
     from rich.style import StyleType
-    from rich.text import Text
+    from rich.text import Span, Text
 
 __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
-_UsageSpans = Generator[Tuple[int, int, str], None, None]
 
 
 class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -134,81 +133,45 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
         return orig_str
 
-    def _usage_spans(
-        self, text: str, start: int, actions: _Actions, groups: _Groups
-    ) -> _UsageSpans:
-        def split_metavar(__start: int, __end: int) -> _UsageSpans:
-            sep = text.find(" ", __start, __end)
-            if sep > -1:
-                # separate option string from metavar
-                yield __start, sep, "argparse.args"
-                yield sep + 1, __end, "argparse.metavar"
-            else:
-                yield __start, __end, "argparse.args"
+    def _usage_spans(self, text: str, start: int, actions: _Actions) -> Generator[Span, None, None]:
+        from rich.text import Span
 
-        optionals: list[argparse.Action] = []
-        positionals: list[argparse.Action] = []
-        group_actions = set()
-        num_groups = 0
-        for group in groups:
-            ga = {action for action in group._group_actions if action.help is not argparse.SUPPRESS}
-            if ga:
-                num_groups += 1  # this group will be included in usage
-                group_actions.update(ga)
-        num_options = 0
-        for action in actions:
+        options, positionals = [], []
+        for action in actions:  # split into options and positionals
+            if action.help is argparse.SUPPRESS:
+                continue
             if action.option_strings:
-                optionals.append(action)
-                if action.help is not argparse.SUPPRESS and action not in group_actions:
-                    num_options += 1
+                options.append(action)
             else:
                 positionals.append(action)
-        num_top_level = num_options + num_groups
-        found = 0
-        matching_delim = {"[": "]", "(": ")"}
-        stack = []
         pos = start
-        for match in re.finditer(r"[\[(\])]", text[start:], re.MULTILINE):
-            if found == num_top_level:
-                break  # found all options, break of the loop
-            pos = match.start() + start
-            char = text[pos]
-            if char in "([":
-                stack.append(pos + 1)
-            elif char in "])":
-                if not stack:
-                    raise ValueError(
-                        f"usage error: encountered extraneous '{char}' at pos {pos}: '{text[pos:]}'"
-                    )
-                if char != matching_delim[text[stack[-1] - 1]]:
+        for action in options:  # start with the options
+            if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
+                usage = action.format_usage()
+                if isinstance(action, argparse.BooleanOptionalAction):
+                    for option_string in action.option_strings:
+                        start = text.index(option_string, pos)
+                        end = start + len(option_string)
+                        yield Span(start, end, "argparse.args")
+                        pos = end + 1
                     continue
-                opening_pos = stack.pop()
-                if stack:
-                    continue  # ignore inner bracket matches
-                # divide the option usage on '|' as well
-                option_start_pos = opening_pos
-                for pipe_match in re.finditer(r"\s\|\s", text[option_start_pos:pos], re.MULTILINE):
-                    yield from split_metavar(opening_pos, pipe_match.start() + option_start_pos)
-                    opening_pos = pipe_match.end() + option_start_pos
-                yield from split_metavar(opening_pos, pos)
-                found += 1
-            else:
-                raise AssertionError(char)
-        if stack:
-            opening = text[stack[0] - 1]
-            raise ValueError(
-                f"usage error: expecting '{matching_delim[opening]}' to match '{opening}' "
-                f"starting at: '{text[stack[0]-1:]}'"
-            )
-        for positional in positionals:
-            if positional.help is argparse.SUPPRESS:
-                continue
-            default = self._get_default_metavar_for_positional(positional)
-            part = self._format_args(positional, default)
-            start = text[pos:].find(part) + pos
-            end = start + len(part)
-            yield start, end, "argparse.args"
-            pos = end
+            else:  # pragma: <3.9 cover
+                usage = action.option_strings[0]
+            start = text.index(usage, pos)
+            end = start + len(usage)
+            yield Span(start, end, "argparse.args")
+            if action.nargs != 0:
+                metavar = self._format_args(action, self._get_default_metavar_for_optional(action))
+                start = text.index(metavar, end)
+                end = start + len(metavar)
+                yield Span(start, end, "argparse.metavar")
+            pos = end + 1
+        for action in positionals:  # positionals come at the end
+            usage = self._format_args(action, self._get_default_metavar_for_positional(action))
+            start = text.index(usage, pos)
+            end = start + len(usage)
+            yield Span(start, end, "argparse.args")
+            pos = end + 1
 
     def add_usage(
         self, usage: str | None, actions: _Actions, groups: _Groups, prefix: str | None = None
@@ -229,12 +192,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         if usage is None:  # only auto generated usage is coloured
             actions_start = len(prefix) + len(self._prog) + 1
             try:
-                actions_spans = [
-                    Span(start, end, style)
-                    for start, end, style in self._usage_spans(
-                        usage_text, start=actions_start, actions=actions, groups=groups
-                    )
-                ]
+                actions_spans = list(self._usage_spans(usage_text, actions_start, actions=actions))
             except ValueError:
                 actions_spans = []
             spans.extend(actions_spans)
@@ -280,8 +238,6 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 
 
 if __name__ == "__main__":
-    import sys
-
     from rich import print
 
     RichHelpFormatter.highlights.append(r"'(?P<help>[^']*)'")  # disable colors inside single quotes
