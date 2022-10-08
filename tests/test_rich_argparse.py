@@ -496,11 +496,13 @@ def test_text_highlighter():
     \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-      \x1b[36marg\x1b[0m         \x1b[39mDid you try `\x1b[0m\x1b[1;39mRichHelpFormatter.highlighter\x1b[0m\x1b[39m`?\x1b[0m
+    \x1b[36m  arg         \x1b[0m\x1b[39mDid you try `\x1b[0m\x1b[1;39mRichHelpFormatter.highlighter\x1b[0m\x1b[39m`?\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
     """
+    if parser.format_help() != dedent(expected_help_output):
+        _compare_lines(parser.format_help(), dedent(expected_help_output))
     assert parser.format_help() == dedent(expected_help_output)
 
 
