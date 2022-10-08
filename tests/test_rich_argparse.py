@@ -275,7 +275,7 @@ def test_spans(usage, usage_text):
     {usage_text}
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-      \x1b[36mfile\x1b[0m
+      \x1b[36mfile         \x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m   \x1b[39mshow this help message and exit\x1b[0m
@@ -285,6 +285,7 @@ def test_spans(usage, usage_text):
       \x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m  \x1b[39mOption path.\x1b[0m
       \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m    \x1b[39mOption url.\x1b[0m
     """
+
     assert parser.format_help() == dedent(expected_help_output)
 
 
@@ -540,3 +541,7 @@ def test_default_highlights():
     \x1b[39mEpilog with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
     """
     assert parser.format_help().endswith(dedent(expected_help_output))
+
+
+def _strip_trailing_whitespace(_string: str) -> str:
+    return "\n".join([line.rstrip() for line in _string.split("\n")])
