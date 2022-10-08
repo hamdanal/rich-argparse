@@ -143,8 +143,18 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
             if v != argparse.SUPPRESS
         }
 
+        print(f"params: {params}")
         params['prog'] = escape(str(self._prog))
-        return Text.from_markup(self._get_help_string(action) % params)  # type: ignore[operator]
+        help_string = (self._get_help_string(action) or '') % params
+        choices = params.get('choices')
+        default_value = params.get('default')
+
+        if default_value and vars(action)['default']:
+            help_string += f" (default: {default_value})"
+        if choices and isinstance(choices, range):
+            help_string += f" (range: {min(choices)}-{max(choices)}"
+
+        return Text.from_markup(help_string)
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)

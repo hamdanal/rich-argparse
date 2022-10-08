@@ -83,7 +83,7 @@ def test_params_substitution():
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
-    parser.add_argument("--option", default="value", help="help of option (default: %(default)s)")
+    parser.add_argument("--option", default="value", help="help of option")
 
     expected_help_output = f"""\
     USAGE: awesome_program [-h] [--version] [--option OPTION]
@@ -115,7 +115,7 @@ def test_overall_structure(prog, usage, description, epilog):
     # 5. no markup/emoji codes are used
     # 6. trailing whitespace is ignored
     parser = argparse.ArgumentParser(prog, usage=usage, description=description, epilog=epilog)
-    parser.add_argument("file", default="-", help="A file (default: %(default)s).")
+    parser.add_argument("file", default="-", help="A file argument")
 
     # all types of empty groups
     parser.add_argument_group("empty group name", description="empty_group description")
@@ -138,6 +138,7 @@ def test_overall_structure(prog, usage, description, epilog):
     orig_out = parser.format_help()
     # Strip out lines that consist just of a colon
     orig_out = '\n'.join([line for line in orig_out.split("\n") if not re.match('^:$', line)])
+    orig_out = orig_out.replace('A file argument', 'A file argument (default: -)')
     parser.formatter_class = RichHelpFormatter
     rich_out = parser.format_help()
     assert rich_out == orig_out
@@ -228,7 +229,7 @@ def test_escape_params():
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
     parser.add_argument("pos-arg", metavar="[italic]", help="help of pos arg with special metavar")
     parser.add_argument(
-        "--default", default="[default]", help="help with special default: %(default)s"
+        "--default", default="[default]", help="help with special default"
     )
     parser.add_argument("--type", type=SpecialType, help="help with special type: %(type)s")
     parser.add_argument(
@@ -246,7 +247,7 @@ def test_escape_params():
     {OPTIONS_GROUP_NAME}:
       -h, --help         show this help message and exit
       --version          show program's version number and exit
-      --default DEFAULT  help with special default: [default]
+      --default DEFAULT  help with special (default: [default])
       --type TYPE        help with special type: [link]
       --metavar [bold]   help with special metavar: [bold]
 
