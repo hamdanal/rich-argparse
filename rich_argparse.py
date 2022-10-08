@@ -5,6 +5,7 @@ import logging
 import re
 import sys
 from os import environ
+from pprint import PrettyPrinter
 from typing import Callable, Generator, Iterable, List, Tuple
 
 from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
@@ -15,13 +16,6 @@ from rich.style import StyleType
 from rich.table import Column, Table
 from rich.text import Span, Text
 from rich.theme import Theme
-
-log = logging.getLogger("rich_argparse")
-
-if environ.get("RICH_ARGPARSE_DEBUG"):
-    log.addHandler(logging.StreamHandler())
-    log.setLevel('DEBUG')
-
 
 __all__ = ["RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
@@ -42,6 +36,13 @@ ARGPARSE_TEXT = style_name("text")
 
 DEFAULT_INDENT_INCREMENT = 2
 DEFAULT_MAX_HELP_INDENT = 24
+
+# Debug logging
+log = logging.getLogger("rich_argparse")
+pp = PrettyPrinter(indent=4, sort_dicts=True)
+
+if environ.get("RICH_ARGPARSE_DEBUG"):
+    log.addHandler(logging.StreamHandler())
 
 
 class _RichSection:
@@ -143,7 +144,8 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         }
 
         params['prog'] = escape(str(self._prog))
-        return Text(self._get_help_string(action) % params)  # type: ignore[operator]
+        return Text.from_markup(self._get_help_string(action) % params)
+
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
@@ -174,14 +176,14 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         for regex in self.highlights:
             help_text.highlight_regex(regex, style_prefix="argparse.")
 
-        log.debug(f"Help text: {help_text.markup}")
+        log.debug(f"Help text: {help_text.markup}\n\n")
         self._current_section.rich.actions.append((action_invocation, help_text))
         return orig_str
 
     def _usage_spans(self, text: str, start: int, actions: _Actions) -> Generator[Span, None, None]:
-        from rich.text import Span
-
         options, positionals = [], []
+        pos = start
+
         for action in actions:  # split into options and positionals
             if action.help is argparse.SUPPRESS:
                 continue
@@ -189,7 +191,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
                 options.append(action)
             else:
                 positionals.append(action)
-        pos = start
+
         for action in options:  # start with the options
             if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
                 usage = action.format_usage()
@@ -244,10 +246,9 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
         if usage is None:  # only auto generated usage is coloured
             actions_start = len(prefix) + len(self._prog) + 1
             try:
-                actions_spans = list(self._usage_spans(usage_text, actions_start, actions=actions))
+                spans.extend(list(self._usage_spans(usage_text, actions_start, actions=actions)))
             except ValueError:
-                actions_spans = []
-            spans.extend(actions_spans)
+                spans.extend([])
 
         self._rich_append(Text(usage_text, spans=spans))
 

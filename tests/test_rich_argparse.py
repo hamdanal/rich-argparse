@@ -26,6 +26,25 @@ def get_cmd_output(parser: argparse.ArgumentParser, cmd: list[str]) -> str:
     return stdout.getvalue()
 
 
+def _assert_same_lines(actual: str, expected: str) -> bool:
+    if actual == expected:
+        return True
+
+    lines1 = actual.split("\n")
+    lines2 = expected.split("\n")
+
+    for i, line in enumerate(lines1):
+        if line != lines2[i]:
+            print(f"\nACTUAL.{i}: {_insert_spaces_between_chars(line)}")
+            print(f"EXPECT.{i}: {_insert_spaces_between_chars(lines2[i])}\n")
+
+    return actual == expected
+
+
+def _insert_spaces_between_chars(_string: str) -> str:
+    return '_'.join([c for c in _string])
+
+
 # fixtures
 # ========
 @pytest.fixture(scope="session", autouse=True)
@@ -233,7 +252,8 @@ def test_escape_params():
 
     [underline] epilog.
     """
-    assert parser.format_help() == dedent(expected_help_output)
+    #import pdb; pdb.set_trace()
+    assert _assert_same_lines(parser.format_help(), dedent(expected_help_output))
     assert get_cmd_output(parser, cmd=["--version"]) == "[underline] 1.0.0\n"
 
 
@@ -320,9 +340,7 @@ def test_actions_spans_in_usage():
       \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m
     """
 
-    if parser.format_help() != dedent(expected_help_output):
-        _compare_lines(parser.format_help(), dedent(expected_help_output))
-    assert parser.format_help() == dedent(expected_help_output)
+    assert _assert_same_lines(parser.format_help(), dedent(expected_help_output))
 
 
 @pytest.mark.skipif(sys.version_info <= (3, 9), reason="not available in 3.8")
@@ -501,9 +519,8 @@ def test_text_highlighter():
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
     """
-    if parser.format_help() != dedent(expected_help_output):
-        _compare_lines(parser.format_help(), dedent(expected_help_output))
-    assert parser.format_help() == dedent(expected_help_output)
+
+    assert _assert_same_lines(parser.format_help(), dedent(expected_help_output))
 
 
 @pytest.mark.usefixtures("force_color")
@@ -548,19 +565,16 @@ def test_default_highlights():
     assert parser.format_help().endswith(dedent(expected_help_output))
 
 
-def _strip_trailing_whitespace(_string: str) -> str:
-    return "\n".join([line.rstrip() for line in _string.split("\n")])
+def test_escape_params_and_expand_help():
+    formatter = RichHelpFormatter('awesomeprog')
 
+    action = argparse._StoreAction(
+        dest='metavar',
+        help='help with special metavar: %(metavar)s',
+        metavar='[bold]',
+        option_strings=['--metavar'],
+        required=False
+    )
 
-def _compare_lines(_string1, _string2) -> None:
-    lines1 = _string1.split("\n")
-    lines2 = _string2.split("\n")
-
-    for i, line in enumerate(lines1):
-        if line != lines2[i]:
-            print(f"\nLINE1.{i}: {_insert_spaces_between_chars(line)}")
-            print(f"LINE2.{i}: {_insert_spaces_between_chars(lines2[i])}\n")
-
-
-def _insert_spaces_between_chars(_string: str):
-    return '_'.join([c for c in _string])
+    output = formatter._escape_params_and_expand_help(action)
+    assert output == Text('help with special metavar: [bold]')
