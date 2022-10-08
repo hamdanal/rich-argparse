@@ -15,7 +15,7 @@ from rich.table import Column, Table
 from rich.text import Span, Text
 from rich.theme import Theme
 
-__all__ = ["RichHelpFormatter"]
+__all__ = ["RichDefaultsHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 
@@ -45,9 +45,9 @@ if environ.get("RICH_ARGPARSE_DEBUG"):
 
 
 class _RichSection:
-    def __init__(self, formatter: RichHelpFormatter, heading: str | None) -> None:
+    def __init__(self, formatter: RichDefaultsHelpFormatter, heading: str | None) -> None:
         self.formatter = formatter
-        self.heading = f"{RichHelpFormatter.group_name_formatter(heading)}:" if heading else None
+        self.heading = f"{RichDefaultsHelpFormatter.group_name_formatter(heading)}:" if heading else None
         self.description: Text | None = None
         self.actions: List[Tuple[Text, Text]] = []
 
@@ -87,7 +87,7 @@ class _RichSection:
         yield table
 
 
-class RichHelpFormatter(argparse.RawTextHelpFormatter):
+class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
@@ -291,10 +291,10 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
 if __name__ == "__main__":
     from rich import print
 
-    RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
+    RichDefaultsHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
-        formatter_class=RichHelpFormatter,
+        formatter_class=RichDefaultsHelpFormatter,
         description=(
             "This is a [link https://pypi.org/project/rich]rich[/]-based formatter for "
             "[link https://docs.python.org/3/library/argparse.html#formatter-class]"
@@ -309,14 +309,14 @@ if __name__ == "__main__":
         "formatter-class",
         help=(
             "All you need to make you argparse ArgumentParser output colorful text like this is to "
-            "pass it `formatter_class=RichHelpFormatter`."
+            "pass it `formatter_class=RichDefaultsHelpFormatter`."
         ),
     )
     parser.add_argument(
         "styles",
         nargs="*",
         help=(
-            "All the styles used by this formatter are defined in the `RichHelpFormatter.styles` "
+            "All the styles used by this formatter are defined in the `RichDefaultsHelpFormatter.styles` "
             "dictionary and customizable. Any rich style can be used."
         ),
     )
@@ -325,13 +325,13 @@ if __name__ == "__main__":
         metavar="REGEXES",
         help=(
             "Highlighting the help text is managed by the list of regular expressions "
-            "`RichHelpFormatter.highlights`. Set to empty list to turn off highlighting.\n"
+            "`RichDefaultsHelpFormatter.highlights`. Set to empty list to turn off highlighting.\n"
             "See the next two options for default values."
         ),
     )
     parser.add_argument(
         "--syntax",
-        default=RichHelpFormatter.styles[ARGPARSE_SYNTAX],
+        default=RichDefaultsHelpFormatter.styles[ARGPARSE_SYNTAX],
         help="Text inside backtics is highlighted using the `argparse.syntax` style (default: '%(default)s')",
     )
     parser.add_argument(
@@ -350,7 +350,7 @@ if __name__ == "__main__":
         "more options",
         description=(
             "This is a custom group. Group names are upper-cased by default but it can be changed "
-            "by setting the `RichHelpFormatter.group_name_formatter` function."
+            "by setting the `RichDefaultsHelpFormatter.group_name_formatter` function."
         ),
     )
     group.add_argument(

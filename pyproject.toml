@@ -3,11 +3,12 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "rich_argparse"
+name = "rich_argparse_plus"
 version = "0.3.1"
-description = "A rich help formatter for argparse"
+description = "A rich text formatter for argparse help with export and default features"
 authors = [
   {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
+  {name="Michel de Cryptadamus", email="michel@cryptadamus.com"},
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -30,7 +31,7 @@ dependencies = [
 requires-python = ">=3.7"
 
 [project.urls]
-Home = "https://github.com/hamdanal/rich-argparse"
+Home = "https://github.com/michelcrypt4d4mus/rich-argparse"
 
 [tool.tox]
 legacy_tox_ini = """
