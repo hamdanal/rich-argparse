@@ -7,8 +7,8 @@ name = "rich_argparse_plus"
 version = "0.3.1"
 description = "A rich text formatter for argparse help with export and default features"
 authors = [
-  {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
-  {name="Michel de Cryptadamus", email="michel@cryptadamus.com"},
+    {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
+    {name="Michel de Cryptadamus", email="michel@cryptadamus.com"},
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -25,8 +25,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 keywords = ["argparse", "rich", "help-formatter"]
+
 dependencies = [
-  "rich >= 11.0.0",
+    "rich >= 11.0.0",
 ]
 requires-python = ">=3.7"
 
