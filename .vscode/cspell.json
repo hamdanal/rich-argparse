@@ -6,12 +6,16 @@
     // words - list of words to be always considered correct
     "words": [
         "capsys",
+        "devenv",
         "isort",
         "kwargs",
         "mypy",
         "positionals",
         "pypi",
+        "pytest",
         "pyupgrade",
+        "venv",
+        "virtualenv",
         "yesqa"
     ],
     // flagWords - list of words to be always considered incorrect

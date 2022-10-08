@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.3.1 - 2022-10-08
+
+### Fixes
+- Fix required options not coloured in the usage
+  * Issue #28, PR #30
+
 ## 0.3.0 - 2022-10-01
 
 ### Features

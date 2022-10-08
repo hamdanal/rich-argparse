@@ -318,6 +318,21 @@ def test_actions_spans_in_usage():
     assert parser.format_help() == dedent(expected_help_output)
 
 
+@pytest.mark.skipif(sys.version_info <= (3, 9), reason="not available in 3.8")
+@pytest.mark.usefixtures("force_color")
+def test_boolean_optional_action_spans():
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
+    expected_help_output = f"""\
+    \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
+
+    \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m         \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--bool\x1b[0m, \x1b[36m--no-bool\x1b[0m
+    """
+    assert parser.format_help() == dedent(expected_help_output)
+
+
 def test_usage_spans_errors():
     parser = argparse.ArgumentParser()
     parser._optionals.required = False
@@ -325,16 +340,6 @@ def test_usage_spans_errors():
     groups = [parser._optionals]
 
     formatter = RichHelpFormatter("PROG")
-    with pytest.raises(
-        ValueError, match=r"usage error: encountered extraneous '\]' at pos 2: '\]'"
-    ):
-        list(formatter._usage_spans("xx]", start=0, actions=actions, groups=groups))
-
-    with pytest.raises(
-        ValueError, match=r"usage error: expecting '\]' to match '\[' starting at: '\[xx'"
-    ):
-        list(formatter._usage_spans("[xx", start=0, actions=actions, groups=groups))
-
     with patch.object(RichHelpFormatter, "_usage_spans", side_effect=ValueError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
     (usage,) = formatter._root_section.rich
@@ -490,3 +495,45 @@ def test_text_highlighter():
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
     """
     assert parser.format_help() == dedent(expected_help_output)
+
+
+@pytest.mark.usefixtures("force_color")
+def test_default_highlights():
+    parser = argparse.ArgumentParser(
+        "PROG",
+        formatter_class=RichHelpFormatter,
+        description="Descritpion with `syntax` and --options.",
+        epilog="Epilog with `syntax` and --options.",
+    )
+    # syntax highlights
+    parser.add_argument("--syntax-normal", action="store_true", help="Start `middle` end")
+    parser.add_argument("--syntax-start", action="store_true", help="`Start` middle end")
+    parser.add_argument("--syntax-end", action="store_true", help="Start middle `end`")
+    # options highlights
+    parser.add_argument("--option-normal", action="store_true", help="Start --middle end")
+    parser.add_argument("--option-start", action="store_true", help="--Start middle end")
+    parser.add_argument("--option-end", action="store_true", help="Start middle --end")
+    parser.add_argument("--option-comma", action="store_true", help="Start --middle, end")
+    parser.add_argument("--option-multi", action="store_true", help="Start --middle-word end")
+    parser.add_argument("--option-not", action="store_true", help="Start middle-word end")
+    parser.add_argument("--option-short", action="store_true", help="Start -middle end")
+
+    expected_help_output = f"""
+    \x1b[39mDescritpion with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
+
+    \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m       \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--syntax-normal\x1b[0m  \x1b[39mStart `\x1b[0m\x1b[1;39mmiddle\x1b[0m\x1b[39m` end\x1b[0m
+      \x1b[36m--syntax-start\x1b[0m   \x1b[39m`\x1b[0m\x1b[1;39mStart\x1b[0m\x1b[39m` middle end\x1b[0m
+      \x1b[36m--syntax-end\x1b[0m     \x1b[39mStart middle `\x1b[0m\x1b[1;39mend\x1b[0m\x1b[39m`\x1b[0m
+      \x1b[36m--option-normal\x1b[0m  \x1b[39mStart \x1b[0m\x1b[36m--middle\x1b[0m\x1b[39m end\x1b[0m
+      \x1b[36m--option-start\x1b[0m   \x1b[36m--Start\x1b[0m\x1b[39m middle end\x1b[0m
+      \x1b[36m--option-end\x1b[0m     \x1b[39mStart middle \x1b[0m\x1b[36m--end\x1b[0m
+      \x1b[36m--option-comma\x1b[0m   \x1b[39mStart \x1b[0m\x1b[36m--middle\x1b[0m\x1b[39m, end\x1b[0m
+      \x1b[36m--option-multi\x1b[0m   \x1b[39mStart \x1b[0m\x1b[36m--middle-word\x1b[0m\x1b[39m end\x1b[0m
+      \x1b[36m--option-not\x1b[0m     \x1b[39mStart middle-word end\x1b[0m
+      \x1b[36m--option-short\x1b[0m   \x1b[39mStart \x1b[0m\x1b[36m-middle\x1b[0m\x1b[39m end\x1b[0m
+
+    \x1b[39mEpilog with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
+    """
+    assert parser.format_help().endswith(dedent(expected_help_output))
