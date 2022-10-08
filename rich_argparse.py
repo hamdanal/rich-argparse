@@ -29,7 +29,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
         "argparse.text": "default",
     }
     highlights: list[str] = [
-        r"\W(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
+        r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
 
@@ -240,68 +240,77 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHe
 if __name__ == "__main__":
     from rich import print
 
-    RichHelpFormatter.highlights.append(r"'(?P<help>[^']*)'")  # disable colors inside single quotes
+    RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
         formatter_class=RichHelpFormatter,
         description=(
             "This is a [link https://pypi.org/project/rich]rich[/]-based formatter for "
             "[link https://docs.python.org/3/library/argparse.html#formatter-class]"
-            "argparse's help output[/]."
+            "argparse's help output[/].\n\n"
+            "It makes it easy to use the powers of rich like markup and highlights in your CLI "
+            "help. For example, the line above contains clickable hyperlinks thanks to rich "
+            "\\[link] markup. Read below for a peek at available features."
         ),
-        epilog="An epilog :sparkles: at the end ⌛",
+        epilog=":link: Read more at https://github.com/hamdanal/rich-argparse#usage.",
     )
-    parser.add_argument("-V", "--version", action="version", version="version 0.1.0")
-    parser.add_argument("pos-args", help="This is a positional argument.")
-    if sys.version_info[:2] >= (3, 9):
-        parser.add_argument(
-            "--bool",
-            action=argparse.BooleanOptionalAction,
-            default=True,
-            help=(
-                "Starting with python 3.9, you can use `action=argparse.BooleanOptionalAction`. "
-                "This action automatically adds an option with a --no- prefix to negate the "
-                "action of this flag."
-                " This is a very long help text in one line. The formatter takes care of wrapping "
-                "the text based on the size of the terminal window."
-            ),
-        )
-    else:
-        bool_mutex = parser.add_mutually_exclusive_group()
-        bool_mutex.add_argument(
-            "--bool, --no-bool",
-            action="store_true",
-            dest="bool",
-            default=True,
-            help=(
-                "Before python 3.9, you had to implement your own version of a boolean optional "
-                "action. The --no- prefix that negates the action of this flag must be added "
-                "manually."
-                " This is a very long help text in one line. The formatter takes care of wrapping "
-                "the text based on the size of the terminal window."
-            ),
-        )
-        bool_mutex.add_argument(
-            "--no-bool", action="store_false", dest="bool", help=argparse.SUPPRESS
-        )
+    parser.add_argument(
+        "formatter-class",
+        help=(
+            "All you need to make you argparse ArgumentParser output colorful text like this is to "
+            "pass it `formatter_class=RichHelpFormatter`."
+        ),
+    )
+    parser.add_argument(
+        "styles",
+        nargs="*",
+        help=(
+            "All the styles used by this formatter are defined in the `RichHelpFormatter.styles` "
+            "dictionary and customizable. Any rich style can be used."
+        ),
+    )
+    parser.add_argument(
+        "--highlights",
+        metavar="REGEXES",
+        help=(
+            "Highlighting the help text is managed by the list of regular expressions "
+            "`RichHelpFormatter.highlights`. Set to empty list to turn off highlighting.\n"
+            "See the next two options for default values."
+        ),
+    )
+    parser.add_argument(
+        "--syntax",
+        default=RichHelpFormatter.styles["argparse.syntax"],
+        help="Text inside backtics is highlighted using the `argparse.syntax` style (default: '%(default)s')",
+    )
     parser.add_argument(
         "-s",
         "--long-option",
         metavar="METAVAR",
         help=(
             "If an option takes a value and has short and long options, it is printed as "
-            "'-s, --long-option METAVAR' instead of '-s METAVAR, --long-option METAVAR'"
+            "-s, --long-option METAVAR instead of -s METAVAR, --long-option METAVAR.\n"
+            "You can see also that words that look like command line options are highlighted by "
+            "deafult. This example, adds a highlighter regex for the word 'METAVAR' following an "
+            "option for the sake of demonsting custom highlights."
         ),
     )
-    parser.add_argument(
-        "--syntax",
+    group = parser.add_argument_group(
+        "more options",
+        description=(
+            "This is a custom group. Group names are upper-cased by default but it can be changed "
+            "by setting the `RichHelpFormatter.group_name_formatter` function."
+        ),
+    )
+    group.add_argument(
+        "--others",
+        nargs="*",
         help=(
-            "Highlighting the help text is managed by the list of regular expressions "
-            "`RichHelpFormatter.highlights`. Set to empty list to turn off highlighting."
+            "This formatter works with subparsers, mutually exclusive groups and hidden arguments. "
+            "It also works with other help formatters such as `ArgumentDefaultsHelpFormatter` and "
+            "`MetavarTypeHelpFormatter`."
         ),
     )
-    group = parser.add_argument_group("my group")
-    group.add_argument("--args", nargs="*", help="Arguments in a custom group")
     mutex = group.add_mutually_exclusive_group()
     mutex.add_argument(
         "--rich",
