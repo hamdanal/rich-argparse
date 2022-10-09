@@ -187,7 +187,7 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_ADDENDUM: 'color(153) bold',
         ARGPARSE_ARGS: 'color(153) bold',
         ARGPARSE_DESCRIPTION: 'color(144)',
-        ARGPARSE_GROUPS: 'color(95) dim',
+        ARGPARSE_GROUPS: 'color(138) dim',
         ARGPARSE_HELP: 'color(144)',
         ARGPARSE_METAVAR: 'bright_white',
         ARGPARSE_SYNTAX: 'color(52) dim',

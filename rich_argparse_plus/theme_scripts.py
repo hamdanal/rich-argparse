@@ -36,6 +36,16 @@ def random_theme_stream() -> None:
         #sleep(1)
 
 
+def rotate_single_element_style() -> None:
+    i = 0
+    while i < 232:
+        print(f"\n\n\nCOLOR: {i}")
+        RichHelpFormatterPlus.choose_theme('mother_earth')
+        RichHelpFormatterPlus.styles[ARGPARSE_GROUPS] = f"color({i}) dim"
+        _print_help_text()
+        i += 1
+
+
 def render_all_themes() -> None:
     """Render all the themes to .png files in the repo"""
     pass
