@@ -445,7 +445,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
                 console.print(renderable)
 
         if environ.get("RENDER_HELP_FORMAT"):
-            _render_help(console_kwargs, self._root_section.rich, self._prog)
+            _render_help(self)
 
         return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
@@ -454,11 +454,11 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
 
 
-def _render_help(console_kwargs: dict, renderables: List[RenderableType], program_name: str) -> None:
+def _render_help(formatter: RichHelpFormatterPlus) -> None:
     """Render the contents of the help screen to an HTML, SVG, or colored text file"""
-    console = Console(record=True, **console_kwargs)
+    console = Console(record=True, theme=Theme(formatter.styles), width=formatter._width)
 
-    for renderable in renderables:
+    for renderable in formatter._root_section.rich:
         console.print(renderable)
 
     export_format_env_value = environ.get("RENDER_HELP_FORMAT")
@@ -469,12 +469,12 @@ def _render_help(console_kwargs: dict, renderables: List[RenderableType], progra
     # Output file location(s)
     output_dir = environ.get("RENDER_HELP_OUTPUT_DIR", getcwd())
     extension = 'txt' if export_format == 'text' else export_format
-    output_basepath = path.join(output_dir, f"{program_name}_help.".replace(" ", "_"))
+    output_basepath = path.join(output_dir, f"{formatter._prog}_help.".replace(" ", "_"))
     output_file = f"{output_basepath}{extension}"
 
     export_kwargs = {
         "save_html": {"theme": ARGPARSE_TERMINAL_THEME, "inline_styles": True},
-        "save_svg": {"theme": ARGPARSE_TERMINAL_THEME, "title": f"{program_name} --help"},
+        "save_svg": {"theme": ARGPARSE_TERMINAL_THEME, "title": f"{formatter._prog} --help"},
         "save_text": {"styles": True},
     }
 
@@ -594,9 +594,13 @@ if __name__ == "__main__":
         Console().print(Text.from_ansi(parser.format_help()))
 
     if environ.get('RICH_RENDER_THEMES'):
+        from rich.panel import Panel
+
         for theme_name in ARGPARSE_COLOR_THEMES.keys():
-            parser.formatter_class.choose_theme(theme_name)
-            print(f"\n\n\nTHEME: {theme_name}\n")
+            RichHelpFormatterPlus.choose_theme(theme_name)
+            print("\n\n\n")
+            Console().print(Panel(f" {theme_name}      ", width=50, expand=False), justify='center', style='reverse')
+            print("\n")
             print_help_text()
 
     if environ.get('RICH_RANDOMIZE'):
@@ -615,10 +619,9 @@ if __name__ == "__main__":
             number = randint(1, 255)
             color_name = get_color_name(number)
 
-            while color_name is None or not re.search('red|grey', color_name):
-                number = randint(1, 255)
-                color_name = get_color_name(number)
-
+            # while color_name is None or not re.search('red|grey', color_name):
+            #     number = randint(1, 255)
+            #     color_name = get_color_name(number)
             style = f"color({number})"
 
             if randint(0, 10) > 5:
