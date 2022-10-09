@@ -173,12 +173,14 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     },
 
     'cold_world': {
-        ARGPARSE_ARGS: 'color(19) bold',
+        ARGPARSE_ARGS: 'color(31)',
         ARGPARSE_DEFAULT: 'color(19)',
-        ARGPARSE_GROUPS: 'color(40) bold dim',
-        ARGPARSE_HELP: 'color(23) bold dim',
+        ARGPARSE_DESCRIPTION: 'color(31) dim',
+        ARGPARSE_GROUPS: 'color(19)',
+        ARGPARSE_HELP: 'color(23) dim',
         ARGPARSE_METAVAR: 'color(85) bold',
-        ARGPARSE_SYNTAX: 'color(78) bold underline',
+        ARGPARSE_PROG: 'color(123) bold',
+        ARGPARSE_SYNTAX: 'color(78) italic',
         ARGPARSE_TEXT: 'color(6)',
     },
 
