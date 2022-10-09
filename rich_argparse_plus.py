@@ -71,16 +71,25 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_SYNTAX: "#E06C75",  # Light Red color used by the one-dark theme
     },
 
-    'cyberdeck': {
-        ARGPARSE_ARGS: "cyan dim",
-        #"argparse.args_help": "color(248)",
-        ARGPARSE_GROUPS: "bold color(105)",
-        ARGPARSE_HELP: "default",
-        ARGPARSE_METAVAR: "color(39)",
-        ARGPARSE_DESCRIPTION: "bright_white",
-        ARGPARSE_SYNTAX: "#E06C75",  # Light Red color used by the one-dark theme
-    }
+    'the_lawn': {
+        ARGPARSE_ARGS: "color(106) dim",
+        ARGPARSE_DESCRIPTION: "bright_green",
+        ARGPARSE_GROUPS: "bold color(220)",
+        ARGPARSE_HELP: "color(156)",
+        ARGPARSE_METAVAR: "color(148)",
+        ARGPARSE_SYNTAX: "color(116) bold",  # Light Red color used by the one-dark theme
+    },
 }
+
+ANTI_THEMES: dict[str, dict[str, StyleType]] = {}
+
+for theme_name, style_dict in ARGPARSE_COLOR_THEMES.items():
+    anti_theme = ANTI_THEMES[f"anti_{theme_name}"] = {}
+
+    for element, style in style_dict.items():
+        anti_theme[element] = f"{style} reverse"
+
+ARGPARSE_COLOR_THEMES.update(ANTI_THEMES)
 
 # The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
 # This is a plain black, totally standard ANSI color theme.
@@ -131,6 +140,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
 
         cls.styles = ARGPARSE_COLOR_THEMES[theme_name]
 
+
     def __init__(
             self,
             prog: str,
@@ -140,7 +150,6 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._root_section.rich = []
-
 
     # TODO: separate file
     class _RichSection:
@@ -412,7 +421,7 @@ if __name__ == "__main__":
     from rich import print
 
     RichHelpFormatterPlus.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
-    RichHelpFormatterPlus.choose_theme('prince')
+    RichHelpFormatterPlus.choose_theme('default')
 
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
