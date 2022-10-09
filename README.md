@@ -9,7 +9,7 @@ Forked from [rich-argparse](https://github.com/hamdanal/rich-argparse)) so check
 1. Displays default argument values by default.
 1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
 
-![python -m rich_argparse_plus --help](doc/python_-m_rich_argparse_help_default_theme.png)
+![python -m rich_argparse_plus --help](doc/themes/python_-m_rich_argparse_help_default_theme.png)
 
 (That's the `prince` theme, for obvious reasons).
 
@@ -55,19 +55,16 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/help_screen.pdf program.py --h
 You can view images of the themes [here in the repo](doc/themes/) or you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz`.  Here's a couple:
 
 ##### `prince`
-![black_and_white](doc/python_-m_rich_argparse_help_prince_theme.png)
-
-
+![black_and_white](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
 
 ##### `black_and_white`
-![black_and_white](doc/python_-m_rich_argparse_help_black_and_white_theme.png)
-
+![black_and_white](doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
 
 ##### `roses`
-![black_and_white](doc/python_-m_rich_argparse_help_roses_theme.png)
+![black_and_white](doc/themes/python_-m_rich_argparse_help_roses_theme.png)
 
 ##### `dracula`
-![dracula](doc/python_-m_rich_argparse_help_dracula_theme.png)
+![dracula](doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
 
 
 
