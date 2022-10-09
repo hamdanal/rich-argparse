@@ -7,9 +7,9 @@ Format **argparse** help output with [**rich**](https://pypi.org/project/rich). 
 1. **Displays default argument values by default.**
 1. **Displays the range of acceptable values for integer arguments limited by `choices=range(n)`**.
 
-**Attn: PyPi Users:** To see the images [view this README on github](https://github.com/michelcrypt4d4mus/rich-argparse/)
+**Attn: PyPi Users:** To see the images [view this README on github](https://github.com/michelcrypt4d4mus/rich-argparse-plus/)
 
-![prince](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_prince_theme.png)
+![prince](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
 
 (That's the `prince` theme, for obvious reasons).
 
@@ -46,27 +46,27 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 
 
 ### Perusing Themes
-You can view images of all the themes [here in the repo](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/). Alternatively you can run `rich_argparse_plus_show_themes` to print them to your terminal.
+You can view images of all the themes [here in the repo](doc/themes/). Alternatively you can run `rich_argparse_plus_show_themes` to print them to your terminal.
 
 Here's a couple of them:
 
 ##### **mother_earth**
-![morning_glory](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_mother_earth_theme.png)
+![morning_glory](doc/themes/python_-m_rich_argparse_help_mother_earth_theme.png)
 
 ##### **the_pink**
-![the_pink](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_the_pink_theme.png)
+![the_pink](doc/themes/python_-m_rich_argparse_help_the_pink_theme.png)
 
 ##### **black_and_white**
-![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
+![black_and_white](doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
 
 ##### **morning_glory**
-![morning_glory](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_morning_glory_theme.png)
+![morning_glory](doc/themes/python_-m_rich_argparse_help_morning_glory_theme.png)
 
 ##### **dracula**
-![dracula](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
+![dracula](doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
 
 ##### **grey_area**
-![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_grey_area_theme.png)
+![default](doc/themes/python_-m_rich_argparse_help_grey_area_theme.png)
 
 
 #### The Random Theme Stream Channel

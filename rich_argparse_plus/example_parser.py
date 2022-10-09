@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(
         "help. For example, the line above contains clickable hyperlinks thanks to rich "
         "\\[link] markup. Read below for a peek at available features."
     ),
-    epilog=":link: Read more at https://github.com/michelcrypt4d4mus/rich-argparse_plus#usage.",
+    epilog=":link: Read more at https://github.com/michelcrypt4d4mus/rich-argparse-plus#usage.",
 )
 parser.add_argument(
     "formatter-class",
