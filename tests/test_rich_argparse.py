@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from rich.text import Text
 
-from rich_argparse import RichDefaultsHelpFormatter
+from rich_argparse_plus import RichDefaultsHelpFormatter
 
 # helpers
 # =======
