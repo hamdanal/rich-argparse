@@ -2,7 +2,7 @@
 
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
-Forked from [rich-argparse](https://github.com/hamdanal/rich-argparse)) so check there to see the details.  This version adds a few features:
+This is a fork of the awesome original [rich-argparse](https://github.com/hamdanal/rich-argparse) so check there to see the details.  This version adds a few features:
 
 1. **Render to various image/web formats by setting an variable when you run `--help`.** PNG, PDF, HTML, SVG, PS, EPS, colored text are supported. Show off your fancy stuff.
 1. Select from several preconfigured color themes.
@@ -35,9 +35,9 @@ parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
 This is done with environment variables:
 
 ```bash
-RENDER_HELP_FORMAT=svg program.py --help
-
-# Optionally set RENDER_HELP_OUTPUT_DIR=/some/path (defaults to writing in current directory)
+# Render a png to the current directory
+RENDER_HELP_FORMAT=png program.py --help
+# Set RENDER_HELP_OUTPUT_DIR to send the output somewhere else
 RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --help
 ```
 
