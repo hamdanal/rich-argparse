@@ -141,22 +141,21 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
 
         help_txt = Text.from_markup((self._get_help_string(action) or '') % format_specifiers)
 
+        # Append (default: ___) and (choices: M-N) to help text
         if default_value and default_value != argparse.SUPPRESS:
-            if isinstance(default_value, Number):
-                default_value_style = ARGPARSE_DEFAULT_NUMBER
-            else:
-                default_value_style = ARGPARSE_DEFAULT_STRING
-
-            help_txt.append(' (').append('default', ARGPARSE_DEFAULT).append(': ')
-            help_txt.append(escape(str(default_value)), default_value_style)
-            help_txt.append(')')
+            style = ARGPARSE_NUMBER if isinstance(default_value, Number) else ARGPARSE_ADDENDUM
+            help_txt += self._help_addendum('default', Text(str(default_value), style))
         if choices and isinstance(choices, range):
-            help_txt.append(' (').append('range', ARGPARSE_DEFAULT).append(': ')
-            help_txt.append(str(min(choices)), ARGPARSE_DEFAULT_NUMBER)
-            help_txt.append('-').append(str(max(choices)), ARGPARSE_DEFAULT_NUMBER)
-            help_txt.append(')')
+            addendum = Text().append(str(min(choices)), ARGPARSE_NUMBER)
+            addendum.append('-').append(str(max(choices)), ARGPARSE_NUMBER)
+            help_txt.append_text(self._help_addendum('range', addendum))
 
         return help_txt
+
+    def _help_addendum(self, label: str, value: Text):
+        """Wrap default:, choices: etc in parentheses"""
+        txt = Text(' (').append(label, ARGPARSE_DEFAULT).append(': ')
+        return txt.append_text(value).append(')')
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)

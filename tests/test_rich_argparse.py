@@ -587,7 +587,7 @@ def test_escape_params_and_expand_help():
         required=False
     )
     output = formatter._escape_params_and_expand_help(choice_action)
-    assert output == Text('help with a choice (range: 0-100)')
+    assert output.plain == 'help with a choice (range: 0-100)'
 
     default_default_action = argparse._StoreAction(
         dest='default',
@@ -597,5 +597,4 @@ def test_escape_params_and_expand_help():
         required=False
     )
     output = formatter._escape_params_and_expand_help(default_default_action)
-    print(f"Plains: {output.plain}")
-    assert output == Text('help with special default (default: [default])')
+    assert output.plain == 'help with special default (default: [default])'

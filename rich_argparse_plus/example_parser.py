@@ -82,7 +82,9 @@ group.add_argument(
     "--numbers",
     help="With numbers.",
     type=int,
-    default=105
+    default=42,
+    choices=range(5, 50),
+    metavar='NUMBER'
 )
 mutex = group.add_mutually_exclusive_group()
 mutex.add_argument(
