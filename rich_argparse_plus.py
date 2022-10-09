@@ -5,6 +5,7 @@ import logging
 import sys
 from os import environ, getcwd, path, remove
 from pprint import PrettyPrinter
+from time import sleep
 from typing import Callable, Generator, Iterable, List, Tuple
 
 from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
@@ -32,6 +33,7 @@ ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
 ARGPARSE_METAVAR = build_style_name("metavar")
 ARGPARSE_SYNTAX = build_style_name("syntax")
+ARGPARSE_TEXT = build_style_name("text")  # TODO: Unused?
 
 # Formatting constants
 DEFAULT_INDENT_INCREMENT = 2
@@ -71,7 +73,25 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_SYNTAX: "#E06C75",  # Light Red color used by the one-dark theme
     },
 
-    'the_lawn': {
+    'night_prince': {
+        ARGPARSE_ARGS: 'color(219)',
+        ARGPARSE_TEXT: 'color(93) dim',
+        ARGPARSE_GROUPS: 'color(174)',
+        ARGPARSE_HELP: 'color(88) dim italic',
+        ARGPARSE_METAVAR: 'color(132) bold italic',
+        ARGPARSE_SYNTAX: 'color(251)'
+    },
+
+    'black_and_white': {
+       ARGPARSE_ARGS: 'color(248)',
+       ARGPARSE_TEXT: 'color(255) bold',
+       ARGPARSE_GROUPS: 'color(232)',
+       ARGPARSE_HELP: 'color(233) italic',
+       ARGPARSE_METAVAR: 'color(250) dim',
+       ARGPARSE_SYNTAX: 'color(247) italic'
+    },
+
+    'the_matrix': {
         ARGPARSE_ARGS: "color(106) dim",
         ARGPARSE_DESCRIPTION: "bright_green",
         ARGPARSE_GROUPS: "bold color(220)",
@@ -79,6 +99,60 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_METAVAR: "color(148)",
         ARGPARSE_SYNTAX: "color(116) bold",  # Light Red color used by the one-dark theme
     },
+
+    'the_lawn': {
+        ARGPARSE_ARGS: 'color(136) bold italic',
+        ARGPARSE_TEXT: 'color(35) bold dim',
+        ARGPARSE_GROUPS: 'color(151) bold dim',
+        ARGPARSE_HELP: 'color(217) bold dim',
+        ARGPARSE_METAVAR: 'color(246) bold',
+        ARGPARSE_SYNTAX: 'color(242) bold dim'
+    },
+
+# alt green
+#         ARGPARSE_ARGS: 'color(242)',
+# │   ARGPARSE_TEXT: 'color(65) dim underline',
+# │   ARGPARSE_GROUPS: 'color(234) bold dim',
+# │   ARGPARSE_HELP: 'color(193) bold',
+# │   ARGPARSE_METAVAR: 'color(28) dim italic',
+# │   ARGPARSE_SYNTAX: 'color(179) bold'
+
+    'a_forest': {
+        ARGPARSE_ARGS: 'color(242)',
+        ARGPARSE_TEXT: 'color(65) dim',
+        ARGPARSE_GROUPS: 'color(234) bold dim',
+        ARGPARSE_HELP: 'color(193) bold',
+        ARGPARSE_METAVAR: 'color(28) dim italic',
+        ARGPARSE_SYNTAX: 'color(179) bold'
+    },
+
+
+    'morning_glory': {
+        ARGPARSE_ARGS: 'color(230) bold dim',
+        ARGPARSE_TEXT: 'color(231) dim',
+        ARGPARSE_GROUPS: 'color(231)',
+        ARGPARSE_HELP: 'color(230) dim italic',
+        ARGPARSE_METAVAR: 'color(184)',
+        ARGPARSE_SYNTAX: 'color(161) italic'
+    },
+
+    'roses': {
+       'argparse.args': 'color(198) italic',
+       'argparse.text': 'color(235)',
+       'argparse.groups': 'color(60) bold',
+       'argparse.help': 'color(8)',
+       'argparse.metavar': 'color(242) bold dim italic',
+       'argparse.syntax': 'color(168)',
+    },
+
+    'dracula': {
+        ARGPARSE_ARGS: 'color(209) bold dim',
+        ARGPARSE_TEXT: 'color(200) dim',
+        ARGPARSE_GROUPS: 'color(60) italic',
+        ARGPARSE_HELP: 'color(1) bold',
+        ARGPARSE_METAVAR: 'color(33) italic',
+        ARGPARSE_SYNTAX: 'color(171) italic underline'
+    }
 }
 
 ANTI_THEMES: dict[str, dict[str, StyleType]] = {}
@@ -125,8 +199,9 @@ CAIRO_FORMATS = ['eps', 'pdf', 'png', 'ps']
 class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
+    theme_name: str = 'default'
     group_name_formatter: Callable[[str], str] = str.upper
-    styles: dict[str, StyleType] = ARGPARSE_COLOR_THEMES['default'].copy()
+    styles: dict[str, StyleType] = ARGPARSE_COLOR_THEMES[theme_name].copy()
 
     highlights: list[str] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
@@ -138,6 +213,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         if theme_name not in ARGPARSE_COLOR_THEMES:
             raise ValueError(f"{theme_name} is not one of {list(ARGPARSE_COLOR_THEMES.keys())}")
 
+        cls.theme_name = theme_name
         cls.styles = ARGPARSE_COLOR_THEMES[theme_name]
 
 
@@ -513,3 +589,52 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print("Got the following arguments on the command line:")
     print(vars(args))
+
+    def print_help_text():
+        Console().print(Text.from_ansi(parser.format_help()))
+
+    if environ.get('RICH_RENDER_THEMES'):
+        for theme_name in ARGPARSE_COLOR_THEMES.keys():
+            pass
+
+    if environ.get('RICH_RANDOMIZE'):
+        from random import randint
+
+        from rich.pretty import pprint
+
+        def random_color(low: int = 1, high: int = 255) -> str:
+            style = f"color({randint(232, 255)})"
+
+            if randint(0, 10) > 5:
+                style += ' bold'
+            if randint(0, 10) > 6:
+                style += ' dim'
+            if randint(0, 10) > 7:
+                style += ' italic'
+            if randint(0, 10) > 9:
+                style += ' underline'
+
+            return style
+
+        def random_theme() -> dict:
+            return {
+                ARGPARSE_ARGS: random_color(),
+                ARGPARSE_DESCRIPTION: random_color(),
+                ARGPARSE_GROUPS: random_color(),
+                ARGPARSE_HELP: random_color(),
+                ARGPARSE_METAVAR: random_color(),
+                ARGPARSE_SYNTAX: random_color(),
+            }
+
+        def copyable_theme(theme: dict) -> dict:
+            return {k.upper().replace('.', '_'): v for k, v in theme.items()}
+
+        while True:
+            parser.formatter_class.styles = random_theme()
+            console = Console()
+            console.line(3)
+            pprint(copyable_theme(parser.formatter_class.styles))
+            console.line(3)
+            help_text = Text.from_ansi(parser.format_help())
+            console.print(help_text)
+            sleep(2)
