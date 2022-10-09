@@ -15,7 +15,7 @@ from rich.table import Column, Table
 from rich.text import Span, Text
 from rich.theme import Theme
 
-__all__ = ["RichDefaultsHelpFormatter"]
+__all__ = ["ARGPARSE_COLOR_THEMES", "RichDefaultsHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 
@@ -23,11 +23,14 @@ _Groups = Iterable[argparse._ArgumentGroup]
 STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 ARGPARSE_ARGS = build_style_name("args")
+ARGPARSE_DEFAULT = build_style_name("default")
+ARGPARSE_DEFAULT_NUMBER = build_style_name("default_number")
+ARGPARSE_DEFAULT_STRING = build_style_name("default_string")
 ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
 ARGPARSE_METAVAR = build_style_name("metavar")
 ARGPARSE_SYNTAX = build_style_name("syntax")
-ARGPARSE_TEXT = build_style_name("text")
+ARGPARSE_DESCRIPTION = build_style_name("text")
 
 # Formatting constants
 DEFAULT_INDENT_INCREMENT = 2
@@ -42,6 +45,33 @@ if environ.get("RICH_ARGPARSE_DEBUG"):
     log.setLevel('DEBUG')
 
 
+ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
+    'default': {
+        ARGPARSE_ARGS: "cyan",
+        ARGPARSE_DEFAULT: "dark_cyan",
+        ARGPARSE_DEFAULT_NUMBER: "bright_cyan",
+        ARGPARSE_DEFAULT_STRING: "color(106)",
+        ARGPARSE_GROUPS: "dark_orange",
+        ARGPARSE_HELP: "default",
+        ARGPARSE_METAVAR: "dark_cyan",
+        ARGPARSE_SYNTAX: "bold",
+        ARGPARSE_DESCRIPTION: "default",  # Really the description...
+    },
+
+    'prince': {
+        ARGPARSE_ARGS: "italic color(147)",
+        ARGPARSE_DEFAULT: "dark_cyan",
+        ARGPARSE_DEFAULT_NUMBER: "bright_cyan",
+        ARGPARSE_DEFAULT_STRING: "color(128)",
+        ARGPARSE_GROUPS: "blue bold",
+        ARGPARSE_HELP: "color(252)",
+        ARGPARSE_METAVAR: "color(96)",
+        ARGPARSE_SYNTAX: "#E06C75",  # Light Red color used by the one-dark theme
+        ARGPARSE_DESCRIPTION: "color(255)",
+    }
+}
+
+
 class _RichSection:
     def __init__(self, formatter: RichDefaultsHelpFormatter, heading: str | None) -> None:
         self.formatter = formatter
@@ -50,9 +80,6 @@ class _RichSection:
         self.actions: List[Tuple[Text, Text]] = []
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        # assert the empty sections are never rendered
-        assert self.description or self.actions
-
         help_position = min(
             self.formatter._action_max_length + DEFAULT_INDENT_INCREMENT,
             self.formatter._max_help_position
@@ -89,18 +116,7 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
-
-    styles: dict[str, StyleType] = {
-        ARGPARSE_ARGS: "cyan",
-        "argparse.default": "dark_cyan",
-        "argparse.default_number": "bright_cyan",
-        "argparse.default_string": "color(106)",
-        ARGPARSE_GROUPS: "dark_orange",
-        ARGPARSE_HELP: "default",
-        ARGPARSE_METAVAR: "dark_cyan",
-        ARGPARSE_SYNTAX: "bold",
-        ARGPARSE_TEXT: "default",
-    }
+    styles: dict[str, StyleType] = ARGPARSE_COLOR_THEMES['default']
 
     highlights: list[str] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
@@ -120,16 +136,16 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
     def _is_root(self) -> bool:
         return self._current_section == self._root_section  # type: ignore[no-any-return]
 
-    def _rich_append(self, r: RenderableType) -> None:
+    def _rich_append(self, renderable: RenderableType) -> None:
         assert self._is_root(), "can only append in root"
 
-        if isinstance(r, _RichSection) and not r.description and not r.actions:
+        if isinstance(renderable, _RichSection) and not (renderable.description or renderable.actions):
             return
 
         if self._root_section.rich:
             self._root_section.rich.append("")
 
-        self._root_section.rich.append(r)
+        self._root_section.rich.append(renderable)
 
     def _escape_params_and_expand_help(self, action: argparse.Action) -> Text:
         if not action.help:
@@ -149,7 +165,6 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
         help_string = (self._get_help_string(action) or '') % format_specifiers
 
         if default_value and default_value != argparse.SUPPRESS:
-            print(f"DEFAULT_VALUE: {default_value}")
             help_string += escape(f" (default: {default_value})")
         if choices and isinstance(choices, range):
             help_string += f" (range: {min(choices)}-{max(choices)})"
@@ -259,6 +274,7 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
         self._rich_append(Text(usage_text, spans=spans))
 
     def add_text(self, text: str | None) -> None:
+        """Add description text."""
         super().add_text(text)
 
         if text is argparse.SUPPRESS or text is None:
@@ -266,7 +282,7 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
         if "%(prog)" in text:
             text = text % {"prog": escape(self._prog)}
 
-        rich_text = Text.from_markup(text, style=ARGPARSE_TEXT)
+        rich_text = Text.from_markup(text, style=ARGPARSE_DESCRIPTION)
         self._highlight_text(rich_text)
         padded_text = Padding.indent(rich_text, self._current_indent)
 
@@ -302,6 +318,8 @@ if __name__ == "__main__":
     from rich import print
 
     RichDefaultsHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
+    RichDefaultsHelpFormatter.styles = ARGPARSE_COLOR_THEMES['prince']
+
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
         formatter_class=RichDefaultsHelpFormatter,
@@ -342,7 +360,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--syntax",
         default=RichDefaultsHelpFormatter.styles[ARGPARSE_SYNTAX],
-        help="Text inside backtics is highlighted using the `argparse.syntax` style (default: '%(default)s')",
+        help="Text inside backtics is highlighted using the `argparse.syntax` style",
     )
     parser.add_argument(
         "-s",
@@ -371,6 +389,12 @@ if __name__ == "__main__":
             "It also works with other help formatters such as `ArgumentDefaultsHelpFormatter` and "
             "`MetavarTypeHelpFormatter`."
         ),
+    )
+    group.add_argument(
+        "--numbers",
+        help="With numbers.",
+        type=int,
+        default=105
     )
     mutex = group.add_mutually_exclusive_group()
     mutex.add_argument(

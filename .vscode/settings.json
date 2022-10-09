@@ -17,5 +17,6 @@
     },
     "[json][yaml][toml]": {
         "editor.tabSize": 2
-    }
+    },
+    "workbench.colorTheme": "Solarized Dark"
 }
