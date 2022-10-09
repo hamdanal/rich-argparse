@@ -5,9 +5,11 @@ Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 This is a fork of the awesome original [rich-argparse](https://github.com/hamdanal/rich-argparse) so check there to see the details.  This version adds a few features:
 
 1. **Render to various image/web formats by setting an variable when you run `--help`.** PNG, PDF, HTML, SVG, PS, EPS, colored text are supported. Show off your fancy stuff.
-1. Select from several preconfigured color themes.
-1. Displays default argument values by default.
-1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
+1. **Select from several preconfigured color themes.**
+1. **Displays default argument values by default.**
+1. **Displays the range of acceptable values for integer arguments limited by `choices=range(n)`**.
+
+**Attn: PyPi Users:** To see the images [view this README on github](https://github.com/michelcrypt4d4mus/rich-argparse/)
 
 ![prince](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_prince_theme.png)
 
