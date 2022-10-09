@@ -18,9 +18,8 @@ ARGPARSE_TEXT = build_style_name("text")  # TODO: Unused?
 ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     'default': {
         ARGPARSE_ARGS: "cyan",
-        ARGPARSE_DEFAULT: "dark_cyan",
+        ARGPARSE_DEFAULT: "color(245)",
         ARGPARSE_DEFAULT_NUMBER: "bright_cyan",
-        ARGPARSE_DEFAULT_STRING: "color(106)",
         ARGPARSE_DESCRIPTION: "default",
         ARGPARSE_GROUPS: "dark_orange",
         ARGPARSE_HELP: "default",
@@ -30,9 +29,8 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
 
     'prince': {
         ARGPARSE_ARGS: "italic color(147)",
-        ARGPARSE_DEFAULT: "dark_cyan",
-        ARGPARSE_DEFAULT_NUMBER: "bright_cyan",
-        ARGPARSE_DEFAULT_STRING: "color(128)",
+        ARGPARSE_DEFAULT: "color(245)",
+        ARGPARSE_DEFAULT_NUMBER: "color(213)",
         ARGPARSE_DESCRIPTION: "color(255)",
         ARGPARSE_GROUPS: "blue bold",
         ARGPARSE_HELP: "color(252)",
@@ -42,29 +40,36 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
 
     'night_prince': {
         ARGPARSE_ARGS: 'color(219)',
-        ARGPARSE_TEXT: 'color(93) dim',
+        ARGPARSE_DEFAULT: 'color(240) bold',
+        ARGPARSE_DEFAULT_NUMBER: "color(213)",
         ARGPARSE_GROUPS: 'color(174)',
         ARGPARSE_HELP: 'color(88) dim italic',
         ARGPARSE_METAVAR: 'color(132) bold italic',
-        ARGPARSE_SYNTAX: 'color(251)'
+        ARGPARSE_SYNTAX: 'color(251)',
+        ARGPARSE_TEXT: 'color(93) dim',
     },
 
     'black_and_white': {
        ARGPARSE_ARGS: 'color(248)',
-       ARGPARSE_TEXT: 'color(255) bold',
+       ARGPARSE_DEFAULT_NUMBER: "bright_white bold",
+       ARGPARSE_DEFAULT_STRING: "bright_white bold",
        ARGPARSE_GROUPS: 'white reverse bold',
        ARGPARSE_HELP: 'color(240) italic',
        ARGPARSE_METAVAR: 'color(250) dim',
-       ARGPARSE_SYNTAX: 'color(247) italic'
+       ARGPARSE_SYNTAX: 'color(247) italic',
+       ARGPARSE_TEXT: 'color(255) bold',
     },
 
     'darkness': {
-       ARGPARSE_ARGS: 'color(236) dim',
-       ARGPARSE_TEXT: 'color(240) italic',
-       ARGPARSE_GROUPS: 'color(238) italic',
-       ARGPARSE_HELP: 'color(237) italic',
-       ARGPARSE_METAVAR: 'color(232) bold',
-       ARGPARSE_SYNTAX: 'color(239) bold dim italic'
+        ARGPARSE_ARGS: 'color(236) dim',
+        ARGPARSE_DEFAULT: 'color(240) bold',
+        ARGPARSE_DEFAULT_NUMBER: 'color(244) bold',
+        ARGPARSE_DEFAULT_STRING: 'color(244) bold',
+        ARGPARSE_GROUPS: 'color(238) italic',
+        ARGPARSE_HELP: 'color(237) italic',
+        ARGPARSE_METAVAR: 'color(244) bold',
+        ARGPARSE_SYNTAX: 'color(239) bold dim italic',
+        ARGPARSE_TEXT: 'color(240) italic',
     },
 
     'the_matrix': {
@@ -78,11 +83,11 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
 
     'the_lawn': {
         ARGPARSE_ARGS: 'color(136) bold italic',
-        ARGPARSE_TEXT: 'color(35) bold dim',
         ARGPARSE_GROUPS: 'color(151) bold dim',
         ARGPARSE_HELP: 'color(217) bold dim',
         ARGPARSE_METAVAR: 'color(246) bold',
-        ARGPARSE_SYNTAX: 'color(242) bold dim'
+        ARGPARSE_SYNTAX: 'color(242) bold dim',
+        ARGPARSE_TEXT: 'color(35) bold dim',
     },
 
     'forest': {
@@ -96,6 +101,7 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
 
     'lilac': {
         ARGPARSE_ARGS: 'color(125)',
+        ARGPARSE_DEFAULT: 'color(125)',
         ARGPARSE_GROUPS: 'color(96)',
         ARGPARSE_HELP: 'color(126) dim italic',
         ARGPARSE_METAVAR: 'color(252) bold',
@@ -130,6 +136,12 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
        ARGPARSE_SYNTAX: 'color(94) italic'
     }
 }
+
+for theme in ARGPARSE_COLOR_THEMES.values():
+    if ARGPARSE_DEFAULT_STRING not in theme:
+        theme[ARGPARSE_DEFAULT_STRING] = f"{theme[ARGPARSE_METAVAR]} bold"
+    if ARGPARSE_DEFAULT_NUMBER not in theme:
+        theme[ARGPARSE_DEFAULT_NUMBER] = theme[ARGPARSE_DEFAULT_STRING]
 
 ANTI_THEMES: dict[str, dict[str, StyleType]] = {}
 

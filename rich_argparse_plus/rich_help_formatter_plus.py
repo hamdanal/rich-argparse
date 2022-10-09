@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from numbers import Number
 from os import environ
 from pprint import PrettyPrinter
 from typing import Callable, Generator, Iterable, List, Tuple
@@ -113,7 +114,8 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
     def _rich_append(self, renderable: RenderableType) -> None:
         assert self._is_root(), "can only append in root"
 
-        if isinstance(renderable, type(self)._RichSection) and not (renderable.description or renderable.actions):
+        if isinstance(renderable, type(self)._RichSection) and \
+                not (renderable.description or renderable.actions):
             return
 
         if self._root_section.rich:
@@ -137,14 +139,24 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             if v != argparse.SUPPRESS
         }
 
-        help_string = (self._get_help_string(action) or '') % format_specifiers
+        help_txt = Text.from_markup((self._get_help_string(action) or '') % format_specifiers)
 
         if default_value and default_value != argparse.SUPPRESS:
-            help_string += escape(f" (default: {default_value})")
-        if choices and isinstance(choices, range):
-            help_string += f" (range: {min(choices)}-{max(choices)})"
+            if isinstance(default_value, Number):
+                default_value_style = ARGPARSE_DEFAULT_NUMBER
+            else:
+                default_value_style = ARGPARSE_DEFAULT_STRING
 
-        return Text.from_markup(help_string)
+            help_txt.append(' (').append('default', ARGPARSE_DEFAULT).append(': ')
+            help_txt.append(escape(str(default_value)), default_value_style)
+            help_txt.append(')')
+        if choices and isinstance(choices, range):
+            help_txt.append(' (').append('range', ARGPARSE_DEFAULT).append(': ')
+            help_txt.append(str(min(choices)), ARGPARSE_DEFAULT_NUMBER)
+            help_txt.append('-').append(str(max(choices)), ARGPARSE_DEFAULT_NUMBER)
+            help_txt.append(')')
+
+        return help_txt
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
