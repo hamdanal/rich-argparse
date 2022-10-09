@@ -163,9 +163,9 @@ for theme_name, style_dict in ARGPARSE_COLOR_THEMES.items():
     for element, style in style_dict.items():
         anti_theme[element] = f"{style} reverse"
 
-#ARGPARSE_COLOR_THEMES.update(ANTI_THEMES)
 
-# Rendering
+# Rendering constants
+CAIRO_FORMATS = ['eps', 'pdf', 'png', 'ps']
 RENDER_HELP_FORMAT = environ.get("RENDER_HELP_FORMAT")
 
 # The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
@@ -194,9 +194,6 @@ ARGPARSE_TERMINAL_THEME = TerminalTheme(
         (255, 255, 255),
     ],
 )
-
-# File formats rendered by cairosvg
-CAIRO_FORMATS = ['eps', 'pdf', 'png', 'ps']
 
 
 class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
