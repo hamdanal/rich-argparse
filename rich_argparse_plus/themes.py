@@ -1,6 +1,7 @@
 from rich.style import StyleType
 from rich.terminal_theme import TerminalTheme
 
+PANEL_PADDING = (2, 1)
 STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
@@ -13,6 +14,7 @@ ARGPARSE_DESCRIPTION = build_style_name("text")
 ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
 ARGPARSE_METAVAR = build_style_name("metavar")
+ARGPARSE_PANEL = build_style_name("panel")
 ARGPARSE_PROG = build_style_name("prog")
 ARGPARSE_SYNTAX = build_style_name("syntax")
 ARGPARSE_TEXT = build_style_name("text")  # TODO: Unused?
@@ -62,6 +64,19 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_HELP: 'color(240) italic',
         ARGPARSE_METAVAR: 'color(250) dim',
         ARGPARSE_NUMBER: "bright_white bold",
+        ARGPARSE_SYNTAX: 'color(247) italic',
+        ARGPARSE_TEXT: 'color(255) bold',
+    },
+
+    'grey_area': {
+        ARGPARSE_ADDENDUM: "bright_white bold",
+        ARGPARSE_ARGS: 'color(248)',
+        ARGPARSE_COLON: 'conceal',
+        ARGPARSE_GROUPS: 'white reverse bold',
+        ARGPARSE_HELP: 'color(240) italic',
+        ARGPARSE_METAVAR: 'color(250) dim',
+        ARGPARSE_NUMBER: "bright_white bold",
+        ARGPARSE_PANEL: 'on color(236)',
         ARGPARSE_SYNTAX: 'color(247) italic',
         ARGPARSE_TEXT: 'color(255) bold',
     },

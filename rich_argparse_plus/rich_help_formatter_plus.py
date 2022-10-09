@@ -8,9 +8,10 @@ from os import environ
 from pprint import PrettyPrinter
 from typing import Callable, Generator, Iterable, List, Tuple
 
-from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
+from rich.console import Console, ConsoleOptions, Group, RenderableType, RenderResult
 from rich.markup import escape
 from rich.padding import Padding
+from rich.panel import Panel
 from rich.style import StyleType
 from rich.table import Column, Table
 from rich.text import Span, Text
@@ -113,7 +114,6 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             log.debug(f"Help pos: {help_position}, action max len: {self.formatter._action_max_length}, " \
                 "max help position: {self.formatter._max_help_position}")
             yield table
-
 
     def _is_root(self) -> bool:
         return self._current_section == self._root_section  # type: ignore[no-any-return]
@@ -296,8 +296,13 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         console = Console(**console_kwargs)
 
         with console.capture() as capture:
-            for renderable in self._root_section.rich:
-                console.print(renderable)
+            if ARGPARSE_PANEL in type(self).styles:
+                group = Group(*self._root_section.rich)
+                panel = Panel(group, padding=PANEL_PADDING, style=ARGPARSE_PANEL)
+                console.print(panel)
+            else:
+                for renderable in self._root_section.rich:
+                    console.print(renderable)
 
         if RENDER_HELP_FORMAT:
             render_help(self)
@@ -305,6 +310,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
     def _highlight_text(self, text: Text) -> None:
+        """Apply highlighers"""
         for regex in self.highlights:
             text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
 
