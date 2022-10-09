@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from os import environ
+from os import environ, getcwd, path, remove
 from pprint import PrettyPrinter
 from typing import Callable, Generator, Iterable, List, Tuple
 
@@ -12,6 +12,7 @@ from rich.markup import escape
 from rich.padding import Padding
 from rich.style import StyleType
 from rich.table import Column, Table
+from rich.terminal_theme import TerminalTheme
 from rich.text import Span, Text
 from rich.theme import Theme
 
@@ -70,6 +71,36 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_DESCRIPTION: "color(255)",
     }
 }
+
+# The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
+# This is a plain black, totally standard ANSI color theme.
+ARGPARSE_TERMINAL_THEME = TerminalTheme(
+    (0, 0, 0),
+    (255, 255, 255),
+    [
+        (0, 0, 0),
+        (128, 0, 0),
+        (0, 128, 0),
+        (128, 128, 0),
+        (0, 0, 128),
+        (128, 0, 128),
+        (0, 128, 128),
+        (192, 192, 192),
+    ],
+    [
+        (128, 128, 128),
+        (255, 0, 0),
+        (0, 255, 0),
+        (255, 255, 0),
+        (0, 0, 255),
+        (255, 0, 255),
+        (0, 255, 255),
+        (255, 255, 255),
+    ],
+)
+
+# File formats rendered by cairosvg
+CAIRO_FORMATS = ['eps', 'pdf', 'png', 'ps']
 
 
 class _RichSection:
@@ -302,16 +333,59 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
 
     def format_help(self) -> str:
         super().format_help()
-        console = Console(theme=Theme(self.styles), width=self._width)
+        console_kwargs = {"theme": Theme(self.styles), "width": self._width}
+        console = Console(**console_kwargs)
 
         with console.capture() as capture:
             for renderable in self._root_section.rich:
                 console.print(renderable)
+
+        if environ.get("RENDER_HELP_FORMAT"):
+            _render_help(console_kwargs, self._root_section.rich, self._prog)
+
         return "\n".join(line.rstrip() for line in capture.get().split("\n"))
 
     def _highlight_text(self, text: Text) -> None:
         for regex in self.highlights:
             text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
+
+
+def _render_help(console_kwargs: dict, renderables: List[RenderableType], program_name: str) -> None:
+    """Render the contents of the help screen to an HTML, SVG, or colored text file"""
+    console = Console(record=True, **console_kwargs)
+
+    for renderable in renderables:
+        console.print(renderable)
+
+    export_format_env_value = environ.get("RENDER_HELP_FORMAT")
+    export_format = 'svg' if export_format_env_value in CAIRO_FORMATS else export_format_env_value
+    export_method_name = f"save_{export_format}"
+    export_method = getattr(console, export_method_name)
+
+    # Output file location(s)
+    output_dir = environ.get("RENDER_HELP_DIR", getcwd())
+    extension = 'txt' if export_format == 'text' else export_format
+    output_basepath = path.join(output_dir, f"{program_name}_help.")
+    output_file = f"{output_basepath}{extension}"
+
+    export_kwargs = {
+        "save_html": {"theme": ARGPARSE_TERMINAL_THEME, "inline_styles": True},
+        "save_svg": {"theme": ARGPARSE_TERMINAL_THEME, "title": f"{program_name} --help"},
+        "save_text": {"styles": True},
+    }
+
+    export_method(output_file, **export_kwargs[export_method_name])
+    log.debug(f"\n\nInvoked Rich.console.{export_method_name}('{output_file}')")
+    log.debug(f"   * kwargs: '{export_kwargs[export_method_name]}'...\n")
+
+    if export_format_env_value in CAIRO_FORMATS:
+        import cairosvg
+        render_file = f"{output_basepath}{export_format_env_value}"
+        renderer = getattr(cairosvg, f"svg2{export_format_env_value}")
+        renderer(url=output_file, write_to=render_file)
+        console.print(f"Help rendered to '{render_file}'...", style='cyan')
+    else:
+        console.print(f"Help rendered to '{output_file}'...", style='cyan')
 
 
 if __name__ == "__main__":
