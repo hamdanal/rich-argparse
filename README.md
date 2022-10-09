@@ -36,7 +36,8 @@ Formats supported are `html`, `png`, `pdf`, `ps`, `svg`, `eps`, and `txt` (color
 
 ```bash
 # Render a png to the current directory
-RENDER_HELP_FORMAT=png program.py --help
+RENDER_HELP_FORMAT=png my_awesome_program.py --help
+
 # Set RENDER_HELP_OUTPUT_DIR to send the output somewhere else
 RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --help
 ```

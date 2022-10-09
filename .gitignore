@@ -3,3 +3,4 @@
 /.coverage
 /.tox
 dist/
+.DS_Store
