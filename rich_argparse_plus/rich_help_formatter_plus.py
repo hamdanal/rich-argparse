@@ -71,9 +71,9 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
     class _RichSection:
         def __init__(self, formatter: RichHelpFormatterPlus, heading: str | None) -> None:
             self.formatter = formatter
-            self.heading = f"{RichHelpFormatterPlus.group_name_formatter(heading)}:" if heading else None
             self.description: Text | None = None
             self.actions: List[Tuple[Text, Text]] = []
+            self.heading = heading
 
         def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
             help_position = min(
@@ -82,7 +82,14 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             )
 
             if self.heading:
-                yield Text(self.heading, style=ARGPARSE_GROUPS)
+                heading = RichHelpFormatterPlus.group_name_formatter(self.heading)
+                heading = Text(heading, ARGPARSE_GROUPS)
+
+                if RichHelpFormatterPlus.styles.get(ARGPARSE_COLON) != 'conceal':
+                    yield heading.append(': ', ARGPARSE_COLON)
+                else:
+                    yield heading
+                #yield Text(self.heading, style=ARGPARSE_GROUPS)
 
             if self.description:
                 yield self.description
@@ -151,11 +158,6 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             help_txt.append_text(self._help_addendum('range', addendum))
 
         return help_txt
-
-    def _help_addendum(self, label: str, value: Text):
-        """Wrap default:, choices: etc in parentheses"""
-        txt = Text(' (').append(label, ARGPARSE_DEFAULT).append(': ')
-        return txt.append_text(value).append(')')
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
@@ -246,21 +248,23 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         prefix = prefix[: len(prefix) - len(prefix_end)]
         prefix = type(self).group_name_formatter(prefix) + prefix_end
 
-        spans = [Span(0, len(prefix.rstrip()), ARGPARSE_GROUPS)]
         usage_text = self._format_usage(usage, actions, groups, prefix=prefix).rstrip()
+        usage_spans = [Span(0, len(prefix.rstrip()), ARGPARSE_GROUPS)]
         log.debug(f"usage_text: {usage_text}")
 
         if usage is None:  # only auto generated usage is coloured
+            usage_spans.append(Span(len(prefix), len(prefix) + len(self._prog), ARGPARSE_PROG))
             actions_start = len(prefix) + len(self._prog) + 1
-            try:
-                spans.extend(list(self._usage_spans(usage_text, actions_start, actions=actions)))
-            except ValueError:
-                spans.extend([])
 
-        self._rich_append(Text(usage_text, spans=spans))
+            try:
+                usage_spans.extend(list(self._usage_spans(usage_text, actions_start, actions=actions)))
+            except ValueError:
+                usage_spans.extend([])
+
+        self._rich_append(Text(usage_text, spans=usage_spans))
 
     def add_text(self, text: str | None) -> None:
-        """Add description text."""
+        """Add group description text."""
         super().add_text(text)
 
         if text is argparse.SUPPRESS or text is None:
@@ -303,3 +307,8 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
     def _highlight_text(self, text: Text) -> None:
         for regex in self.highlights:
             text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
+
+    def _help_addendum(self, label: str, value: Text):
+        """Wrap default:, choices: etc in parentheses"""
+        txt = Text(' (').append(label, ARGPARSE_DEFAULT).append(': ')
+        return txt.append_text(value).append(')')

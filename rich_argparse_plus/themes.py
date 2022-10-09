@@ -5,6 +5,7 @@ STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
 ARGPARSE_ARGS = build_style_name("args")
+ARGPARSE_COLON = build_style_name("colon")
 ARGPARSE_DEFAULT = build_style_name("default")
 ARGPARSE_ADDENDUM = build_style_name("default_string")
 ARGPARSE_NUMBER = build_style_name("default_number")
@@ -12,6 +13,7 @@ ARGPARSE_DESCRIPTION = build_style_name("text")
 ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
 ARGPARSE_METAVAR = build_style_name("metavar")
+ARGPARSE_PROG = build_style_name("prog")
 ARGPARSE_SYNTAX = build_style_name("syntax")
 ARGPARSE_TEXT = build_style_name("text")  # TODO: Unused?
 
@@ -24,11 +26,13 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_HELP: "default",
         ARGPARSE_METAVAR: "dark_cyan",
         ARGPARSE_NUMBER: "bright_cyan",
+        ARGPARSE_PROG: "color(123)",
         ARGPARSE_SYNTAX: "bold",
     },
 
     'prince': {
         ARGPARSE_ARGS: "italic color(147)",
+        ARGPARSE_COLON: 'conceal',
         ARGPARSE_DEFAULT: "color(245)",
         ARGPARSE_DESCRIPTION: "color(255)",
         ARGPARSE_GROUPS: "blue bold",
@@ -45,13 +49,15 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_HELP: 'color(88) dim italic',
         ARGPARSE_METAVAR: 'color(132) bold italic',
         ARGPARSE_NUMBER: "color(213)",
+        ARGPARSE_PROG: 'color(251)',
         ARGPARSE_SYNTAX: 'color(251)',
         ARGPARSE_TEXT: 'color(93) dim',
     },
 
     'black_and_white': {
-        ARGPARSE_ARGS: 'color(248)',
         ARGPARSE_ADDENDUM: "bright_white bold",
+        ARGPARSE_ARGS: 'color(248)',
+        ARGPARSE_COLON: 'conceal',
         ARGPARSE_GROUPS: 'white reverse bold',
         ARGPARSE_HELP: 'color(240) italic',
         ARGPARSE_METAVAR: 'color(250) dim',
@@ -61,11 +67,12 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     },
 
     'darkness': {
+        ARGPARSE_ADDENDUM: 'color(244) bold',
         ARGPARSE_ARGS: 'color(236) dim',
+        ARGPARSE_COLON: 'conceal',
         ARGPARSE_DEFAULT: 'color(240) bold',
         ARGPARSE_NUMBER: 'color(244) bold',
-        ARGPARSE_ADDENDUM: 'color(244) bold',
-        ARGPARSE_GROUPS: 'color(238) italic',
+        ARGPARSE_GROUPS: 'color(235) underline reverse',
         ARGPARSE_HELP: 'color(237) italic',
         ARGPARSE_METAVAR: 'color(244) bold',
         ARGPARSE_SYNTAX: 'color(239) bold dim italic',
@@ -115,16 +122,19 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_GROUPS: 'color(231)',
         ARGPARSE_HELP: 'color(230) italic',
         ARGPARSE_METAVAR: 'color(184)',
+        ARGPARSE_PROG: 'color(208) bold',
         ARGPARSE_SYNTAX: 'color(190) bold'
     },
 
     'roses': {
        ARGPARSE_ARGS: 'color(198) italic',
-       ARGPARSE_TEXT: 'color(235)',
        ARGPARSE_GROUPS: 'color(60) bold',
        ARGPARSE_HELP: 'color(8)',
        ARGPARSE_METAVAR: 'color(242) bold dim italic',
+       ARGPARSE_NUMBER: 'color(90)',
+       ARGPARSE_PROG: 'color(52) bold',
        ARGPARSE_SYNTAX: 'color(168)',
+       ARGPARSE_TEXT: 'color(235)',
     },
 
     'dracula': {
@@ -133,7 +143,7 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
        ARGPARSE_GROUPS: 'color(167) dim italic',
        ARGPARSE_HELP: 'color(9) dim italic',
        ARGPARSE_METAVAR: 'color(59)',
-       ARGPARSE_SYNTAX: 'color(94) italic'
+       ARGPARSE_SYNTAX: 'color(94) italic dim'
     }
 }
 
