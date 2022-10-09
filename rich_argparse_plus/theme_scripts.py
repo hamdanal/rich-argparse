@@ -31,13 +31,14 @@ def random_theme_stream() -> None:
     while True:
         theme = random_theme()
         _print_theme_styles(theme)
-        example_parser.formatter_class.styles = random_theme()
+        RichHelpFormatterPlus.styles = random_theme()
         _print_help_text()
         sleep(2)
 
 
 def render_all_themes() -> None:
     """Render all the themes to .png files in the repo"""
+    pass
 
 
 def random_theme() -> dict:
@@ -51,7 +52,7 @@ def random_theme() -> dict:
     }
 
 
-def _print_theme_styles(theme: dict) -> dict:
+def _print_theme_styles(theme: dict) -> None:
     """Print settings in a way that can be copy/pasted"""
     console.line(3)
     printable_theme = {k.upper().replace('.', '_'): v for k, v in theme.items()}

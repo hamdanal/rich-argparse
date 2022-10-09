@@ -26,7 +26,7 @@ pip install rich-argparse-plus
 Pass the `formatter_class` to the argument parser, optionally choosing a theme.
 ```python
 import argparse
-from rich_argparse_plus.rich_help_formatter_plus import RichHelpFormatterPlus
+from rich_argparse_plus import RichHelpFormatterPlus
 
 RichHelpFormatterPlus.choose_theme('prince')
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
@@ -60,6 +60,10 @@ Here's a couple of them:
 
 ##### **default**
 ![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_default_theme.png)
+
+#### The Random Theme Stream Channel
+
+Try running `rich_argparse_plus_random_theme_stream`.
 
 
 ## Recipes

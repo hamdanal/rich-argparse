@@ -292,12 +292,3 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
     def _highlight_text(self, text: Text) -> None:
         for regex in self.highlights:
             text.highlight_regex(regex, style_prefix=STYLE_PREFIX)
-
-
-if __name__ == "__main__":
-    from rich_argparse_plus.example_parser import parser as example_parser
-
-    args = example_parser.parse_args()
-    print("Got the following arguments on the command line:")
-    print(vars(args))
-
