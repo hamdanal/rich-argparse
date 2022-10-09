@@ -15,7 +15,7 @@ from rich.table import Column, Table
 from rich.text import Span, Text
 from rich.theme import Theme
 
-__all__ = ["RichHelpFormatter"]
+__all__ = ["ARGPARSE_COLOR_THEMES", "RichHelpFormatter"]
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
 
@@ -24,6 +24,9 @@ STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
 ARGPARSE_ARGS = build_style_name("args")
+ARGPARSE_DEFAULT = build_style_name("default")
+ARGPARSE_DEFAULT_NUMBER = build_style_name("default_number")
+ARGPARSE_DEFAULT_STRING = build_style_name("default_string")
 ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
 ARGPARSE_METAVAR = build_style_name("metavar")
@@ -42,6 +45,30 @@ pp = PrettyPrinter(indent=4, sort_dicts=True)
 if environ.get("RICH_ARGPARSE_DEBUG"):
     log.addHandler(logging.StreamHandler())
     log.setLevel('DEBUG')
+
+
+ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
+    'default': {
+        ARGPARSE_ARGS: "cyan",
+        ARGPARSE_DEFAULT: "dark_cyan",
+        ARGPARSE_DEFAULT_NUMBER: "bright_cyan",
+        ARGPARSE_DEFAULT_STRING: "color(106)",
+        ARGPARSE_GROUPS: "dark_orange",
+        ARGPARSE_HELP: "default",
+        ARGPARSE_METAVAR: "dark_cyan",
+        ARGPARSE_SYNTAX: "bold",
+        ARGPARSE_TEXT: "default",
+    },
+    'prince': {
+        ARGPARSE_ARGS: "italic color(147)",
+        ARGPARSE_DEFAULT_STRING: "bold color(128)",
+        ARGPARSE_HELP: "default",
+        "argparse.arg_help": "color(249)",
+        ARGPARSE_METAVAR: "color(96)",
+        ARGPARSE_SYNTAX: "#E06C75",  # Light Red color used by the one-dark theme
+        ARGPARSE_TEXT: "color(255)",
+    }
+}
 
 
 class _RichSection:
@@ -91,18 +118,7 @@ class RichHelpFormatter(argparse.RawTextHelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: Callable[[str], str] = str.upper
-
-    styles: dict[str, StyleType] = {
-        ARGPARSE_ARGS: "cyan",
-        "argparse.default": "dark_cyan",
-        "argparse.default_number": "bright_cyan",
-        "argparse.default_string": "color(106)",
-        ARGPARSE_GROUPS: "dark_orange",
-        ARGPARSE_HELP: "default",
-        ARGPARSE_METAVAR: "dark_cyan",
-        ARGPARSE_SYNTAX: "bold",
-        ARGPARSE_TEXT: "default",
-    }
+    styles: dict[str, StyleType] = ARGPARSE_COLOR_THEMES['default']
 
     highlights: list[str] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
