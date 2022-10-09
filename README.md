@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
 ```
 
 ### Rendering Help Text As Imagery
-Formats supported are `eps`, `html`, `png`, `pdf`, `ps`, `svg`, and `txt` (colored text). To actually render send the `RENDER_HELP_FORMAT` environment variable while you run your program with `--help`:
+Formats supported are `html`, `png`, `pdf`, `ps`, `svg`, `eps`, and `txt` (colored text). To actually render send the `RENDER_HELP_FORMAT` environment variable while you run your program with `--help`:
 
 ```bash
 # Render a png to the current directory
@@ -43,7 +43,7 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 
 
 ### Perusing Themes
-You can view images of the themes [here in the repo](doc/themes/) or you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz`.  Here's a couple:
+You can view images of the themes [here in the repo](doc/themes/):
 
 ##### `prince`
 ![black_and_white](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
@@ -57,6 +57,7 @@ You can view images of the themes [here in the repo](doc/themes/) or you can run
 ##### `dracula`
 ![dracula](doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
 
+Alternatively you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
 
 
 ## Recipes
