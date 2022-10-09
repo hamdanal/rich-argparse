@@ -9,7 +9,7 @@ This is a fork of the awesome original [rich-argparse](https://github.com/hamdan
 1. Displays default argument values by default.
 1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
 
-![prince](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
+![prince](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_prince_theme.png)
 
 (That's the `prince` theme, for obvious reasons).
 
@@ -44,19 +44,19 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 
 
 ### Perusing Themes
-You can view images of all the themes [here in the repo](doc/themes/). Here's a couple of them:
-
-##### **black_and_white**
-![black_and_white](doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
+You can view images of all the themes [here in the repo](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/). Here's a couple of them:
 
 ##### **roses**
-![black_and_white](doc/themes/python_-m_rich_argparse_help_roses_theme.png)
+![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_roses_theme.png)
+
+##### **black_and_white**
+![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
 
 ##### **dracula**
-![dracula](doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
+![dracula](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
 
 ##### **default**
-![default](doc/themes/python_-m_rich_argparse_help_default_theme.png)
+![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_default_theme.png)
 
 
 Alternatively you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
