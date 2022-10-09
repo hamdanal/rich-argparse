@@ -9,7 +9,7 @@ This is a fork of the awesome original [rich-argparse](https://github.com/hamdan
 1. Displays default argument values by default.
 1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
 
-![python -m rich_argparse_plus --help](doc/themes/python_-m_rich_argparse_help_default_theme.png)
+![prince](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
 
 (That's the `prince` theme, for obvious reasons).
 
@@ -45,17 +45,18 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 ### Perusing Themes
 You can view images of all the themes [here in the repo](doc/themes/). Here's a couple of them:
 
-##### `prince`
-![black_and_white](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
-
-##### `black_and_white`
+##### **black_and_white**
 ![black_and_white](doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
 
-##### `roses`
+##### **roses**
 ![black_and_white](doc/themes/python_-m_rich_argparse_help_roses_theme.png)
 
-##### `dracula`
+##### **dracula**
 ![dracula](doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
+
+##### **default**
+![default](doc/themes/python_-m_rich_argparse_help_default_theme.png)
+
 
 Alternatively you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
 
