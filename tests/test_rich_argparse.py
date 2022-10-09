@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from rich.text import Text
 
-from rich_argparse_plus import RichDefaultsHelpFormatter
+from rich_argparse_plus import RichHelpFormatterPlus
 
 # helpers
 # =======
@@ -67,7 +67,7 @@ def force_color():
 
 @pytest.fixture()
 def disable_group_name_formatter():
-    with patch.object(RichDefaultsHelpFormatter, "group_name_formatter", str):
+    with patch.object(RichHelpFormatterPlus, "group_name_formatter", str):
         yield
 
 
@@ -80,7 +80,7 @@ def test_params_substitution():
         "awesome_program",
         description="This is the %(prog)s program.",
         epilog="The epilog of %(prog)s.",
-        formatter_class=RichDefaultsHelpFormatter,
+        formatter_class=RichHelpFormatterPlus,
     )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
     parser.add_argument("--option", default="value", help="help of option")
@@ -139,7 +139,7 @@ def test_overall_structure(prog, usage, description, epilog):
     # Strip out lines that consist just of a colon
     orig_out = '\n'.join([line for line in orig_out.split("\n") if not re.match('^:$', line)])
     orig_out = orig_out.replace('A file argument', 'A file argument (default: -)')
-    parser.formatter_class = RichDefaultsHelpFormatter
+    parser.formatter_class = RichHelpFormatterPlus
     rich_out = parser.format_help()
     assert rich_out == orig_out
 
@@ -148,7 +148,7 @@ def test_padding_and_wrapping():
     # padding of group descritpion works as expected even when wrapped
     # wrapping of options work as expected
     parser = argparse.ArgumentParser(
-        "PROG", description="-" * 120, epilog="%" * 120, formatter_class=RichDefaultsHelpFormatter
+        "PROG", description="-" * 120, epilog="%" * 120, formatter_class=RichHelpFormatterPlus
     )
     parser.add_argument("-o", "--very-long-option-name", metavar="LONG_METAVAR", help="." * 120)
     group_with_description = parser.add_argument_group("group", description="*" * 120)
@@ -206,7 +206,7 @@ def test_subparsers(title, description, dest, metavar, help, required):
         return p, sp
 
     orig_parser, orig_subparser = create_parsers(fmt_cls=argparse.HelpFormatter)
-    rich_parser, rich_subparser = create_parsers(fmt_cls=RichDefaultsHelpFormatter)
+    rich_parser, rich_subparser = create_parsers(fmt_cls=RichHelpFormatterPlus)
 
     assert rich_parser.format_help() == orig_parser.format_help()
     assert rich_subparser.format_help() == orig_subparser.format_help()
@@ -218,7 +218,7 @@ def test_escape_params():
         "[underline]",
         description="%(prog)s description.",
         epilog="%(prog)s epilog.",
-        formatter_class=RichDefaultsHelpFormatter,
+        formatter_class=RichHelpFormatterPlus,
     )
 
     class SpecialType(str):
@@ -278,7 +278,7 @@ def test_escape_params():
 )
 @pytest.mark.usefixtures("force_color")
 def test_spans(usage, usage_text):
-    parser = argparse.ArgumentParser("PROG", usage=usage, formatter_class=RichDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser("PROG", usage=usage, formatter_class=RichHelpFormatterPlus)
     parser.add_argument("file")
     parser.add_argument("hidden", help=argparse.SUPPRESS)
     parser.add_argument("--weird", metavar="y)")
@@ -312,7 +312,7 @@ def test_spans(usage, usage_text):
 
 @pytest.mark.usefixtures("force_color")
 def test_actions_spans_in_usage():
-    parser = argparse.ArgumentParser("PROG", formatter_class=RichDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatterPlus)
     parser.add_argument("arg", nargs="*")
     mut_ex = parser.add_mutually_exclusive_group()
     mut_ex.add_argument("--opt", nargs="?")
@@ -347,7 +347,7 @@ def test_actions_spans_in_usage():
 @pytest.mark.skipif(sys.version_info <= (3, 9), reason="not available in 3.8")
 @pytest.mark.usefixtures("force_color")
 def test_boolean_optional_action_spans():
-    parser = argparse.ArgumentParser("PROG", formatter_class=RichDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatterPlus)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = f"""\
     \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
@@ -365,8 +365,8 @@ def test_usage_spans_errors():
     actions = parser._actions
     groups = [parser._optionals]
 
-    formatter = RichDefaultsHelpFormatter("PROG")
-    with patch.object(RichDefaultsHelpFormatter, "_usage_spans", side_effect=ValueError):
+    formatter = RichHelpFormatterPlus("PROG")
+    with patch.object(RichHelpFormatterPlus, "_usage_spans", side_effect=ValueError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
     (usage,) = formatter._root_section.rich
     assert isinstance(usage, Text)
@@ -378,7 +378,7 @@ def test_usage_spans_errors():
 
 
 def test_no_help():
-    formatter = RichDefaultsHelpFormatter("prog")
+    formatter = RichHelpFormatterPlus("prog")
     formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
     out = formatter.format_help()
     assert not formatter._root_section.rich
@@ -403,7 +403,7 @@ def test_no_help():
 
 
 def test_with_metavar_type_help_formatter():
-    class Fmt(RichDefaultsHelpFormatter, argparse.MetavarTypeHelpFormatter):
+    class Fmt(RichHelpFormatterPlus, argparse.MetavarTypeHelpFormatter):
         ...
 
     parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
@@ -447,7 +447,7 @@ def test_with_django_help_formatter():
         def add_arguments(self, actions):
             super().add_arguments(self._reordered_actions(actions))
 
-    class Fmt(DjangoHelpFormatter, RichDefaultsHelpFormatter):
+    class Fmt(DjangoHelpFormatter, RichHelpFormatterPlus):
         ...
 
     parser = argparse.ArgumentParser("command", formatter_class=Fmt)
@@ -492,7 +492,7 @@ def test_help_formatter_args(indent_increment, max_help_position, width):
     orig_parser.add_argument(option, help=help_text)
     rich_parser = argparse.ArgumentParser(
         "program",
-        formatter_class=lambda prog: RichDefaultsHelpFormatter(
+        formatter_class=lambda prog: RichHelpFormatterPlus(
             prog, indent_increment, max_help_position, width
         ),
     )
@@ -501,20 +501,20 @@ def test_help_formatter_args(indent_increment, max_help_position, width):
 
 
 def test_return_output():
-    parser = argparse.ArgumentParser("prog", formatter_class=RichDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser("prog", formatter_class=RichHelpFormatterPlus)
     assert parser.format_help()
 
 
 @pytest.mark.usefixtures("force_color")
 def test_text_highlighter():
-    parser = argparse.ArgumentParser("PROG", formatter_class=RichDefaultsHelpFormatter)
-    parser.add_argument("arg", help="Did you try `RichDefaultsHelpFormatter.highlighter`?")
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatterPlus)
+    parser.add_argument("arg", help="Did you try `RichHelpFormatterPlus.highlighter`?")
 
     expected_help_output = f"""\
     \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
-    \x1b[36m  arg         \x1b[0m\x1b[39mDid you try `\x1b[0m\x1b[1;39mRichDefaultsHelpFormatter.highlighter\x1b[0m\x1b[39m`?\x1b[0m
+    \x1b[36m  arg         \x1b[0m\x1b[39mDid you try `\x1b[0m\x1b[1;39mRichHelpFormatterPlus.highlighter\x1b[0m\x1b[39m`?\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
@@ -527,7 +527,7 @@ def test_text_highlighter():
 def test_default_highlights():
     parser = argparse.ArgumentParser(
         "PROG",
-        formatter_class=RichDefaultsHelpFormatter,
+        formatter_class=RichHelpFormatterPlus,
         description="Descritpion with `syntax` and --options.",
         epilog="Epilog with `syntax` and --options.",
     )
@@ -566,7 +566,7 @@ def test_default_highlights():
 
 
 def test_escape_params_and_expand_help():
-    formatter = RichDefaultsHelpFormatter('awesomeprog')
+    formatter = RichHelpFormatterPlus('awesomeprog')
 
     action = argparse._StoreAction(
         dest='metavar',

@@ -4,17 +4,16 @@ Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
 Forked from [rich-argparse](https://github.com/hamdanal/rich-argparse)) so check there to see the details.  This version adds a few features:
 
-1. Render to various image and web formats (PNG, PDF, HTML, SVG, PS, EPS, colored text) by setting an environment variable when you run `--help`.
+1. **Render to various image/web formats by setting an variable when you run `--help`.** PNG, PDF, HTML, SVG, PS, EPS, colored text are supported. Show off your fancy stuff.
 1. Select from several preconfigured color themes.
 1. Displays default argument values by default.
 1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
 
-![python -m rich_argparse_plus --help](doc/python -m rich_argparse_help.png)
+![python -m rich_argparse_plus --help](doc/python_-m_rich_argparse_help.png)
+
+(That's the `prince` theme, for obvious reasons).
 
 ## Installation
-
-Install from PyPI with pip or your favorite tool.
-
 ```sh
 pip install rich-argparse-plus
 ```
@@ -23,14 +22,16 @@ Or copy the file `rich_argparse.py` to your project provided you have `rich` alr
 
 ## Usage
 
-Pass the `formatter_class` to the argument parser
+Pass the `formatter_class` to the argument parser, optionally choosing a theme.
 ```python
 import argparse
-from rich_argparse_plus import RichDefaultsHelpFormatter
+from rich_argparse_plus import RichHelpFormatterPlus
 
-parser = argparse.ArgumentParser(..., formatter_class=RichDefaultsHelpFormatter)
+RichHelpFormatterPlus.choose_theme('prince')
+parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
 ...
 ```
+
 
 ## Recipes
 
@@ -84,9 +85,9 @@ index 7fb6855..5e5d48a 100755
          ) from exc
 +
 +    from django.core.management.base import BaseCommand, DjangoHelpFormatter
-+    from rich_argparse_plus import RichDefaultsHelpFormatter
++    from rich_argparse_plus import RichHelpFormatterPlus
 +
-+    class RichDjangoHelpFormatter(DjangoHelpFormatter, RichDefaultsHelpFormatter):  # django first
++    class RichDjangoHelpFormatter(DjangoHelpFormatter, RichHelpFormatterPlus):  # django first
 +        """A rich-based help formatter for django commands."""
 +
 +    original_create_parser = BaseCommand.create_parser
@@ -109,10 +110,10 @@ Now try out some command like: `python manage.py runserver --help`
 
 ### Special text highlighting
 
-You can highlight patterns in the help text of your CLI. By default, `RichDefaultsHelpFormatter` defines
+You can highlight patterns in the help text of your CLI. By default, `RichHelpFormatterPlus` defines
 the following styles:
 ```pycon
->>> pprint(RichDefaultsHelpFormatter.styles)
+>>> pprint(RichHelpFormatterPlus.styles)
 {'argparse.args': 'cyan',
  'argparse.groups': 'dark_orange',
  'argparse.help': 'default',
@@ -124,20 +125,20 @@ The following example highlights all occurrences of `pyproject.toml` in green.
 
 ```python
 # add a style called `pyproject` which applies a green style (any rich style works)
-RichDefaultsHelpFormatter.styles["argparse.pyproject"] = "green"
+RichHelpFormatterPlus.styles["argparse.pyproject"] = "green"
 # add the highlight regex (the regex group name must match an existing style name)
-RichDefaultsHelpFormatter.highlights.append(r"\b(?P<pyproject>pyproject\.toml)\b")
+RichHelpFormatterPlus.highlights.append(r"\b(?P<pyproject>pyproject\.toml)\b")
 # pass the formatter class to argparse
-parser = argparse.ArgumentParser(..., formatter_class=RichDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
 ...
 ```
 
 ### Custom group name formatting
 
 You can change the formatting of the group name (like `'positional arguments'` and `'options'`) by
-setting the `RichDefaultsHelpFormatter.group_name_formatter` to any function that takes the group name as
-an input and returns a str. By default, `RichDefaultsHelpFormatter` sets the function to `str.upper`.
+setting the `RichHelpFormatterPlus.group_name_formatter` to any function that takes the group name as
+an input and returns a str. By default, `RichHelpFormatterPlus` sets the function to `str.upper`.
 
 ```python
-RichDefaultsHelpFormatter.group_name_formatter = str.title
+RichHelpFormatterPlus.group_name_formatter = str.title
 ```
