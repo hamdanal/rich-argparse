@@ -31,9 +31,9 @@ def random_theme_stream() -> None:
     while True:
         theme = random_theme()
         _print_theme_styles(theme)
-        RichHelpFormatterPlus.styles = random_theme()
+        RichHelpFormatterPlus.styles = theme
         _print_help_text()
-        sleep(1)
+        #sleep(1)
 
 
 def render_all_themes() -> None:

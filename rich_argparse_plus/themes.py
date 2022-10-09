@@ -95,12 +95,13 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     },
 
     'the_matrix': {
-        ARGPARSE_ARGS: "color(106) dim",
-        ARGPARSE_DESCRIPTION: "bright_green",
-        ARGPARSE_GROUPS: "bold color(220)",
-        ARGPARSE_HELP: "color(156)",
-        ARGPARSE_METAVAR: "color(148)",
-        ARGPARSE_SYNTAX: "color(116) bold",  # Light Red color used by the one-dark theme
+        ARGPARSE_ARGS: 'color(120) bold italic',
+        ARGPARSE_DEFAULT: 'color(136) italic',
+        ARGPARSE_GROUPS: 'color(239) bold',
+        ARGPARSE_HELP: 'color(114) bold dim italic',
+        ARGPARSE_METAVAR: 'color(83) bold dim italic',
+        ARGPARSE_SYNTAX: 'color(235)',
+        ARGPARSE_TEXT: 'color(156) bold',
     },
 
     'the_lawn': {
@@ -159,6 +160,38 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
        ARGPARSE_HELP: 'color(9) dim italic',
        ARGPARSE_METAVAR: 'color(59)',
        ARGPARSE_SYNTAX: 'color(94) italic dim'
+    },
+
+    'roses': {
+        ARGPARSE_ARGS: 'color(133) bold',
+        ARGPARSE_DEFAULT: 'color(77) bold',
+        ARGPARSE_GROUPS: 'color(238) italic',
+        ARGPARSE_HELP: 'color(48)',
+        ARGPARSE_METAVAR: 'color(74) italic',
+        ARGPARSE_SYNTAX: 'color(128) dim italic',
+        ARGPARSE_TEXT: 'color(79)',
+    },
+
+    'cold_world': {
+        ARGPARSE_ARGS: 'color(19) bold',
+        ARGPARSE_DEFAULT: 'color(19)',
+        ARGPARSE_GROUPS: 'color(40) bold dim',
+        ARGPARSE_HELP: 'color(23) bold dim',
+        ARGPARSE_METAVAR: 'color(85) bold',
+        ARGPARSE_SYNTAX: 'color(78) bold underline',
+        ARGPARSE_TEXT: 'color(6)',
+    },
+
+    'mother_earth': {
+        ARGPARSE_DEFAULT: 'cyan',
+        ARGPARSE_ADDENDUM: 'color(153) bold',
+        ARGPARSE_ARGS: 'color(153) bold',
+        ARGPARSE_DESCRIPTION: 'color(144)',
+        ARGPARSE_GROUPS: 'color(95) dim',
+        ARGPARSE_HELP: 'color(144)',
+        ARGPARSE_METAVAR: 'bright_white',
+        ARGPARSE_SYNTAX: 'color(52) dim',
+
     }
 }
 
