@@ -295,14 +295,13 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         console_kwargs = {"theme": Theme(self.styles), "width": self._width}
         console = Console(**console_kwargs)
 
+        if ARGPARSE_PANEL in type(self).styles:
+            group = Group(*self._root_section.rich)
+            self._root_section.rich = [Panel(group, padding=PANEL_PADDING, style=ARGPARSE_PANEL)]
+
         with console.capture() as capture:
-            if ARGPARSE_PANEL in type(self).styles:
-                group = Group(*self._root_section.rich)
-                panel = Panel(group, padding=PANEL_PADDING, style=ARGPARSE_PANEL)
-                console.print(panel)
-            else:
-                for renderable in self._root_section.rich:
-                    console.print(renderable)
+            for renderable in self._root_section.rich:
+                console.print(renderable)
 
         if RENDER_HELP_FORMAT:
             render_help(self)
