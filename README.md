@@ -43,7 +43,7 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 
 
 ### Perusing Themes
-You can view images of the themes [here in the repo](doc/themes/):
+You can view images of all the themes [here in the repo](doc/themes/). Here's a couple of them:
 
 ##### `prince`
 ![black_and_white](doc/themes/python_-m_rich_argparse_help_prince_theme.png)
