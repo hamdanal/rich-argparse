@@ -141,7 +141,7 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_SYNTAX: 'color(190) bold'
     },
 
-    'roses': {
+    'the_pink': {
        ARGPARSE_ARGS: 'color(198) italic',
        ARGPARSE_GROUPS: 'color(60) bold',
        ARGPARSE_HELP: 'color(8)',

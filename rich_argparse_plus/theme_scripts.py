@@ -33,7 +33,7 @@ def random_theme_stream() -> None:
         _print_theme_styles(theme)
         RichHelpFormatterPlus.styles = random_theme()
         _print_help_text()
-        sleep(2)
+        sleep(1)
 
 
 def render_all_themes() -> None:
@@ -42,14 +42,20 @@ def render_all_themes() -> None:
 
 
 def random_theme() -> dict:
-    return {
+    theme = {
         ARGPARSE_ARGS: _random_style(),
+        ARGPARSE_DEFAULT: _random_style(),
         ARGPARSE_DESCRIPTION: _random_style(),
         ARGPARSE_GROUPS: _random_style(),
         ARGPARSE_HELP: _random_style(),
         ARGPARSE_METAVAR: _random_style(),
         ARGPARSE_SYNTAX: _random_style(),
     }
+
+    if randint(0, 10) == 10:
+        theme[ARGPARSE_PANEL] = _random_style()
+
+    return theme
 
 
 def _print_theme_styles(theme: dict) -> None:

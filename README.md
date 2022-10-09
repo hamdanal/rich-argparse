@@ -52,17 +52,21 @@ You can view images of all the themes [here in the repo](https://github.com/mich
 
 Here's a couple of them:
 
-##### **roses**
-![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_roses_theme.png)
+##### **the_pink**
+![the_pink](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_the_pink_theme.png)
 
 ##### **black_and_white**
 ![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_black_and_white_theme.png)
 
+##### **morning_glory**
+![morning_glory](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_morning_glory_theme.png)
+
 ##### **dracula**
 ![dracula](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_dracula_theme.png)
 
-##### **default**
-![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_default_theme.png)
+##### **grey_area**
+![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_grey_area_theme.png)
+
 
 #### The Random Theme Stream Channel
 
