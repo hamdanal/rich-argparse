@@ -19,6 +19,9 @@ This is a fork of the awesome original [rich-argparse](https://github.com/hamdan
 
 ```sh
 pip install rich-argparse-plus
+
+# To render to image formats like PNG or PDF you need the optional dependencies:
+pip install rich-argparse-plus[optional]
 ```
 
 ## Usage
