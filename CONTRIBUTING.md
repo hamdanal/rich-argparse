@@ -23,6 +23,8 @@ This is needed to the run the test suite. The easiest way to set up a dev env is
 the dev dependencies. To activate it run `. venv/bin/activate` if you are on *MacOS/Linux* and
 `.\venv\Scripts\activate` if you are on *Windows*.
 
+If you have your own virtual env management system, you can install the project with pip in editable mode with `pip install -e .`.
+
 ### Developing and testing
 Any change made to code base needs to pass the test suite. If you are fixing a bug, add a test
 that shows the fix. If you add a new feature, you have to add tests that cover all added code.

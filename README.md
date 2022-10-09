@@ -45,7 +45,9 @@ RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/themes/ my_awesome_program --h
 
 
 ### Perusing Themes
-You can view images of all the themes [here in the repo](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/). Here's a couple of them:
+You can view images of all the themes [here in the repo](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/). Alternatively you can run `rich_argparse_plus_show_themes` to print them to your terminal.
+
+Here's a couple of them:
 
 ##### **roses**
 ![black_and_white](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_roses_theme.png)
@@ -58,9 +60,6 @@ You can view images of all the themes [here in the repo](https://github.com/mich
 
 ##### **default**
 ![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_default_theme.png)
-
-
-Alternatively you can run `SHOW_RICH_ARGPARSE_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
 
 
 ## Recipes

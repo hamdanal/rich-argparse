@@ -37,8 +37,9 @@ Home = "https://github.com/michelcrypt4d4mus/rich-argparse"
 
 
 [project.scripts]
-rich_argparse_plus_themes = "rich_argparse_plus.theme_scripts:show_themes"
-rich_argparse_random_theme_stream = "rich_argparse_plus.theme_scripts:rich_argparse_random_theme_stream"
+rich_argparse_plus_show_themes = "rich_argparse_plus.theme_scripts:show_themes"
+rich_argparse_random_theme_stream = "rich_argparse_plus.theme_scripts:random_theme_stream"
+rich_argparse_render_all_themes = "rich_argparse_plus.theme_scripts:render_all_themes"
 
 [project.optional-dependencies]
 # Install with 'pip install rich_argparse[dev]' or 'pip install .[dev]'

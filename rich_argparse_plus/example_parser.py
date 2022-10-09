@@ -47,7 +47,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--syntax",
-    default=RichHelpFormatterPlus.styles['default'],
+    default=RichHelpFormatterPlus.styles['argparse.syntax'],
     help="Text inside backtics is highlighted using the `argparse.syntax` style",
 )
 parser.add_argument(

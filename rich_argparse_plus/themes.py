@@ -1,7 +1,6 @@
 from rich.style import StyleType
 from rich.terminal_theme import TerminalTheme
 
-# Style name constants
 STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
 
@@ -53,8 +52,8 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     'black_and_white': {
        ARGPARSE_ARGS: 'color(248)',
        ARGPARSE_TEXT: 'color(255) bold',
-       ARGPARSE_GROUPS: 'color(232)',
-       ARGPARSE_HELP: 'color(233) italic',
+       ARGPARSE_GROUPS: 'white reverse bold',
+       ARGPARSE_HELP: 'color(240) italic',
        ARGPARSE_METAVAR: 'color(250) dim',
        ARGPARSE_SYNTAX: 'color(247) italic'
     },
@@ -93,6 +92,15 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_HELP: 'color(193)',
         ARGPARSE_METAVAR: 'color(28) dim italic',
         ARGPARSE_SYNTAX: 'color(179)'
+    },
+
+    'lilac': {
+        ARGPARSE_ARGS: 'color(125)',
+        ARGPARSE_GROUPS: 'color(96)',
+        ARGPARSE_HELP: 'color(126) dim italic',
+        ARGPARSE_METAVAR: 'color(252) bold',
+        ARGPARSE_SYNTAX: 'color(108) bold dim',
+        ARGPARSE_TEXT: 'color(168) dim'
     },
 
     'morning_glory': {

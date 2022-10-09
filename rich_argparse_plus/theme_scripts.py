@@ -1,42 +1,43 @@
-import re
+from os.path import dirname, join, pardir, realpath
 from random import randint
 from time import sleep
 
 from rich.color import ANSI_COLOR_NAMES
 from rich.console import Console
 from rich.panel import Panel
-from rich.pretty import pprint
 from rich.text import Text
 
 from rich_argparse_plus import RichHelpFormatterPlus
 from rich_argparse_plus.example_parser import parser as example_parser
 from rich_argparse_plus.themes import *
 
+RENDERED_THEME_DIR = realpath(join(dirname(__file__), pardir, 'doc', 'themes'))
+
 console = Console()
-
-
-def print_help_text() -> None:
-    console.print(Text.from_ansi(example_parser.format_help()))
 
 
 def show_themes() -> None:
     for theme_name in ARGPARSE_COLOR_THEMES.keys():
         RichHelpFormatterPlus.choose_theme(theme_name)
         console.line(3)
-        title_panel = Panel(f" '{theme_name}'    ", width=50, expand=False, style='bright_white')
+        title_panel = Panel(f" {theme_name}    ", width=50, expand=False, style='bright_white')
         console.print(title_panel, justify='center')
         console.line()
-        print_help_text()
+        _print_help_text()
 
 
-def rich_argparse_random_theme_stream() -> None:
+def random_theme_stream() -> None:
     """Print a random theme every few seconds"""
     while True:
         theme = random_theme()
         _print_theme_styles(theme)
         example_parser.formatter_class.styles = random_theme()
-        print_help_text()
+        _print_help_text()
         sleep(2)
+
+
+def render_all_themes() -> None:
+    """Render all the themes to .png files in the repo"""
 
 
 def random_theme() -> dict:
@@ -51,12 +52,12 @@ def random_theme() -> dict:
 
 
 def _print_theme_styles(theme: dict) -> dict:
-    """Print settings that can be copy/pasted"""
+    """Print settings in a way that can be copy/pasted"""
     console.line(3)
     printable_theme = {k.upper().replace('.', '_'): v for k, v in theme.items()}
 
     for element in sorted(list(printable_theme.keys())):
-        print(f"{element}: {theme[element]}")
+        print(f"{element}: '{printable_theme[element]}',")
 
     console.line(2)
 
@@ -88,3 +89,7 @@ def _get_color_name(n: int):
     if n not in ANSI_COLOR_NAMES.values():
         return None
     return list(ANSI_COLOR_NAMES.keys())[list(ANSI_COLOR_NAMES.values()).index(n)]
+
+
+def _print_help_text() -> None:
+    console.print(Text.from_ansi(example_parser.format_help()))
