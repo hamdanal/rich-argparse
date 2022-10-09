@@ -91,6 +91,15 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
        ARGPARSE_SYNTAX: 'color(247) italic'
     },
 
+    'darkness': {
+       ARGPARSE_ARGS: 'color(236) dim',
+       ARGPARSE_TEXT: 'color(240) italic',
+       ARGPARSE_GROUPS: 'color(238) italic',
+       ARGPARSE_HELP: 'color(237) italic',
+       ARGPARSE_METAVAR: 'color(232) bold',
+       ARGPARSE_SYNTAX: 'color(239) bold dim italic'
+    },
+
     'the_matrix': {
         ARGPARSE_ARGS: "color(106) dim",
         ARGPARSE_DESCRIPTION: "bright_green",
@@ -117,13 +126,13 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
 # │   ARGPARSE_METAVAR: 'color(28) dim italic',
 # │   ARGPARSE_SYNTAX: 'color(179) bold'
 
-    'a_forest': {
+    'forest': {
         ARGPARSE_ARGS: 'color(242)',
         ARGPARSE_TEXT: 'color(65) dim',
         ARGPARSE_GROUPS: 'color(234) bold dim',
-        ARGPARSE_HELP: 'color(193) bold',
+        ARGPARSE_HELP: 'color(193)',
         ARGPARSE_METAVAR: 'color(28) dim italic',
-        ARGPARSE_SYNTAX: 'color(179) bold'
+        ARGPARSE_SYNTAX: 'color(179)'
     },
 
 
@@ -131,18 +140,18 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_ARGS: 'color(230) bold dim',
         ARGPARSE_TEXT: 'color(231) dim',
         ARGPARSE_GROUPS: 'color(231)',
-        ARGPARSE_HELP: 'color(230) dim italic',
+        ARGPARSE_HELP: 'color(230) italic',
         ARGPARSE_METAVAR: 'color(184)',
-        ARGPARSE_SYNTAX: 'color(161) italic'
+        ARGPARSE_SYNTAX: 'color(190) bold'
     },
 
     'roses': {
-       'argparse.args': 'color(198) italic',
-       'argparse.text': 'color(235)',
-       'argparse.groups': 'color(60) bold',
-       'argparse.help': 'color(8)',
-       'argparse.metavar': 'color(242) bold dim italic',
-       'argparse.syntax': 'color(168)',
+       ARGPARSE_ARGS: 'color(198) italic',
+       ARGPARSE_TEXT: 'color(235)',
+       ARGPARSE_GROUPS: 'color(60) bold',
+       ARGPARSE_HELP: 'color(8)',
+       ARGPARSE_METAVAR: 'color(242) bold dim italic',
+       ARGPARSE_SYNTAX: 'color(168)',
     },
 
     'dracula': {
@@ -163,7 +172,7 @@ for theme_name, style_dict in ARGPARSE_COLOR_THEMES.items():
     for element, style in style_dict.items():
         anti_theme[element] = f"{style} reverse"
 
-ARGPARSE_COLOR_THEMES.update(ANTI_THEMES)
+#ARGPARSE_COLOR_THEMES.update(ANTI_THEMES)
 
 # The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
 # This is a plain black, totally standard ANSI color theme.
@@ -595,7 +604,9 @@ if __name__ == "__main__":
 
     if environ.get('RICH_RENDER_THEMES'):
         for theme_name in ARGPARSE_COLOR_THEMES.keys():
-            pass
+            parser.formatter_class.choose_theme(theme_name)
+            print(f"\n\n\nTHEME: {theme_name}\n")
+            print_help_text()
 
     if environ.get('RICH_RANDOMIZE'):
         from random import randint
@@ -635,6 +646,5 @@ if __name__ == "__main__":
             console.line(3)
             pprint(copyable_theme(parser.formatter_class.styles))
             console.line(3)
-            help_text = Text.from_ansi(parser.format_help())
-            console.print(help_text)
+            print_help_text()
             sleep(2)
