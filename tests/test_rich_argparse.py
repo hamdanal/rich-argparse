@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 import pytest
 from rich.text import Text
-from rich_argparse_plus import RichDefaultsHelpFormatter
+
+from rich_argparse import RichDefaultsHelpFormatter
 
 # helpers
 # =======
@@ -82,7 +83,7 @@ def test_params_substitution():
         formatter_class=RichDefaultsHelpFormatter,
     )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
-    parser.add_argument("--option", default="value", help="help of option (default: %(default)s)")
+    parser.add_argument("--option", default="value", help="help of option")
 
     expected_help_output = f"""\
     USAGE: awesome_program [-h] [--version] [--option OPTION]
@@ -114,7 +115,7 @@ def test_overall_structure(prog, usage, description, epilog):
     # 5. no markup/emoji codes are used
     # 6. trailing whitespace is ignored
     parser = argparse.ArgumentParser(prog, usage=usage, description=description, epilog=epilog)
-    parser.add_argument("file", default="-", help="A file (default: %(default)s).")
+    parser.add_argument("file", default="-", help="A file argument")
 
     # all types of empty groups
     parser.add_argument_group("empty group name", description="empty_group description")
@@ -137,6 +138,7 @@ def test_overall_structure(prog, usage, description, epilog):
     orig_out = parser.format_help()
     # Strip out lines that consist just of a colon
     orig_out = '\n'.join([line for line in orig_out.split("\n") if not re.match('^:$', line)])
+    orig_out = orig_out.replace('A file argument', 'A file argument (default: -)')
     parser.formatter_class = RichDefaultsHelpFormatter
     rich_out = parser.format_help()
     assert rich_out == orig_out
@@ -227,7 +229,7 @@ def test_escape_params():
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
     parser.add_argument("pos-arg", metavar="[italic]", help="help of pos arg with special metavar")
     parser.add_argument(
-        "--default", default="[default]", help="help with special default: %(default)s"
+        "--default", default="[default]", help="help with special default"
     )
     parser.add_argument("--type", type=SpecialType, help="help with special type: %(type)s")
     parser.add_argument(
@@ -245,7 +247,7 @@ def test_escape_params():
     {OPTIONS_GROUP_NAME}:
       -h, --help         show this help message and exit
       --version          show program's version number and exit
-      --default DEFAULT  help with special default: [default]
+      --default DEFAULT  help with special default (default: [default])
       --type TYPE        help with special type: [link]
       --metavar [bold]   help with special metavar: [bold]
 
@@ -383,21 +385,21 @@ def test_no_help():
     assert not out
 
 
-def test_with_argument_default_help_formatter():
-    class Fmt(RichDefaultsHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
-        ...
+# def test_with_argument_default_help_formatter():
+#     class Fmt(RichHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+#         ...
 
-    parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
-    parser.add_argument("--option", default="def", help="help of option")
+#     parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
+#     parser.add_argument("--option", default="def", help="help of option")
 
-    expected_help_output = f"""\
-    USAGE: PROG [-h] [--option OPTION]
+#     expected_help_output = f"""\
+#     USAGE: PROG [-h] [--option OPTION]
 
-    {OPTIONS_GROUP_NAME}:
-      -h, --help       show this help message and exit
-      --option OPTION  help of option (default: def)
-    """
-    assert parser.format_help() == dedent(expected_help_output)
+#     {OPTIONS_GROUP_NAME}:
+#       -h, --help       show this help message and exit
+#       --option OPTION  help of option (default: def)
+#     """
+#     assert _assert_same_lines(parser.format_help(), dedent(expected_help_output))
 
 
 def test_with_metavar_type_help_formatter():
@@ -495,7 +497,6 @@ def test_help_formatter_args(indent_increment, max_help_position, width):
         ),
     )
     rich_parser.add_argument(option, help=help_text)
-
     assert rich_parser.format_help() == orig_parser.format_help()
 
 
@@ -574,6 +575,27 @@ def test_escape_params_and_expand_help():
         option_strings=['--metavar'],
         required=False
     )
-
     output = formatter._escape_params_and_expand_help(action)
     assert output == Text('help with special metavar: [bold]')
+
+    choice_action = argparse._StoreAction(
+        dest='arg_name',
+        help='help with a choice',
+        metavar='CHOICE',
+        choices=range(101),
+        option_strings=['--arg-name'],
+        required=False
+    )
+    output = formatter._escape_params_and_expand_help(choice_action)
+    assert output == Text('help with a choice (range: 0-100)')
+
+    default_default_action = argparse._StoreAction(
+        dest='default',
+        default='[default]',
+        help='help with special default',
+        option_strings=['--default'],
+        required=False
+    )
+    output = formatter._escape_params_and_expand_help(default_default_action)
+    print(f"Plains: {output.plain}")
+    assert output == Text('help with special default (default: [default])')

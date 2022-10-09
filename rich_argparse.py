@@ -137,14 +137,26 @@ class RichDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
         if not action.help:
             return Text()
 
-        params = {
+        action_vars = vars(action)
+        action_vars['prog'] = escape(str(self._prog))
+        choices = action_vars.get('choices')
+        default_value = action_vars.get('default')
+
+        format_specifiers = {
             k: escape(str(v.__name__ if hasattr(v, "__name__") else v))
-            for k, v in vars(action).items()
+            for k, v in action_vars.items()
             if v != argparse.SUPPRESS
         }
 
-        params['prog'] = escape(str(self._prog))
-        return Text.from_markup(self._get_help_string(action) % params)  # type: ignore[operator]
+        help_string = (self._get_help_string(action) or '') % format_specifiers
+
+        if default_value and default_value != argparse.SUPPRESS:
+            print(f"DEFAULT_VALUE: {default_value}")
+            help_string += escape(f" (default: {default_value})")
+        if choices and isinstance(choices, range):
+            help_string += f" (range: {min(choices)}-{max(choices)})"
+
+        return Text.from_markup(help_string)
 
     def _format_action_invocation(self, action: argparse.Action) -> str:
         orig_str = super()._format_action_invocation(action)
