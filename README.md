@@ -1,18 +1,15 @@
 # rich-argparse-plus
-![Tests](https://img.shields.io/github/workflow/status/hamdanal/rich-argparse/tests?label=tests)
-![pre-commit](https://img.shields.io/github/workflow/status/hamdanal/rich-argparse/pre-commit?label=pre-commit)
-![Python Version](https://img.shields.io/pypi/pyversions/rich-argparse)
-![Release](https://img.shields.io/github/v/release/hamdanal/rich-argparse?sort=semver)
-![Status](https://img.shields.io/pypi/status/rich-argparse)
-![Downloads](https://img.shields.io/pypi/dm/rich-argparse)
 
-Format **argparse** help output with [**rich**](https://pypi.org/project/rich). Forked from [rich-argparse](https://github.com/hamdanal/rich-argparse)) to add a few features:
+Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
 
-1. Shows default argument values by default
-2. Allows easy rendering to SVG, HTML, and colored text formats.
+Forked from [rich-argparse](https://github.com/hamdanal/rich-argparse)) so check there to see the details.  This version adds a few features:
 
-![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/194706255-caf3e987-9853-41f5-85d9-1150c7c8ac31.png)
+1. Render to various image and web formats (PNG, PDF, HTML, SVG, PS, EPS, colored text) by setting an environment variable when you run `--help`.
+1. Select from several preconfigured color themes.
+1. Displays default argument values by default.
+1. Displays the range of acceptable values for integer arguments limited by `choices=range(n)`.
+
+![python -m rich_argparse_plus --help](doc/python -m rich_argparse_help.png)
 
 ## Installation
 

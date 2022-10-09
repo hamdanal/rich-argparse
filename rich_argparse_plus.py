@@ -365,7 +365,7 @@ def _render_help(console_kwargs: dict, renderables: List[RenderableType], progra
     # Output file location(s)
     output_dir = environ.get("RENDER_HELP_DIR", getcwd())
     extension = 'txt' if export_format == 'text' else export_format
-    output_basepath = path.join(output_dir, f"{program_name}_help.")
+    output_basepath = path.join(output_dir, f"{program_name}_help.".replace(" ", "_"))
     output_file = f"{output_basepath}{extension}"
 
     export_kwargs = {
@@ -383,6 +383,7 @@ def _render_help(console_kwargs: dict, renderables: List[RenderableType], progra
         render_file = f"{output_basepath}{export_format_env_value}"
         renderer = getattr(cairosvg, f"svg2{export_format_env_value}")
         renderer(url=output_file, write_to=render_file)
+        remove(output_file)
         console.print(f"Help rendered to '{render_file}'...", style='cyan')
     else:
         console.print(f"Help rendered to '{output_file}'...", style='cyan')
