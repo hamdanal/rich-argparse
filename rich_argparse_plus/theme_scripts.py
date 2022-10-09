@@ -8,9 +8,9 @@ from rich.panel import Panel
 from rich.pretty import pprint
 from rich.text import Text
 
-from rich_argparse_lib.example_parser import parser as example_parser
-from rich_argparse_lib.themes import *
 from rich_argparse_plus import RichHelpFormatterPlus
+from rich_argparse_plus.example_parser import parser as example_parser
+from rich_argparse_plus.themes import *
 
 console = Console()
 

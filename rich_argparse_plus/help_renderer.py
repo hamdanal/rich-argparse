@@ -4,7 +4,7 @@ from os import environ, getcwd, path, remove
 from rich.console import Console
 from rich.theme import Theme
 
-from rich_argparse_lib.themes import *
+from rich_argparse_plus.themes import *
 
 # Rendering constants
 CAIRO_FORMATS = ['eps', 'pdf', 'png', 'ps']

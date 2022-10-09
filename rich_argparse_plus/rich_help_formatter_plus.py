@@ -15,8 +15,8 @@ from rich.table import Column, Table
 from rich.text import Span, Text
 from rich.theme import Theme
 
-from .rich_argparse_lib.help_renderer import RENDER_HELP_FORMAT, render_help
-from .rich_argparse_lib.themes import *
+from rich_argparse_plus.help_renderer import RENDER_HELP_FORMAT, render_help
+from rich_argparse_plus.themes import *
 
 _Actions = Iterable[argparse.Action]
 _Groups = Iterable[argparse._ArgumentGroup]
@@ -295,7 +295,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
 
 
 if __name__ == "__main__":
-    from .rich_argparse_lib.example_parser import parser as example_parser
+    from rich_argparse_plus.example_parser import parser as example_parser
 
     args = example_parser.parse_args()
     print("Got the following arguments on the command line:")

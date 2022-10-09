@@ -26,7 +26,7 @@ pip install rich-argparse-plus
 Pass the `formatter_class` to the argument parser, optionally choosing a theme.
 ```python
 import argparse
-from rich_argparse_plus import RichHelpFormatterPlus
+from rich_argparse_plus.rich_help_formatter_plus import RichHelpFormatterPlus
 
 RichHelpFormatterPlus.choose_theme('prince')
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)

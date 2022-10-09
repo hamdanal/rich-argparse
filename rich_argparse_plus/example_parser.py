@@ -1,9 +1,8 @@
 import argparse
 
-from rich import print
 from rich.console import Console
 
-from rich_argparse_plus import RichHelpFormatterPlus
+from rich_argparse_plus.rich_help_formatter_plus import RichHelpFormatterPlus
 
 RichHelpFormatterPlus.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
 RichHelpFormatterPlus.choose_theme('default')
