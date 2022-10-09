@@ -16,11 +16,10 @@ This is a fork of the awesome original [rich-argparse](https://github.com/hamdan
 (That's the `prince` theme, for obvious reasons).
 
 ## Installation
+
 ```sh
 pip install rich-argparse-plus
 ```
-
-Or copy the file `rich_argparse.py` to your project provided you have `rich` already installed.
 
 ## Usage
 
