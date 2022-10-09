@@ -29,8 +29,30 @@ from rich_argparse_plus import RichHelpFormatterPlus
 
 RichHelpFormatterPlus.choose_theme('prince')
 parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatterPlus)
-...
 ```
+
+#### Rendering Help Text As Imagery
+This is done with environment variables:
+
+```bash
+RENDER_HELP_FORMAT=svg program.py --help
+
+# Optionally set RENDER_HELP_OUTPUT_DIR=/some/path (defaults to writing in current directory)
+RENDER_HELP_FORMAT=pdf RENDER_HELP_OUTPUT_DIR=doc/help_screen.pdf program.py --help
+```
+
+`RENDER_HELP_FORMAT` can be any of:
+
+* `eps`
+* `html`
+* `png`
+* `pdf`
+* `ps`
+* `svg`
+* `txt`
+
+#### Perusing Themes
+You can view renderings [here in the repo](doc/themes/) or you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz`.
 
 
 ## Recipes

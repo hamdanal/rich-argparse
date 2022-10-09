@@ -118,14 +118,6 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_SYNTAX: 'color(242) bold dim'
     },
 
-# alt green
-#         ARGPARSE_ARGS: 'color(242)',
-# │   ARGPARSE_TEXT: 'color(65) dim underline',
-# │   ARGPARSE_GROUPS: 'color(234) bold dim',
-# │   ARGPARSE_HELP: 'color(193) bold',
-# │   ARGPARSE_METAVAR: 'color(28) dim italic',
-# │   ARGPARSE_SYNTAX: 'color(179) bold'
-
     'forest': {
         ARGPARSE_ARGS: 'color(242)',
         ARGPARSE_TEXT: 'color(65) dim',
@@ -134,7 +126,6 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
         ARGPARSE_METAVAR: 'color(28) dim italic',
         ARGPARSE_SYNTAX: 'color(179)'
     },
-
 
     'morning_glory': {
         ARGPARSE_ARGS: 'color(230) bold dim',
@@ -155,12 +146,12 @@ ARGPARSE_COLOR_THEMES: dict[str, dict[str, StyleType]] = {
     },
 
     'dracula': {
-        ARGPARSE_ARGS: 'color(209) bold dim',
-        ARGPARSE_TEXT: 'color(200) dim',
-        ARGPARSE_GROUPS: 'color(60) italic',
-        ARGPARSE_HELP: 'color(1) bold',
-        ARGPARSE_METAVAR: 'color(33) italic',
-        ARGPARSE_SYNTAX: 'color(171) italic underline'
+       ARGPARSE_ARGS: 'color(239) bold dim italic',
+       ARGPARSE_TEXT: 'color(160) italic',
+       ARGPARSE_GROUPS: 'color(167) dim italic',
+       ARGPARSE_HELP: 'color(9) dim italic',
+       ARGPARSE_METAVAR: 'color(59)',
+       ARGPARSE_SYNTAX: 'color(94) italic'
     }
 }
 
@@ -476,7 +467,7 @@ def _render_help(console_kwargs: dict, renderables: List[RenderableType], progra
     export_method = getattr(console, export_method_name)
 
     # Output file location(s)
-    output_dir = environ.get("RENDER_HELP_DIR", getcwd())
+    output_dir = environ.get("RENDER_HELP_OUTPUT_DIR", getcwd())
     extension = 'txt' if export_format == 'text' else export_format
     output_basepath = path.join(output_dir, f"{program_name}_help.".replace(" ", "_"))
     output_file = f"{output_basepath}{extension}"
@@ -519,7 +510,7 @@ if __name__ == "__main__":
             "help. For example, the line above contains clickable hyperlinks thanks to rich "
             "\\[link] markup. Read below for a peek at available features."
         ),
-        epilog=":link: Read more at https://github.com/hamdanal/rich-argparse#usage.",
+        epilog=":link: Read more at https://github.com/michelcrypt4d4mus/rich-argparse_plus#usage.",
     )
     parser.add_argument(
         "formatter-class",
@@ -609,12 +600,26 @@ if __name__ == "__main__":
             print_help_text()
 
     if environ.get('RICH_RANDOMIZE'):
+        import re
         from random import randint
 
+        from rich.color import ANSI_COLOR_NAMES
         from rich.pretty import pprint
 
+        def get_color_name(n: int):
+            if n not in ANSI_COLOR_NAMES.values():
+                return None
+            return list(ANSI_COLOR_NAMES.keys())[list(ANSI_COLOR_NAMES.values()).index(n)]
+
         def random_color(low: int = 1, high: int = 255) -> str:
-            style = f"color({randint(232, 255)})"
+            number = randint(1, 255)
+            color_name = get_color_name(number)
+
+            while color_name is None or not re.search('red|grey', color_name):
+                number = randint(1, 255)
+                color_name = get_color_name(number)
+
+            style = f"color({number})"
 
             if randint(0, 10) > 5:
                 style += ' bold'
