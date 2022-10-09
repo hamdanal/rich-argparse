@@ -50,7 +50,7 @@ You can view images of all the themes [here in the repo](https://github.com/mich
 
 Here's a couple of them:
 
-##### **mother_earch**
+##### **mother_earth**
 ![morning_glory](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_mother_earth_theme.png)
 
 ##### **the_pink**
