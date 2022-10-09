@@ -4,3 +4,4 @@
 /.tox
 dist/
 .DS_Store
+.venv/
