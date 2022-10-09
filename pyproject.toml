@@ -32,6 +32,15 @@ dependencies = [
 ]
 requires-python = ">=3.7"
 
+# Install with 'pip install '.[dev]'
+[project.optional-dependencies]
+dev = [
+    "flit ~= 3.7.1",
+    "keyring ~= 23.9.3",
+    "pytest-cov",
+    "pytest"
+]
+
 [project.urls]
 Home = "https://github.com/michelcrypt4d4mus/rich-argparse"
 
