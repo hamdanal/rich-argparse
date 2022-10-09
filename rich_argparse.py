@@ -22,7 +22,6 @@ _Groups = Iterable[argparse._ArgumentGroup]
 # Style name constants
 STYLE_PREFIX = "argparse."
 build_style_name = lambda _type: f"{STYLE_PREFIX}{_type}"
-
 ARGPARSE_ARGS = build_style_name("args")
 ARGPARSE_GROUPS = build_style_name("groups")
 ARGPARSE_HELP = build_style_name("help")
@@ -33,7 +32,6 @@ ARGPARSE_TEXT = build_style_name("text")
 # Formatting constants
 DEFAULT_INDENT_INCREMENT = 2
 DEFAULT_MAX_HELP_INDENT = 24
-
 
 # Debug logging
 log = logging.getLogger("rich_argparse")
