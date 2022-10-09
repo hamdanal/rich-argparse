@@ -165,6 +165,9 @@ for theme_name, style_dict in ARGPARSE_COLOR_THEMES.items():
 
 #ARGPARSE_COLOR_THEMES.update(ANTI_THEMES)
 
+# Rendering
+RENDER_HELP_FORMAT = environ.get("RENDER_HELP_FORMAT")
+
 # The TerminalThemes that come with Rich all have the black and white offset from actual black and white.
 # This is a plain black, totally standard ANSI color theme.
 ARGPARSE_TERMINAL_THEME = TerminalTheme(
@@ -444,7 +447,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
             for renderable in self._root_section.rich:
                 console.print(renderable)
 
-        if environ.get("RENDER_HELP_FORMAT"):
+        if RENDER_HELP_FORMAT:
             _render_help(self)
 
         return "\n".join(line.rstrip() for line in capture.get().split("\n"))
@@ -461,15 +464,15 @@ def _render_help(formatter: RichHelpFormatterPlus) -> None:
     for renderable in formatter._root_section.rich:
         console.print(renderable)
 
-    export_format_env_value = environ.get("RENDER_HELP_FORMAT")
-    export_format = 'svg' if export_format_env_value in CAIRO_FORMATS else export_format_env_value
+    export_format = 'svg' if RENDER_HELP_FORMAT in CAIRO_FORMATS else RENDER_HELP_FORMAT
     export_method_name = f"save_{export_format}"
     export_method = getattr(console, export_method_name)
 
     # Output file location(s)
     output_dir = environ.get("RENDER_HELP_OUTPUT_DIR", getcwd())
     extension = 'txt' if export_format == 'text' else export_format
-    output_basepath = path.join(output_dir, f"{formatter._prog}_help.".replace(" ", "_"))
+    output_file_no_extension = f"{formatter._prog}_help_{formatter.theme_name}_theme".replace(" ", "_")
+    output_basepath = path.join(output_dir, output_file_no_extension + ".")
     output_file = f"{output_basepath}{extension}"
 
     export_kwargs = {
@@ -482,10 +485,10 @@ def _render_help(formatter: RichHelpFormatterPlus) -> None:
     log.debug(f"\n\nInvoked Rich.console.{export_method_name}('{output_file}')")
     log.debug(f"   * kwargs: '{export_kwargs[export_method_name]}'...\n")
 
-    if export_format_env_value in CAIRO_FORMATS:
+    if RENDER_HELP_FORMAT in CAIRO_FORMATS:
         import cairosvg
-        render_file = f"{output_basepath}{export_format_env_value}"
-        renderer = getattr(cairosvg, f"svg2{export_format_env_value}")
+        render_file = f"{output_basepath}{RENDER_HELP_FORMAT}"
+        renderer = getattr(cairosvg, f"svg2{RENDER_HELP_FORMAT}")
         renderer(url=output_file, write_to=render_file)
         remove(output_file)
         console.print(f"Help rendered to '{render_file}'...", style='cyan')
