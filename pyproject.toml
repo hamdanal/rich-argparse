@@ -27,21 +27,30 @@ classifiers = [
 keywords = ["argparse", "rich", "help-formatter"]
 
 dependencies = [
-    "cairosvg ~= 2.5",
     "rich >= 11.0.0",
 ]
 requires-python = ">=3.7"
 
+
 [project.urls]
 Home = "https://github.com/michelcrypt4d4mus/rich-argparse"
 
-# Install with 'pip install '.[dev]'
+
+[project.scripts]
+rich_argparse_plus_themes = "rich_argparse_plus.rich_argparse_lib.theme_scripts:show_themes"
+rich_argparse_random_theme_stream = "rich_argparse_plus.rich_argparse_lib.theme_scripts:rich_argparse_random_theme_stream"
+
 [project.optional-dependencies]
+# Install with 'pip install rich_argparse[dev]' or 'pip install .[dev]'
 dev = [
-    "flit ~= 3.7.1",
-    "keyring ~= 23.9.3",
+    "flit ~= 3.7",
+    "keyring ~= 23.9",
     "pytest-cov",
     "pytest"
+]
+# Install with 'pip install rich_argparse[optional]'
+optional = [
+    "cairosvg ~= 2.5"
 ]
 
 [tool.flit.sdist]

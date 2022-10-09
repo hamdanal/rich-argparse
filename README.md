@@ -61,7 +61,7 @@ You can view images of all the themes [here in the repo](https://github.com/mich
 ![default](https://github.com/michelcrypt4d4mus/rich-argparse/blob/rich_argparse_plus/doc/themes/python_-m_rich_argparse_help_default_theme.png)
 
 
-Alternatively you can run `RICH_RENDER_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
+Alternatively you can run `SHOW_RICH_ARGPARSE_THEMES=true python -m rich_argparse_plus xyz` to print them to your terminal.
 
 
 ## Recipes
