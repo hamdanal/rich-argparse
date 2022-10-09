@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "rich_argparse_plus"
-version = "0.3.1.2"
+version = "0.3.1.3"
 description = "A rich text formatter for argparse help with export and default features"
 authors = [
     {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
