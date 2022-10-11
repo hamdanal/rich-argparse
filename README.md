@@ -2,8 +2,8 @@
 
 Format **argparse** help output with [**rich**](https://pypi.org/project/rich). This is a fork of the awesome [rich-argparse](https://github.com/hamdanal/rich-argparse) that adds a few features:
 
+1. **Select from many [preconfigured color themes](#perusing-themes)**.
 1. **Render to various image/web formats by setting an variable when you run `--help`.** PNG, PDF, HTML, SVG, PS, EPS, colored text are supported. Show off your fancy stuff.
-1. **Select from many [preconfigured color themes](#perusing-themes).**
 1. **Displays default argument values by default.**
 1. **Displays the range of acceptable values for integer arguments limited by `choices=range(n)`**.
 
