@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.4.0 - 2022-10-15
+
+### Features
+- Add support for all help formatters of argparse. Now there are five formatter classes defined in
+  `rich_argparse`:
+  ```
+  RichHelpFormatter:                 the equivalent of argparse.HelpFormatter
+  RawDescriptionRichHelpFormatter:   the equivalent of argparse.RawDescriptionHelpFormatter
+  RawTextRichHelpFormatter:          the equivalent of argparse.RawTextHelpFormatter
+  ArgumentDefaultsRichHelpFormatter: the equivalent of argparse.ArgumentDefaultsHelpFormatter
+  MetavarTypeRichHelpFormatter:      the equivalent of argparse.MetavarTypeHelpFormatter
+  ```
+  Note that this changes the default behaviour of `RichHelpFormatter` to no longer respect line
+  breaks in the description and help text. It now behaves similarly to the original
+  `HelpFormatter`. You have now to use the appropriate subclass for this to happen.
+  * PR #31
+
 ## 0.3.1 - 2022-10-08
 
 ### Fixes
