@@ -10,7 +10,13 @@ from unittest.mock import patch
 import pytest
 from rich.text import Text
 
-from rich_argparse import RichHelpFormatter
+from rich_argparse import (
+    ArgumentDefaultsRichHelpFormatter,
+    MetavarTypeRichHelpFormatter,
+    RawDescriptionRichHelpFormatter,
+    RawTextRichHelpFormatter,
+    RichHelpFormatter,
+)
 
 # helpers
 # =======
@@ -88,20 +94,21 @@ def test_params_substitution():
 @pytest.mark.usefixtures("disable_group_name_formatter")
 def test_overall_structure(prog, usage, description, epilog):
     # The output must be consistent with the original HelpFormatter in these cases:
-    # 1. all names and help text are short to avoid special wrapping
+    # 1. no markup/emoji codes are used
     # 2. no short and long options with args are used
     # 3. group_name_formatter is disabled
     # 4. colors are disabled
-    # 5. no markup/emoji codes are used
-    # 6. trailing whitespace is ignored
     parser = argparse.ArgumentParser(prog, usage=usage, description=description, epilog=epilog)
     parser.add_argument("file", default="-", help="A file (default: %(default)s).")
+    parser.add_argument("spaces", help="Arg   with  weird\n\n whitespaces\t\t.")
+    parser.add_argument("--very-very-very-very-very-very-very-very-long-option-name", help="help!")
 
     # all types of empty groups
     parser.add_argument_group("empty group name", description="empty_group description")
     parser.add_argument_group("no description empty group name")
     parser.add_argument_group("", description="empty_name_empty_group description")
     parser.add_argument_group(description="no_name_empty_group description")
+    parser.add_argument_group("spaces group", description=" \tspaces_group description  ")
 
     # all types of non-empty groups
     group = parser.add_argument_group("group name", description="group description")
@@ -121,31 +128,28 @@ def test_overall_structure(prog, usage, description, epilog):
     assert rich_out == orig_out
 
 
+@pytest.mark.usefixtures("disable_group_name_formatter")
 def test_padding_and_wrapping():
-    # padding of group descritpion works as expected even when wrapped
-    # wrapping of options work as expected
-    parser = argparse.ArgumentParser(
-        "PROG", description="-" * 120, epilog="%" * 120, formatter_class=RichHelpFormatter
-    )
-    parser.add_argument("-o", "--very-long-option-name", metavar="LONG_METAVAR", help="." * 120)
+    parser = argparse.ArgumentParser("PROG", description="-" * 120, epilog="%" * 120)
+    parser.add_argument("--very-long-option-name", metavar="LONG_METAVAR", help="." * 120)
     group_with_description = parser.add_argument_group("group", description="*" * 120)
     group_with_description.add_argument("pos-arg", help="#" * 120)
 
     expected_help_output = f"""\
-    USAGE: PROG [-h] [-o LONG_METAVAR] pos-arg
+    usage: PROG [-h] [--very-long-option-name LONG_METAVAR] pos-arg
 
     --------------------------------------------------------------------------------------------------
     ----------------------
 
-    {OPTIONS_GROUP_NAME}:
+    {OPTIONS_GROUP_NAME.lower()}:
       -h, --help            show this help message and exit
-      -o, --very-long-option-name LONG_METAVAR
+      --very-long-option-name LONG_METAVAR
                             ..........................................................................
                             ..............................................
 
-    GROUP:
-      ************************************************************************************************
-      ************************
+    group:
+      **********************************************************************************************
+      **************************
 
       pos-arg               ##########################################################################
                             ##############################################
@@ -153,7 +157,11 @@ def test_padding_and_wrapping():
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%
     """
-    assert parser.format_help() == dedent(expected_help_output)
+    orig_output = parser.format_help()
+    parser.formatter_class = RichHelpFormatter
+    rich_output = parser.format_help()
+    assert rich_output == orig_output
+    assert rich_output == dedent(expected_help_output)
 
 
 @pytest.mark.parametrize("title", (None, "available commands"), ids=("no_title", "title"))
@@ -239,17 +247,15 @@ def test_escape_params():
     (
         pytest.param(
             None,
-            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] "
-            "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m] [\x1b[36m--flag\x1b[0m "
-            "| \x1b[36m--not-flag\x1b[0m] (\x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m "
-            "| \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m)  \x1b[36mfile\x1b[0m",
+            "PROG [\x1b[36m-h\x1b[0m] "
+            "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m]  "
+            "\x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m "
+            "[\x1b[36m--flag\x1b[0m | \x1b[36m--not-flag\x1b[0m] "
+            "(\x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m | \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m) "
+            "\x1b[36mfile\x1b[0m",
             id="auto_usage",
         ),
-        pytest.param(
-            "%(prog)s [-h] [--flag | --not-flag] (--path PATH | --url URL]) file",
-            "\x1b[38;5;208mUSAGE:\x1b[0m PROG [-h] [--flag | --not-flag] (--path PATH | --url URL]) file",
-            id="user_usage",
-        ),
+        pytest.param("%(prog)s [OPTIONS] COMMAND", "PROG [OPTIONS] COMMAND", id="user_usage"),
     ),
 )
 @pytest.mark.usefixtures("force_color")
@@ -258,29 +264,31 @@ def test_spans(usage, usage_text):
     parser.add_argument("file")
     parser.add_argument("hidden", help=argparse.SUPPRESS)
     parser.add_argument("--weird", metavar="y)")
+    hidden_group = parser.add_mutually_exclusive_group()
+    hidden_group.add_argument("--hidden-group-arg1", help=argparse.SUPPRESS)
+    hidden_group.add_argument("--hidden-group-arg2", help=argparse.SUPPRESS)
+    parser.add_argument("--required", metavar="REQ", required=True)
     mut_ex = parser.add_mutually_exclusive_group()
     mut_ex.add_argument("--flag", action="store_true", help="Is flag?")
     mut_ex.add_argument("--not-flag", action="store_true", help="Is not flag?")
     req_mut_ex = parser.add_mutually_exclusive_group(required=True)
-    req_mut_ex.add_argument("--path", help="Option path.")
-    req_mut_ex.add_argument("--url", help="Option url.")
-    hidden_group = parser.add_mutually_exclusive_group()
-    hidden_group.add_argument("--hidden-group-arg1", help=argparse.SUPPRESS)
-    hidden_group.add_argument("--hidden-group-arg2", help=argparse.SUPPRESS)
+    req_mut_ex.add_argument("-y", help="Yes.")
+    req_mut_ex.add_argument("-n", help="No.")
 
     expected_help_output = f"""\
-    {usage_text}
+    \x1b[38;5;208mUSAGE:\x1b[0m {usage_text}
 
     \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
       \x1b[36mfile\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
-      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m   \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m      \x1b[39mshow this help message and exit\x1b[0m
       \x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m
-      \x1b[36m--flag\x1b[0m       \x1b[39mIs flag?\x1b[0m
-      \x1b[36m--not-flag\x1b[0m   \x1b[39mIs not flag?\x1b[0m
-      \x1b[36m--path\x1b[0m \x1b[38;5;36mPATH\x1b[0m  \x1b[39mOption path.\x1b[0m
-      \x1b[36m--url\x1b[0m \x1b[38;5;36mURL\x1b[0m    \x1b[39mOption url.\x1b[0m
+      \x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m
+      \x1b[36m--flag\x1b[0m          \x1b[39mIs flag?\x1b[0m
+      \x1b[36m--not-flag\x1b[0m      \x1b[39mIs not flag?\x1b[0m
+      \x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m            \x1b[39mYes.\x1b[0m
+      \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m            \x1b[39mNo.\x1b[0m
     """
     assert parser.format_help() == dedent(expected_help_output)
 
@@ -340,11 +348,11 @@ def test_usage_spans_errors():
     groups = [parser._optionals]
 
     formatter = RichHelpFormatter("PROG")
-    with patch.object(RichHelpFormatter, "_usage_spans", side_effect=ValueError):
+    with patch.object(RichHelpFormatter, "_rich_usage_spans", side_effect=ValueError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
-    (usage,) = formatter._root_section.rich
+    (usage,) = formatter._root_section.rich_items
     assert isinstance(usage, Text)
-    assert str(usage) == "USAGE: PROG [-h]"
+    assert str(usage).rstrip() == "USAGE: PROG [-h]"
     (prefix_span,) = usage.spans
     assert prefix_span.start == 0
     assert prefix_span.end == len("usage:")
@@ -355,15 +363,68 @@ def test_no_help():
     formatter = RichHelpFormatter("prog")
     formatter.add_usage(usage=argparse.SUPPRESS, actions=[], groups=[])
     out = formatter.format_help()
-    assert not formatter._root_section.rich
+    assert not formatter._root_section.rich_items
     assert not out
 
 
-def test_with_argument_default_help_formatter():
-    class Fmt(RichHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
-        ...
+def test_raw_description_rich_help_formatter():
+    long_text = " ".join(["The quick brown fox jumps over the lazy dog."] * 3)
+    parser = argparse.ArgumentParser(
+        "PROG",
+        formatter_class=RawDescriptionRichHelpFormatter,
+        description=long_text,
+        epilog=long_text,
+    )
+    group = parser.add_argument_group("group", description=long_text)
+    group.add_argument("--long", help=long_text)
 
-    parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
+    expected_help_output = f"""\
+    USAGE: PROG [-h] [--long LONG]
+
+    The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help   show this help message and exit
+
+    GROUP:
+      The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+
+      --long LONG  The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the
+                   lazy dog. The quick brown fox jumps over the lazy dog.
+
+    The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+    """
+    assert parser.format_help() == dedent(expected_help_output)
+
+
+def test_raw_text_rich_help_formatter():
+    long_text = " ".join(["The quick brown fox jumps over the lazy dog."] * 3)
+    parser = argparse.ArgumentParser(
+        "PROG", formatter_class=RawTextRichHelpFormatter, description=long_text, epilog=long_text
+    )
+    group = parser.add_argument_group("group", description=long_text)
+    group.add_argument("--long", help=long_text)
+
+    expected_help_output = f"""\
+    USAGE: PROG [-h] [--long LONG]
+
+    The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+
+    {OPTIONS_GROUP_NAME}:
+      -h, --help   show this help message and exit
+
+    GROUP:
+      The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+
+      --long LONG  The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+
+    The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
+    """
+    assert parser.format_help() == dedent(expected_help_output)
+
+
+def test_argument_default_rich_help_formatter():
+    parser = argparse.ArgumentParser("PROG", formatter_class=ArgumentDefaultsRichHelpFormatter)
     parser.add_argument("--option", default="def", help="help of option")
 
     expected_help_output = f"""\
@@ -376,11 +437,8 @@ def test_with_argument_default_help_formatter():
     assert parser.format_help() == dedent(expected_help_output)
 
 
-def test_with_metavar_type_help_formatter():
-    class Fmt(RichHelpFormatter, argparse.MetavarTypeHelpFormatter):
-        ...
-
-    parser = argparse.ArgumentParser("PROG", formatter_class=Fmt)
+def test_metavar_type_help_formatter():
+    parser = argparse.ArgumentParser("PROG", formatter_class=MetavarTypeRichHelpFormatter)
     parser.add_argument("--count", type=int, default=0, help="how many?")
 
     expected_help_output = f"""\
@@ -393,8 +451,8 @@ def test_with_metavar_type_help_formatter():
     assert parser.format_help() == dedent(expected_help_output)
 
 
-def test_with_django_help_formatter():
-    # https://github.com/django/django/blob/8eed30aec606ff70eee920af84e880ea19da481b/django/core/management/base.py#L105-L131
+def test_django_rich_help_formatter():
+    # https://github.com/django/django/blob/8eed30aec6/django/core/management/base.py#L105-L131
     class DjangoHelpFormatter(argparse.HelpFormatter):
         """
         Customized formatter so that command-specific arguments appear in the
@@ -421,10 +479,10 @@ def test_with_django_help_formatter():
         def add_arguments(self, actions):
             super().add_arguments(self._reordered_actions(actions))
 
-    class Fmt(DjangoHelpFormatter, RichHelpFormatter):
-        ...
+    class DjangoRichHelpFormatter(DjangoHelpFormatter, RichHelpFormatter):
+        """Rich help message formatter with django's special ordering of arguments."""
 
-    parser = argparse.ArgumentParser("command", formatter_class=Fmt)
+    parser = argparse.ArgumentParser("command", formatter_class=DjangoRichHelpFormatter)
     parser.add_argument("--version", action="version", version="1.0.0")
     parser.add_argument("--traceback", action="store_true", help="show traceback")
     parser.add_argument("my-arg", help="custom argument.")
