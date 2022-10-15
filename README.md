@@ -53,8 +53,8 @@ The default styles used by *rich-argparse* formatters are carefully chosen to wo
 light and dark themes. If the these styles don't suit your taste, read below to know how to change
 them.
 
-> **Note:** Any subsequent mention of `RichHelpFormatter` in this section also applies to its
-subclasses.
+> **Note**
+> Any subsequent mention of `RichHelpFormatter` in this section also applies to its subclasses.
 
 ### Customize the colors
 You can customize the colors in the output by modifying the `styles` dictionary on the formatter
