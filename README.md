@@ -1,9 +1,8 @@
 # rich-argparse
 [![tests](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml/badge.svg)
 ](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)
-[![pre-commit](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml/badge.svg)
-](https://github.com/hamdanal/rich-argparse/actions/workflows/pre-commit.yml)
-
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hamdanal/rich-argparse/main.svg)
+](https://results.pre-commit.ci/latest/github/hamdanal/rich-argparse/main)
 [![Python Version](https://img.shields.io/pypi/pyversions/rich-argparse)
 ![Release](https://img.shields.io/github/v/release/hamdanal/rich-argparse?sort=semver)
 ![Status](https://img.shields.io/pypi/status/rich-argparse)
