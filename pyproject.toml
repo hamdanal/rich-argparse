@@ -48,6 +48,7 @@ commands =
   coverage erase
   coverage run -m pytest {posargs}
   coverage report
+  coverage html
 """
 
 [tool.black]

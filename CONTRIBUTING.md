@@ -57,7 +57,7 @@ Code changes must not trigger linting errors by [flake8].
 
 ## Creating a Pull Request
 
-Once your happy with your change and have ensured that all steps above have been followed (and
+Once you are happy with your change and have ensured that all steps above have been followed (and
 checks have passed), you can create a pull request. GitHub offers a guide on how to do this
 [here][PR]. Please ensure that you include a good description of what your change does in your
 pull request, and link it to any relevant issues or discussions.
