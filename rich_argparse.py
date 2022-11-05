@@ -218,7 +218,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
         params = {k: escape(str(v)) for k, v in params.items()}
         help_string = self._get_help_string(action) % params  # type: ignore[operator]
         rich_help = Text.from_markup(help_string, style="argparse.help")
-        rich_help.highlight_regex("|".join(self.highlights), style_prefix="argparse.")
+        for highlight in self.highlights:
+            rich_help.highlight_regex(highlight, style_prefix="argparse.")
         return rich_help
 
     def _rich_format_text(self, text: str) -> Text:
@@ -228,7 +229,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
         if "%(prog)" in text:
             text = text % {"prog": escape(self._prog)}
         rich_text = Text.from_markup(text, style="argparse.text")
-        rich_text.highlight_regex("|".join(self.highlights), style_prefix="argparse.")
+        for highlight in self.highlights:
+            rich_text.highlight_regex(highlight, style_prefix="argparse.")
         text_width = max(self._width - self._current_indent * 2, 11)
         indent = Text(" " * self._current_indent)
         return self._rich_fill_text(rich_text, text_width, indent)
