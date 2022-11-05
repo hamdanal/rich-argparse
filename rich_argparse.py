@@ -41,6 +41,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
+    usage_markup: bool = False
 
     def __init__(
         self,
@@ -120,14 +121,20 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
         usage_spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
         usage_text = self._format_usage(usage, actions, groups, prefix=prefix)
-        if usage is None:  # only auto generated usage is coloured
+        if usage is None:  # get colour spans for generated usage
             actions_start = len(prefix) + len(self._prog) + 1
             try:
                 spans = list(self._rich_usage_spans(usage_text, actions_start, actions=actions))
             except ValueError:
                 spans = []
             usage_spans.extend(spans)
-        self._root_section.rich_items.append(Text(usage_text, spans=usage_spans))
+            rich_usage = Text(usage_text)
+        elif self.usage_markup:  # treat user provided usage as markup
+            rich_usage = Text.from_markup(usage_text)
+        else:  # treat user provided usage as plain text
+            rich_usage = Text(usage_text)
+        rich_usage.spans.extend(usage_spans)
+        self._root_section.rich_items.append(rich_usage)
 
     def add_argument(self, action: argparse.Action) -> None:
         super().add_argument(action)

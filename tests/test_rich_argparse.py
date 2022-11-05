@@ -4,6 +4,7 @@ import argparse
 import io
 import os
 import sys
+from contextlib import nullcontext
 from textwrap import dedent
 from unittest.mock import patch
 
@@ -242,25 +243,9 @@ def test_escape_params():
     assert get_cmd_output(parser, cmd=["--version"]) == "[underline] 1.0.0\n"
 
 
-@pytest.mark.parametrize(
-    ("usage", "usage_text"),
-    (
-        pytest.param(
-            None,
-            "PROG [\x1b[36m-h\x1b[0m] "
-            "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m]  "
-            "\x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m "
-            "[\x1b[36m--flag\x1b[0m | \x1b[36m--not-flag\x1b[0m] "
-            "(\x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m | \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m) "
-            "\x1b[36mfile\x1b[0m",
-            id="auto_usage",
-        ),
-        pytest.param("%(prog)s [OPTIONS] COMMAND", "PROG [OPTIONS] COMMAND", id="user_usage"),
-    ),
-)
 @pytest.mark.usefixtures("force_color")
-def test_spans(usage, usage_text):
-    parser = argparse.ArgumentParser("PROG", usage=usage, formatter_class=RichHelpFormatter)
+def test_generated_usage():
+    parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("file")
     parser.add_argument("hidden", help=argparse.SUPPRESS)
     parser.add_argument("--weird", metavar="y)")
@@ -274,6 +259,15 @@ def test_spans(usage, usage_text):
     req_mut_ex = parser.add_mutually_exclusive_group(required=True)
     req_mut_ex.add_argument("-y", help="Yes.")
     req_mut_ex.add_argument("-n", help="No.")
+
+    usage_text = (
+        "PROG [\x1b[36m-h\x1b[0m] "
+        "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m]  "
+        "\x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m "
+        "[\x1b[36m--flag\x1b[0m | \x1b[36m--not-flag\x1b[0m] "
+        "(\x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m | \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m) "
+        "\x1b[36mfile\x1b[0m"
+    )
 
     expected_help_output = f"""\
     \x1b[38;5;208mUSAGE:\x1b[0m {usage_text}
@@ -291,6 +285,25 @@ def test_spans(usage, usage_text):
       \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m            \x1b[39mNo.\x1b[0m
     """
     assert parser.format_help() == dedent(expected_help_output)
+
+
+@pytest.mark.parametrize(
+    ("usage", "expected", "usage_markup"),
+    (
+        pytest.param("%(prog)s [bold] CMD[/]", "PROG [bold] CMD[/]", None, id="default"),
+        pytest.param("%(prog)s [bold] CMD[/]", "PROG [bold] CMD[/]", False, id="no_markup"),
+        pytest.param("%(prog)s [bold] CMD[/]", "PROG \x1b[1m CMD\x1b[0m", True, id="markup"),
+    ),
+)
+@pytest.mark.usefixtures("force_color")
+def test_user_usage(usage, expected, usage_markup):
+    parser = argparse.ArgumentParser(prog="PROG", usage=usage, formatter_class=RichHelpFormatter)
+    if usage_markup is not None:
+        ctx = patch.object(RichHelpFormatter, "usage_markup", usage_markup)
+    else:
+        ctx = nullcontext()
+    with ctx:
+        assert parser.format_usage() == f"\x1b[38;5;208mUSAGE:\x1b[0m {expected}\n"
 
 
 @pytest.mark.usefixtures("force_color")

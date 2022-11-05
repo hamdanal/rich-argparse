@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+- Support console markup in **custom** `usage` messages. Note that this feature is not activated by
+  default. To enable it, set `RichHelpFormatter.usage_markup = True`.
+  * PR #38
+
 ### Fixes
 - Use `soft_wrap` in `console.print` instead of a large fixed console width for wrapping
   * PR #35
