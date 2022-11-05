@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixes
+- Use `soft_wrap` in `console.print` instead of a large fixed console width for wrapping
+  * PR #35
+- Fix a regression in highlight regexes that caused the formatter to crash when using the same
+  style multiple times.
+  * Issue #36, PR #37
+
 ## 0.4.0 - 2022-10-15
 
 ### Features
