@@ -53,7 +53,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         from rich.theme import Theme
 
         super().__init__(prog, indent_increment, max_help_position, width)
-        self.console = Console(theme=Theme(self.styles), width=5000)
+        self.console = Console(theme=Theme(self.styles))
 
     class _Section(argparse.HelpFormatter._Section):  # type: ignore[valid-type,misc]
         def __init__(
@@ -136,7 +136,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
     def format_help(self) -> str:
         with self.console.capture() as capture:
-            self.console.print(self._root_section)
+            self.console.print(self._root_section, highlight=False, soft_wrap=True)
         help = capture.get()
         if help:
             help = self._long_break_matcher.sub("\n\n", help).strip("\n") + "\n"
