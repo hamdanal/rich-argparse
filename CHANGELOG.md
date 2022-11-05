@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0 - 2022-11-05
+
 ### Features
 - Support console markup in **custom** `usage` messages. Note that this feature is not activated by
   default. To enable it, set `RichHelpFormatter.usage_markup = True`.
