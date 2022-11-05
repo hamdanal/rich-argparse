@@ -552,7 +552,12 @@ def test_text_highlighter():
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
     """
+
+    # Make sure we can use a style multiple times in regexes
+    pattern_with_duplicate_style = r"'(?P<syntax>[^']*)'"
+    RichHelpFormatter.highlights.append(pattern_with_duplicate_style)
     assert parser.format_help() == dedent(expected_help_output)
+    RichHelpFormatter.highlights.remove(pattern_with_duplicate_style)
 
 
 @pytest.mark.usefixtures("force_color")
