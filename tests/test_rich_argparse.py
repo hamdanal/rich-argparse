@@ -339,7 +339,7 @@ def test_actions_spans_in_usage():
     assert parser.format_help() == dedent(expected_help_output)
 
 
-@pytest.mark.skipif(sys.version_info <= (3, 9), reason="not available in 3.8")
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="not available in 3.8")
 @pytest.mark.usefixtures("force_color")
 def test_boolean_optional_action_spans():
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
