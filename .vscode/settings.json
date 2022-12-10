@@ -7,6 +7,7 @@
     },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
+    "python.formatting.provider": "none",
     "[python]": {
         "editor.tabSize": 4,
         "editor.defaultFormatter": "ms-python.black-formatter",
@@ -15,7 +16,7 @@
             "source.organizeImports": true,
         },
     },
-    "[json][yaml][toml]": {
+    "[yaml][toml]": {
         "editor.tabSize": 2
     }
 }
