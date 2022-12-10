@@ -115,7 +115,7 @@ def test_overall_structure(prog, usage, description, epilog):
     group = parser.add_argument_group("group name", description="group description")
     group.add_argument("arg", help="help inside group")
     no_desc_group = parser.add_argument_group("no description group name")
-    no_desc_group.add_argument("arg", help="agr help inside no_desc_group")
+    no_desc_group.add_argument("arg", help="arg help inside no_desc_group")
     empty_name_group = parser.add_argument_group("", description="empty_name_group description")
     empty_name_group.add_argument("arg", help="arg help inside empty_name_group")
     no_name_group = parser.add_argument_group(description="no_name_group description")

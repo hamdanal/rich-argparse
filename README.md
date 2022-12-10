@@ -3,13 +3,15 @@
 ](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hamdanal/rich-argparse/main.svg)
 ](https://results.pre-commit.ci/latest/github/hamdanal/rich-argparse/main)
+
 [![Python Version](https://img.shields.io/pypi/pyversions/rich-argparse)
 ![Release](https://img.shields.io/github/v/release/hamdanal/rich-argparse?sort=semver)
 ![Status](https://img.shields.io/pypi/status/rich-argparse)
 ![Downloads](https://pepy.tech/badge/rich-argparse/month)
 ](https://pypi.org/project/rich-argparse/)
 
-Format **argparse** help output with [**rich**](https://pypi.org/project/rich).
+Format [argparse](https://docs.python.org/3/library/argparse.html) help output with
+[rich](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
 https://user-images.githubusercontent.com/93259987/194706255-caf3e987-9853-41f5-85d9-1150c7c8ac31.png)
@@ -35,8 +37,9 @@ parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
 ...
 ```
 
-`RichHelpFormatter` is the equivalent to `argparse.HelpFormatter`. *rich-argparse* also defines
-four subclasses of `RichHelpFormatter` that are equivalent to the other argparse formatters:
+`RichHelpFormatter` is the equivalent to `argparse.HelpFormatter` in the way it treats whitespace.
+rich-argparse also defines four subclasses of `RichHelpFormatter` that are equivalent to the other
+argparse formatters:
 
 * `argparse.RawDescriptionHelpFormatter` -> `RawDescriptionRichHelpFormatter`
 * `argparse.RawTextHelpFormatter` -> `RawTextRichHelpFormatter`
@@ -48,24 +51,26 @@ https://docs.python.org/3/library/argparse.html#formatter-class).
 
 ## Output styles
 
-The default styles used by *rich-argparse* formatters are carefully chosen to work in different
+The default styles used by rich-argparse formatters are carefully chosen to work in different
 light and dark themes. If the these styles don't suit your taste, read below to know how to change
 them.
 
 > **Note**
-> Any subsequent mention of `RichHelpFormatter` in this section also applies to its subclasses.
+> This section only mentions `RichHelpFormatter` but the same can be applied its subclasses.
 
 ### Customize the colors
 You can customize the colors in the output by modifying the `styles` dictionary on the formatter
 class. By default, `RichHelpFormatter` defines the following styles:
 
 ```python
-{'argparse.args': 'cyan',
- 'argparse.groups': 'dark_orange',
- 'argparse.help': 'default',
- 'argparse.metavar': 'dark_cyan',
- 'argparse.syntax': 'bold',
- 'argparse.text': 'default'}
+{
+    'argparse.args': 'cyan',  # for positional-arguments and --options (e.g "--help")
+    'argparse.groups': 'dark_orange',  # for group names (e.g. "positional arguments")
+    'argparse.help': 'default',  # for argument's help text (e.g. "show this help message and exit")
+    'argparse.metavar': 'dark_cyan',  # for metavariables (e.g. "FILE" in "--file FILE")
+    'argparse.syntax': 'bold',  # for highlights of back-tick quoted text (e.g. "`some text`"),
+    'argparse.text': 'default',  # for the description, epilog and group descriptions (e.g. "A program to foo")
+}
 ```
 
 For example, to make the description and epilog *italic*, change the `argparse.text` style:
@@ -88,9 +93,9 @@ RichHelpFormatter.group_name_formatter = str.title
 
 You can highlight patterns in the help text and the description text of your parser's help output
 using regular expressions. By default, `RichHelpFormatter` highlights patterns of
-`--options-with-hyphens` using the `argparse.args` style and patterns of ``back tick quoted text``
-using the `argparse.syntax` style. You can control what patterns get highlighted by modifying the
-`RichHelpFormatter.highlights` list.
+`--options-with-hyphens` using the `argparse.args` style and patterns of
+`` `back tick quoted text` `` using the `argparse.syntax` style. You can control what patterns get
+highlighted by modifying the `RichHelpFormatter.highlights` list.
 For example, to disable all highlights, you can clear this list using
 `RichHelpFormatter.highlights.clear()`.
 
@@ -98,7 +103,7 @@ You can also add custom highlight patterns and styles. The following example hig
 occurrences of `pyproject.toml` in green.
 
 ```python
-# 1dd a style called `pyproject` which applies a green style (any rich style works)
+# Add a style called `pyproject` which applies a green style (any rich style works)
 RichHelpFormatter.styles["argparse.pyproject"] = "green"
 # Add the highlight regex (the regex group name must match an existing style name)
 RichHelpFormatter.highlights.append(r"\b(?P<pyproject>pyproject\.toml)\b")
@@ -117,8 +122,8 @@ usage message with [console markup](https://rich.readthedocs.io/en/stable/markup
 
 ## Working with subparsers
 
-If your code uses *argparse*'s subparsers and you want to format the subparsers' help output with
-*rich-argparse*, you have to explicitly pass `formatter_class` to the subparsers since subparsers
+If your code uses argparse's subparsers and you want to format the subparsers' help output with
+rich-argparse, you have to explicitly pass `formatter_class` to the subparsers since subparsers
 do not inherit the formatter class from the parent parser by default. You have two options:
 
 1. Create a helper function to set `formatter_class` automatically:
@@ -145,7 +150,7 @@ do not inherit the formatter class from the parent parser by default. You have t
 `RichHelpFormatter` can be used with third party formatters that do not rely on the **private**
 internals of `argparse.HelpFormatter`. For example, [django](https://pypi.org/project/django)
 defines a custom help formatter that is used with the built in commands as well as with extension
-libraries and user defined commands. To use *rich-argparse* in your *django* project, change your
+libraries and user defined commands. To use rich-argparse in your django project, change your
 `manage.py` file as follows:
 
 ```diff
