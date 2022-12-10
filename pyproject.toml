@@ -38,7 +38,7 @@ Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37,py38,py39,py310,py311
+envlist = py37,py38,py39,py310,py311,py312
 isolated_build = true
 skip_missing_interpreters = true
 
