@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+
 from rich import print
 
 from . import RichHelpFormatter
