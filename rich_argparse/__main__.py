@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 from rich import print
 
 from . import RichHelpFormatter
-
 
 RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
 parser = argparse.ArgumentParser(
@@ -80,9 +81,7 @@ mutex.add_argument(
     action="store_true",
     help="Rich and poor are mutually exclusive. Choose either one but not both.",
 )
-mutex.add_argument(
-    "--poor", action="store_false", dest="rich", help="Does poor mean --not-rich 😉?"
-)
+mutex.add_argument("--poor", action="store_false", dest="rich", help="Does poor mean --not-rich 😉?")
 mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
 
 args = parser.parse_args()
