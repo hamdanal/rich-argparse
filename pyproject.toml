@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling>=1.11.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "rich_argparse"
@@ -35,6 +35,13 @@ Documentation = "https://github.com/hamdanal/rich-argparse#rich-argparse"
 Issue-Tracker = "https://github.com/hamdanal/rich-argparse/issues"
 Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 
+[tool.hatch.build]
+sources = ["stubs"]
+include = [
+  "rich_argparse-stubs",
+  "rich_argparse.py",
+]
+
 [tool.tox]
 legacy_tox_ini = """
 [tox]
@@ -64,6 +71,7 @@ line_length = 100
 [tool.mypy]
 strict = true
 show_error_codes = true
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]

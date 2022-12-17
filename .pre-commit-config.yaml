@@ -22,7 +22,10 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+        types_or: [python]
         args: [--add-import, "from __future__ import annotations"]
+      - id: isort
+        types_or: [pyi]
   - repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
