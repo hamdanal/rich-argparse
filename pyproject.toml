@@ -22,6 +22,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 keywords = ["argparse", "rich", "help-formatter"]
 dependencies = [
@@ -84,7 +85,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
-source = ["rich_argparse"]
+source = ["rich_argparse", "tests"]
 
 [tool.coverage.report]
 ignore_errors = true

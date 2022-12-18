@@ -315,9 +315,9 @@ def test_actions_spans_in_usage():
     mut_ex.add_argument("--opts", nargs="+")
 
     # https://github.com/python/cpython/issues/82619
-    if sys.version_info < (3, 9):
+    if sys.version_info < (3, 9):  # pragma: <3.9 cover
         arg_metavar = "[arg [arg ...]]"
-    else:
+    else:  # pragma: >=3.9 cover
         arg_metavar = "[arg ...]"
 
     usage_text = (
@@ -341,7 +341,7 @@ def test_actions_spans_in_usage():
 
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="not available in 3.8")
 @pytest.mark.usefixtures("force_color")
-def test_boolean_optional_action_spans():
+def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = f"""\
@@ -525,7 +525,8 @@ def test_django_rich_help_formatter():
 @pytest.mark.parametrize("width", (None, 70))
 @pytest.mark.usefixtures("disable_group_name_formatter")
 def test_help_formatter_args(indent_increment, max_help_position, width):
-    # Note: the length of the option corresponds with the values of max_help_position
+    # Note: the length of the option string is chosen to test edge cases where it is less than,
+    # equal to, and bigger than max_help_position
     option = "option-of-certain-length"
     help_text = "This is the help of the said option"
     orig_parser = argparse.ArgumentParser(
