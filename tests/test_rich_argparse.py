@@ -341,7 +341,7 @@ def test_actions_spans_in_usage():
 
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="not available in 3.8")
 @pytest.mark.usefixtures("force_color")
-def test_boolean_optional_action_spans():
+def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = f"""\
