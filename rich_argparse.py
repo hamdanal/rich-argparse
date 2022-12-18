@@ -315,7 +315,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "formatter-class",
         help=(
-            "All you need to make you argparse ArgumentParser output colorful text like this is to "
+            "All you need to make your argparse.ArgumentParser output colorful text like this is to "
             "pass it `formatter_class=RichHelpFormatter` or any of the available variants."
         ),
     )
@@ -324,7 +324,7 @@ if __name__ == "__main__":
         nargs="*",
         help=(
             "All the styles used by this formatter are defined in the `RichHelpFormatter.styles` "
-            "dictionary and customizable. Any rich style can be used."
+            "dictionary and they can be changed. Any rich style can be used."
         ),
     )
     parser.add_argument(
@@ -339,7 +339,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--syntax",
         default=RichHelpFormatter.styles["argparse.syntax"],
-        help="Text inside backtics is highlighted using the `argparse.syntax` style (default: '%(default)s')",
+        help=(
+            "Text inside backticks is highlighted using the `argparse.syntax` style "
+            "(default: '%(default)s')"
+        ),
     )
     parser.add_argument(
         "-s",
@@ -363,11 +366,7 @@ if __name__ == "__main__":
     group.add_argument(
         "--others",
         nargs="*",
-        help=(
-            "This formatter works with subparsers, mutually exclusive groups and hidden arguments. "
-            "It also works with other help formatters such as `ArgumentDefaultsHelpFormatter` and "
-            "`MetavarTypeHelpFormatter`."
-        ),
+        help="This formatter works with subparsers, mutually exclusive groups and hidden arguments.",
     )
     mutex = group.add_mutually_exclusive_group()
     mutex.add_argument(

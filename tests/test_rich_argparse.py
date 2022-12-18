@@ -525,7 +525,8 @@ def test_django_rich_help_formatter():
 @pytest.mark.parametrize("width", (None, 70))
 @pytest.mark.usefixtures("disable_group_name_formatter")
 def test_help_formatter_args(indent_increment, max_help_position, width):
-    # Note: the length of the option corresponds with the values of max_help_position
+    # Note: the length of the option string is chosen to test edge cases where it is less than,
+    # equal to, and bigger than max_help_position
     option = "option-of-certain-length"
     help_text = "This is the help of the said option"
     orig_parser = argparse.ArgumentParser(
