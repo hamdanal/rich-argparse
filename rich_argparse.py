@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import TYPE_CHECKING, Callable, Iterable, Iterator
+from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
 
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
@@ -28,8 +28,8 @@ _Groups = Iterable[argparse._ArgumentGroup]
 class RichHelpFormatter(argparse.HelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
-    group_name_formatter: Callable[[str], str] = str.upper
-    styles: dict[str, StyleType] = {
+    group_name_formatter: ClassVar[Callable[[str], str]] = str.upper
+    styles: ClassVar[dict[str, StyleType]] = {
         "argparse.args": "cyan",
         "argparse.groups": "dark_orange",
         "argparse.help": "default",
@@ -37,11 +37,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
         "argparse.syntax": "bold",
         "argparse.text": "default",
     }
-    highlights: list[str] = [
+    highlights: ClassVar[list[str]] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
-    usage_markup: bool = False
+    usage_markup: ClassVar[bool] = False
 
     def __init__(
         self,
@@ -60,7 +60,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         def __init__(
             self,
             formatter: RichHelpFormatter,
-            parent: RichHelpFormatter._Section,
+            parent: RichHelpFormatter._Section | None,
             heading: str | None = None,
         ) -> None:
             if heading is not None:
