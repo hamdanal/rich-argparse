@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.0 - 2022-12-18
+
+### Features
+- Support type checking for users. Bundle type information in the wheel and sdist.
+  * PR #43
+
+### Fixes
+- Fix annotations of class variables previously typed as instance variables.
+  * PR #43
+
 ## 0.5.0 - 2022-11-05
 
 ### Features
@@ -28,7 +38,7 @@
   ArgumentDefaultsRichHelpFormatter: the equivalent of argparse.ArgumentDefaultsHelpFormatter
   MetavarTypeRichHelpFormatter:      the equivalent of argparse.MetavarTypeHelpFormatter
   ```
-  Note that this changes the default behaviour of `RichHelpFormatter` to no longer respect line
+  Note that this changes the default behavior of `RichHelpFormatter` to no longer respect line
   breaks in the description and help text. It now behaves similarly to the original
   `HelpFormatter`. You have now to use the appropriate subclass for this to happen.
   * PR #31

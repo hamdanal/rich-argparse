@@ -21,6 +21,7 @@
         "pyproject",
         "pytest",
         "pyupgrade",
+        "sdist",
         "venv",
         "virtualenv",
         "yesqa"
