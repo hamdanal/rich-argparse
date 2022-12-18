@@ -315,9 +315,9 @@ def test_actions_spans_in_usage():
     mut_ex.add_argument("--opts", nargs="+")
 
     # https://github.com/python/cpython/issues/82619
-    if sys.version_info < (3, 9):
+    if sys.version_info < (3, 9):  # pragma: <3.9 cover
         arg_metavar = "[arg [arg ...]]"
-    else:
+    else:  # pragma: >=3.9 cover
         arg_metavar = "[arg ...]"
 
     usage_text = (

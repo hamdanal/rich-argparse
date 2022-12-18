@@ -84,7 +84,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
-source = ["rich_argparse"]
+source = ["rich_argparse", "tests"]
 
 [tool.coverage.report]
 ignore_errors = true
