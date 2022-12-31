@@ -10,7 +10,7 @@ authors = [
   {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
 ]
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -56,7 +56,6 @@ deps =
   coverage[toml]
   covdefaults
 commands =
-  coverage erase
   coverage run -m pytest {posargs}
   coverage report
   coverage html
