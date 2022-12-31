@@ -14,7 +14,7 @@ Format [argparse](https://docs.python.org/3/library/argparse.html) help output w
 [rich](https://pypi.org/project/rich).
 
 ![python -m rich_argparse --help](
-https://user-images.githubusercontent.com/93259987/194706255-caf3e987-9853-41f5-85d9-1150c7c8ac31.png)
+https://user-images.githubusercontent.com/93259987/210156693-a09f2e3d-8822-4f86-a3dc-6dd3f53a539c.png)
 
 ## Installation
 
