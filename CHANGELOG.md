@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Features
+- The default `group_name_formatter` has changed from `str.upper` to `str.title`. This renders
+  better with long group names and follows the convention of popular CLI tools and programs.
+  Please note that if you test the output of your CLI **verbatim** and rely on the default behavior
+  of rich_argparse, you will have to either set the formatter explicitly or update the tests.
+  * Issue #47, PR #48
+
 ## 0.6.0 - 2022-12-18
 
 ### Features

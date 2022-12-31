@@ -28,7 +28,7 @@ _Groups = Iterable[argparse._ArgumentGroup]
 class RichHelpFormatter(argparse.HelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
-    group_name_formatter: ClassVar[Callable[[str], str]] = str.upper
+    group_name_formatter: ClassVar[Callable[[str], str]] = str.title
     styles: ClassVar[dict[str, StyleType]] = {
         "argparse.args": "cyan",
         "argparse.groups": "dark_orange",
@@ -359,8 +359,8 @@ if __name__ == "__main__":
     group = parser.add_argument_group(
         "more options",
         description=(
-            "This is a custom group. Group names are upper-cased by default but it can be changed "
-            "by setting the `RichHelpFormatter.group_name_formatter` function."
+            "This is a custom group. Group names are [italic]*Title Cased*[/] by default and can "
+            "be changed by setting the `RichHelpFormatter.group_name_formatter` function."
         ),
     )
     group.add_argument(

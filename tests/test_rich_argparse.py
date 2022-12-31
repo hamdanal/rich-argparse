@@ -21,7 +21,7 @@ from rich_argparse import (
 
 # helpers
 # =======
-OPTIONS_GROUP_NAME = "OPTIONS" if sys.version_info >= (3, 10) else "OPTIONAL ARGUMENTS"
+OPTIONS_GROUP_NAME = "Options" if sys.version_info >= (3, 10) else "Optional Arguments"
 
 
 def get_cmd_output(parser: argparse.ArgumentParser, cmd: list[str]) -> str:
@@ -73,7 +73,7 @@ def test_params_substitution():
     parser.add_argument("--option", default="value", help="help of option (default: %(default)s)")
 
     expected_help_output = f"""\
-    USAGE: awesome_program [-h] [--version] [--option OPTION]
+    Usage: awesome_program [-h] [--version] [--option OPTION]
 
     This is the awesome_program program.
 
@@ -223,11 +223,11 @@ def test_escape_params():
     )
 
     expected_help_output = f"""\
-    USAGE: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
+    Usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
 
     [underline] description.
 
-    POSITIONAL ARGUMENTS:
+    Positional Arguments:
       [italic]           help of pos arg with special metavar
 
     {OPTIONS_GROUP_NAME}:
@@ -270,9 +270,9 @@ def test_generated_usage():
     )
 
     expected_help_output = f"""\
-    \x1b[38;5;208mUSAGE:\x1b[0m {usage_text}
+    \x1b[38;5;208mUsage:\x1b[0m {usage_text}
 
-    \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
+    \x1b[38;5;208mPositional Arguments:\x1b[0m
       \x1b[36mfile\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
@@ -303,7 +303,7 @@ def test_user_usage(usage, expected, usage_markup):
     else:
         ctx = nullcontext()
     with ctx:
-        assert parser.format_usage() == f"\x1b[38;5;208mUSAGE:\x1b[0m {expected}\n"
+        assert parser.format_usage() == f"\x1b[38;5;208mUsage:\x1b[0m {expected}\n"
 
 
 @pytest.mark.usefixtures("force_color")
@@ -321,14 +321,14 @@ def test_actions_spans_in_usage():
         arg_metavar = "[arg ...]"
 
     usage_text = (
-        f"\x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
+        f"\x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
         f"[OPT]\x1b[0m | \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] "
         f"\x1b[36m{arg_metavar}\x1b[0m"
     )
     expected_help_output = f"""\
     {usage_text}
 
-    \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
+    \x1b[38;5;208mPositional Arguments:\x1b[0m
       \x1b[36marg\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
@@ -345,7 +345,7 @@ def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = f"""\
-    \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
+    \x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m         \x1b[39mshow this help message and exit\x1b[0m
@@ -365,7 +365,7 @@ def test_usage_spans_errors():
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
     (usage,) = formatter._root_section.rich_items
     assert isinstance(usage, Text)
-    assert str(usage).rstrip() == "USAGE: PROG [-h]"
+    assert str(usage).rstrip() == "Usage: PROG [-h]"
     (prefix_span,) = usage.spans
     assert prefix_span.start == 0
     assert prefix_span.end == len("usage:")
@@ -392,14 +392,14 @@ def test_raw_description_rich_help_formatter():
     group.add_argument("--long", help=long_text)
 
     expected_help_output = f"""\
-    USAGE: PROG [-h] [--long LONG]
+    Usage: PROG [-h] [--long LONG]
 
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
 
     {OPTIONS_GROUP_NAME}:
       -h, --help   show this help message and exit
 
-    GROUP:
+    Group:
       The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
 
       --long LONG  The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the
@@ -419,14 +419,14 @@ def test_raw_text_rich_help_formatter():
     group.add_argument("--long", help=long_text)
 
     expected_help_output = f"""\
-    USAGE: PROG [-h] [--long LONG]
+    Usage: PROG [-h] [--long LONG]
 
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
 
     {OPTIONS_GROUP_NAME}:
       -h, --help   show this help message and exit
 
-    GROUP:
+    Group:
       The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
 
       --long LONG  The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
@@ -441,7 +441,7 @@ def test_argument_default_rich_help_formatter():
     parser.add_argument("--option", default="def", help="help of option")
 
     expected_help_output = f"""\
-    USAGE: PROG [-h] [--option OPTION]
+    Usage: PROG [-h] [--option OPTION]
 
     {OPTIONS_GROUP_NAME}:
       -h, --help       show this help message and exit
@@ -455,7 +455,7 @@ def test_metavar_type_help_formatter():
     parser.add_argument("--count", type=int, default=0, help="how many?")
 
     expected_help_output = f"""\
-    USAGE: PROG [-h] [--count int]
+    Usage: PROG [-h] [--count int]
 
     {OPTIONS_GROUP_NAME}:
       -h, --help   show this help message and exit
@@ -504,9 +504,9 @@ def test_django_rich_help_formatter():
     parser.add_argument("-a", "--an-option", action="store_true", help="another custom option")
 
     expected_help_output = f"""\
-    USAGE: command [-h] [--my-option] [-a] [--version] [--traceback] [--verbosity] my-arg
+    Usage: command [-h] [--my-option] [-a] [--version] [--traceback] [--verbosity] my-arg
 
-    POSITIONAL ARGUMENTS:
+    Positional Arguments:
       my-arg           custom argument.
 
     {OPTIONS_GROUP_NAME}:
@@ -558,9 +558,9 @@ def test_text_highlighter():
     parser.add_argument("arg", help="Did you try `RichHelpFormatter.highlighter`?")
 
     expected_help_output = f"""\
-    \x1b[38;5;208mUSAGE:\x1b[0m PROG [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
+    \x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
 
-    \x1b[38;5;208mPOSITIONAL ARGUMENTS:\x1b[0m
+    \x1b[38;5;208mPositional Arguments:\x1b[0m
       \x1b[36marg\x1b[0m         \x1b[39mDid you try `\x1b[0m\x1b[1;39mRichHelpFormatter.highlighter\x1b[0m\x1b[39m`?\x1b[0m
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
