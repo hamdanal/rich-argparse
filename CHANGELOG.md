@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.0 - 2022-12-31
+
 ### Features
 - The default `group_name_formatter` has changed from `str.upper` to `str.title`. This renders
   better with long group names and follows the convention of popular CLI tools and programs.
