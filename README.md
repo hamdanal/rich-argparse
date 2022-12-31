@@ -82,11 +82,11 @@ RichHelpFormatter.styles["argparse.text"] = "italic"
 ### Customize group name formatting
 You can change how the names of the groups (like `'positional arguments'` and `'options'`) are
 formatted by setting the `RichHelpFormatter.group_name_formatter` function. By default,
-`RichHelpFormatter` sets the function to `str.upper` but any function that takes the group name
-as an input and returns a str works. For example, to apply the *Title Case* format do this:
+`RichHelpFormatter` sets the function to `str.title` but any function that takes the group name
+as an input and returns a str works. For example, to apply the *UPPER CASE* format do this:
 
 ```python
-RichHelpFormatter.group_name_formatter = str.title
+RichHelpFormatter.group_name_formatter = str.upper
 ```
 
 ### Special text highlighting
