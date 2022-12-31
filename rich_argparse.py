@@ -29,6 +29,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     """An argparse HelpFormatter class that renders using rich."""
 
     group_name_formatter: ClassVar[Callable[[str], str]] = str.title
+    """A function that formats group names. Defaults to ``str.title``."""
     styles: ClassVar[dict[str, StyleType]] = {
         "argparse.args": "cyan",
         "argparse.groups": "dark_orange",
@@ -37,11 +38,37 @@ class RichHelpFormatter(argparse.HelpFormatter):
         "argparse.syntax": "bold",
         "argparse.text": "default",
     }
+    """A dict of rich styles to control the formatter styles.
+
+    The following styles are used:
+
+    - argparse.args: for arguments
+    - ``argparse.args``: for positional-arguments and --options (e.g "--help")
+    - ``argparse.groups``: for group names (e.g. "positional arguments")
+    - ``argparse.help``: for argument's help text (e.g. "show this help message and exit")
+    - ``argparse.metavar``: for meta variables (e.g. "FILE" in "--file FILE")
+    - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
+    - ``argparse.text``: for the description, epilog and group descriptions (e.g. "A foo program")
+    """
     highlights: ClassVar[list[str]] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
         r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
     ]
+    """A list of regex patterns to highlight in help text.
+
+    It is used in the description, epilog, group description, and argument help text. By default,
+    it highlights ``--words-with-dashes`` with the `argparse.args` style and
+    ``` `text in backquotes` ``` with the `argparse.syntax` style.
+
+    To disable highlighting, clear this list (``RichHelpFormatter.highlights.clear()``).
+    """
     usage_markup: ClassVar[bool] = False
+    """Whether to render the usage string passed to ``ArgumentParser(usage=...)`` as markup.
+
+    Defaults to ``False`` meaning the text of the usage will be printed verbatim.
+
+    Note that the auto-generated usage string is always colored.
+    """
 
     def __init__(
         self,
