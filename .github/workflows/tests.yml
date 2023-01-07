@@ -26,9 +26,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
-        run: pip install --upgrade tox
+        run: pipx install tox
       - name: Run the test suite
-        run: tox -e py -- -vv
+        run: tox -e py -- -vv --color=yes
       - name: Upload coverage report if tests fail.
         uses: actions/upload-artifact@v3
         with:
