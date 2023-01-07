@@ -221,9 +221,15 @@ def test_escape_params():
     parser.add_argument(
         "--metavar", metavar="[bold]", help="help with special metavar: %(metavar)s"
     )
+    parser.add_argument(
+        "--float", type=float, default=1.5, help="help with float conversion: %(default).5f"
+    )
+    parser.add_argument("--repr", type=str, help="help with repr conversion: %(type)r")
 
     expected_help_output = f"""\
-    Usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]] [italic]
+    Usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]]
+                       [--float FLOAT] [--repr REPR]
+                       [italic]
 
     [underline] description.
 
@@ -236,6 +242,8 @@ def test_escape_params():
       --default DEFAULT  help with special default: [default]
       --type TYPE        help with special type: [link]
       --metavar [bold]   help with special metavar: [bold]
+      --float FLOAT      help with float conversion: 1.50000
+      --repr REPR        help with repr conversion: 'str'
 
     [underline] epilog.
     """
