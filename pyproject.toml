@@ -62,15 +62,17 @@ commands =
 """
 
 [tool.black]
+target_version = ["py37"]
 line_length = 100
 
 [tool.isort]
+py_version = 37
 profile = "black"
 line_length = 100
 
 [tool.mypy]
+python_version = "3.7"
 strict = true
-show_error_codes = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
@@ -78,6 +80,11 @@ module = ["tests.*"]
 check_untyped_defs = false
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+
+[tool.pyright]
+pythonVersion = "3.7"
+stubPath = "stubs"
+include = ["rich_argparse.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
