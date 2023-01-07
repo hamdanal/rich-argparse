@@ -1,11 +1,11 @@
 import argparse
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Iterator
 from typing import ClassVar
 
-from rich.console import Console
+from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
+from rich.containers import Lines
 from rich.style import StyleType
-
-# flake8: noqa
+from rich.text import Span, Text
 
 class RichHelpFormatter(argparse.HelpFormatter):
     group_name_formatter: ClassVar[Callable[[str], str]]
@@ -13,6 +13,30 @@ class RichHelpFormatter(argparse.HelpFormatter):
     highlights: ClassVar[list[str]]
     usage_markup: ClassVar[bool]
     console: Console
+
+    class _Section(argparse.HelpFormatter._Section):  # type: ignore[valid-type,misc]
+        rich_items: list[RenderableType]
+        rich_actions: list[tuple[Text, Text | None]]
+        def __init__(
+            self,
+            formatter: RichHelpFormatter,
+            parent: RichHelpFormatter._Section | None,
+            heading: str | None = None,
+        ) -> None: ...
+        def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult: ...
+
+    def _rich_usage_spans(
+        self, text: str, start: int, actions: Iterable[argparse.Action]
+    ) -> Iterator[Span]: ...
+    def _rich_whitespace_sub(self, text: Text) -> Text: ...
+    def _rich_expand_help(self, action: argparse.Action) -> Text: ...
+    def _rich_format_text(self, text: str) -> Text: ...
+    def _rich_format_action(
+        self, action: argparse.Action
+    ) -> Iterator[tuple[Text, Text | None]]: ...
+    def _rich_format_action_invocation(self, action: argparse.Action) -> Text: ...
+    def _rich_split_lines(self, text: Text, width: int) -> Lines: ...
+    def _rich_fill_text(self, text: Text, width: int, indent: Text) -> Text: ...
 
 class RawDescriptionRichHelpFormatter(RichHelpFormatter): ...
 class RawTextRichHelpFormatter(RawDescriptionRichHelpFormatter): ...

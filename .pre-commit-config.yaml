@@ -19,7 +19,7 @@ repos:
       - id: pyupgrade
         args: [--py37-plus]
   - repo: https://github.com/pycqa/isort
-    rev: 5.11.0
+    rev: 5.11.4
     hooks:
       - id: isort
         types_or: [python]
@@ -39,6 +39,8 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [ "flake8-bugbear" ]
+        types: []
+        types_or: [python, pyi]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.991
     hooks:
