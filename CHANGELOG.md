@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+- `RichHelpFormatter` now respects format conversion types in help strings
+  * Issue #49, PR #50
+
 ## 0.7.0 - 2022-12-31
 
 ### Features

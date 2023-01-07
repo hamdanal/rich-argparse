@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
 
@@ -249,9 +250,32 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 params[name] = params[name].__name__
         if params.get("choices") is not None:
             params["choices"] = ", ".join([str(c) for c in params["choices"]])
-        params = {k: escape(str(v)) for k, v in params.items()}
-        help_string = self._get_help_string(action) % params  # type: ignore[operator]
-        rich_help = Text.from_markup(help_string, style="argparse.help")
+        help_string = self._get_help_string(action)
+        assert help_string is not None
+        help_string % params  # pyright: ignore[reportUnusedExpression] # raise ValueError if needed
+
+        # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
+        printf_style_pattern = re.compile(
+            r"""
+            %                               # Percent character
+            (?:\((?P<mapping>[^)]*)\))      # Mapping key (not optional for argparse)
+            (?P<flag>[#0\-+ ])?             # Conversion Flags
+            (?P<width>\*|\d+)?              # Minimum field width
+            (?P<precision>\.(?:\*?|\d*))?   # Precision
+            [hlL]?                          # Length modifier (ignored)
+            (?P<format>[diouxXeEfFgGcrsa%]) # Conversion type
+            """,
+            re.VERBOSE,
+        )
+        parts = []
+        last = 0
+        for m in printf_style_pattern.finditer(help_string):
+            start, end = m.span()
+            parts.append(help_string[last:start])
+            parts.append(escape(help_string[start:end] % params))
+            last = end
+        parts.append(help_string[last:])
+        rich_help = Text.from_markup("".join(parts), style="argparse.help")
         for highlight in self.highlights:
             rich_help.highlight_regex(highlight, style_prefix="argparse.")
         return rich_help
