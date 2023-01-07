@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rich_argparse"
-version = "0.7.0"
+version = "1.0.0"
 description = "A rich help formatter for argparse"
 authors = [
   {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},
@@ -12,7 +12,7 @@ authors = [
 readme = "README.md"
 license = "MIT"
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
@@ -23,6 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: User Interfaces",
 ]
 keywords = ["argparse", "rich", "help-formatter"]
 dependencies = [
