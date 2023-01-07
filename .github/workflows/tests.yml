@@ -28,7 +28,7 @@ jobs:
       - name: Install tox
         run: pipx install tox
       - name: Run the test suite
-        run: tox -e py -- -vv --color=yes
+        run: tox run -e py -- -vv --color=yes
       - name: Upload coverage report if tests fail.
         uses: actions/upload-artifact@v3
         with:
