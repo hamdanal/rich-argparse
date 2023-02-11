@@ -43,7 +43,6 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
     The following styles are used:
 
-    - argparse.args: for arguments
     - ``argparse.args``: for positional-arguments and --options (e.g "--help")
     - ``argparse.groups``: for group names (e.g. "positional arguments")
     - ``argparse.help``: for argument's help text (e.g. "show this help message and exit")
@@ -84,7 +83,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         super().__init__(prog, indent_increment, max_help_position, width)
         self.console = Console(theme=Theme(self.styles))
 
-    class _Section(argparse.HelpFormatter._Section):  # type: ignore[valid-type,misc]
+    class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
         def __init__(
             self,
             formatter: RichHelpFormatter,
@@ -404,7 +403,7 @@ if __name__ == "__main__":
             "-s, --long-option METAVAR instead of -s METAVAR, --long-option METAVAR.\n"
             "You can see also that words that look like command line options are highlighted by "
             "deafult. This example, adds a highlighter regex for the word 'METAVAR' following an "
-            "option for the sake of demonsting custom highlights."
+            "option for the sake of demonstrating custom highlights."
         ),
     )
     group = parser.add_argument_group(
