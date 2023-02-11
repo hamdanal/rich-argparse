@@ -14,7 +14,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     usage_markup: ClassVar[bool]
     console: Console
 
-    class _Section(argparse.HelpFormatter._Section):  # type: ignore[valid-type,misc]
+    class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
         rich_items: list[RenderableType]
         rich_actions: list[tuple[Text, Text | None]]
         def __init__(
