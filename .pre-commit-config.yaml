@@ -28,6 +28,7 @@ repos:
         types_or: [python]
         args: [--add-import, "from __future__ import annotations"]
       - id: isort
+        name: isort (pyi)
         types_or: [pyi]
         args: [--remove-import, "from __future__ import annotations"]
   - repo: https://github.com/psf/black
