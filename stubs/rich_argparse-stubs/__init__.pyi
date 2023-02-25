@@ -1,4 +1,5 @@
 import argparse
+import re
 from collections.abc import Callable, Iterable, Iterator
 from typing import ClassVar
 
@@ -13,6 +14,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     highlights: ClassVar[list[str]]
     usage_markup: ClassVar[bool]
     console: Console
+    _printf_style_pattern: re.Pattern[str]
 
     class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
         rich_items: list[RenderableType]
@@ -25,6 +27,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         ) -> None: ...
         def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult: ...
 
+    def _rich_prog_spans(self, usage: str) -> Iterator[Span]: ...
     def _rich_usage_spans(
         self, text: str, start: int, actions: Iterable[argparse.Action]
     ) -> Iterator[Span]: ...

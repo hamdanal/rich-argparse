@@ -269,7 +269,7 @@ def test_generated_usage():
     req_mut_ex.add_argument("-n", help="No.")
 
     usage_text = (
-        "PROG [\x1b[36m-h\x1b[0m] "
+        "\x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
         "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m]  "
         "\x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m "
         "[\x1b[36m--flag\x1b[0m | \x1b[36m--not-flag\x1b[0m] "
@@ -298,9 +298,35 @@ def test_generated_usage():
 @pytest.mark.parametrize(
     ("usage", "expected", "usage_markup"),
     (
-        pytest.param("%(prog)s [bold] CMD[/]", "PROG [bold] CMD[/]", None, id="default"),
-        pytest.param("%(prog)s [bold] CMD[/]", "PROG [bold] CMD[/]", False, id="no_markup"),
-        pytest.param("%(prog)s [bold] CMD[/]", "PROG \x1b[1m CMD\x1b[0m", True, id="markup"),
+        pytest.param(
+            "%(prog)s [bold] PROG_CMD[/]",
+            "\x1b[38;5;244mPROG\x1b[0m [bold] PROG_CMD[/]",
+            None,
+            id="default",
+        ),
+        pytest.param(
+            "%(prog)s [bold] PROG_CMD[/]",
+            "\x1b[38;5;244mPROG\x1b[0m [bold] PROG_CMD[/]",
+            False,
+            id="no_markup",
+        ),
+        pytest.param(
+            "%(prog)s [bold] PROG_CMD[/]",
+            "\x1b[38;5;244mPROG\x1b[0m \x1b[1m PROG_CMD\x1b[0m",
+            True,
+            id="markup",
+        ),
+        pytest.param(
+            "PROG %(prog)s [bold] %(prog)s [/]\n%(prog)r",
+            (
+                "PROG "
+                "\x1b[38;5;244mPROG\x1b[0m "
+                "\x1b[1m \x1b[0m\x1b[1;38;5;244mPROG\x1b[0m\x1b[1m \x1b[0m"
+                "\n\x1b[38;5;244m'PROG'\x1b[0m"
+            ),
+            True,
+            id="prog_prog",
+        ),
     ),
 )
 @pytest.mark.usefixtures("force_color")
@@ -329,8 +355,9 @@ def test_actions_spans_in_usage():
         arg_metavar = "[arg ...]"
 
     usage_text = (
-        f"\x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--opt\x1b[0m \x1b[38;5;36m"
-        f"[OPT]\x1b[0m | \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] "
+        f"\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
+        f"[\x1b[36m--opt\x1b[0m \x1b[38;5;36m[OPT]\x1b[0m | "
+        f"\x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] "
         f"\x1b[36m{arg_metavar}\x1b[0m"
     )
     expected_help_output = f"""\
@@ -353,7 +380,7 @@ def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
     parser = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = f"""\
-    \x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--bool\x1b[0m | \x1b[36m--no-bool\x1b[0m]
 
     \x1b[38;5;208m{OPTIONS_GROUP_NAME}:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m         \x1b[39mshow this help message and exit\x1b[0m
@@ -374,10 +401,13 @@ def test_usage_spans_errors():
     (usage,) = formatter._root_section.rich_items
     assert isinstance(usage, Text)
     assert str(usage).rstrip() == "Usage: PROG [-h]"
-    (prefix_span,) = usage.spans
+    prefix_span, prog_span = usage.spans
     assert prefix_span.start == 0
     assert prefix_span.end == len("usage:")
     assert prefix_span.style == "argparse.groups"
+    assert prog_span.start == len("usage: ")
+    assert prog_span.end == len("usage: PROG")
+    assert prog_span.style == "argparse.prog"
 
 
 def test_no_help():
@@ -566,7 +596,7 @@ def test_text_highlighter():
     parser.add_argument("arg", help="Did you try `RichHelpFormatter.highlighter`?")
 
     expected_help_output = f"""\
-    \x1b[38;5;208mUsage:\x1b[0m PROG [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] \x1b[36marg\x1b[0m
 
     \x1b[38;5;208mPositional Arguments:\x1b[0m
       \x1b[36marg\x1b[0m         \x1b[39mDid you try `\x1b[0m\x1b[1;39mRichHelpFormatter.highlighter\x1b[0m\x1b[39m`?\x1b[0m
@@ -622,3 +652,31 @@ def test_default_highlights():
     \x1b[39mEpilog with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
     """
     assert parser.format_help().endswith(dedent(expected_help_output))
+
+
+@pytest.mark.usefixtures("force_color")
+def test_subparsers_usage():
+    # Parent uses RichHelpFormatter
+    rich_parent = argparse.ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    rich_subparsers = rich_parent.add_subparsers()
+    rich_child1 = rich_subparsers.add_parser("sp1", formatter_class=RichHelpFormatter)
+    rich_child2 = rich_subparsers.add_parser("sp2")
+    assert rich_parent.format_usage() == (
+        "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
+        "\x1b[36m{sp1,sp2} ...\x1b[0m\n"
+    )
+    assert rich_child1.format_usage() == (
+        "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"
+    )
+    assert rich_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+
+    # Parent uses original formatter
+    orig_parent = argparse.ArgumentParser("PROG")
+    orig_subparsers = orig_parent.add_subparsers()
+    orig_child1 = orig_subparsers.add_parser("sp1", formatter_class=RichHelpFormatter)
+    orig_child2 = orig_subparsers.add_parser("sp2")
+    assert orig_parent.format_usage() == ("usage: PROG [-h] {sp1,sp2} ...\n")
+    assert orig_child1.format_usage() == (
+        "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"
+    )
+    assert orig_child2.format_usage() == "usage: PROG sp2 [-h]\n"

@@ -70,6 +70,7 @@ class. By default, `RichHelpFormatter` defines the following styles:
     'argparse.metavar': 'dark_cyan',  # for metavariables (e.g. "FILE" in "--file FILE")
     'argparse.syntax': 'bold',  # for highlights of back-tick quoted text (e.g. "`some text`"),
     'argparse.text': 'default',  # for the description, epilog and group descriptions (e.g. "A program to foo")
+    'argparse.prog': 'grey50',  # for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
 }
 ```
 

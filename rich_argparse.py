@@ -38,6 +38,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         "argparse.metavar": "dark_cyan",
         "argparse.syntax": "bold",
         "argparse.text": "default",
+        "argparse.prog": "grey50",
     }
     """A dict of rich styles to control the formatter styles.
 
@@ -49,6 +50,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     - ``argparse.metavar``: for meta variables (e.g. "FILE" in "--file FILE")
     - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
     - ``argparse.text``: for the description, epilog and group descriptions (e.g. "A foo program")
+    - ``argparse.prog``: for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
     """
     highlights: ClassVar[list[str]] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
@@ -82,6 +84,20 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
         super().__init__(prog, indent_increment, max_help_position, width)
         self.console = Console(theme=Theme(self.styles))
+
+        # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
+        self._printf_style_pattern = re.compile(
+            r"""
+            %                               # Percent character
+            (?:\((?P<mapping>[^)]*)\))      # Mapping key (not optional for argparse)
+            (?P<flag>[#0\-+ ])?             # Conversion Flags
+            (?P<width>\*|\d+)?              # Minimum field width
+            (?P<precision>\.(?:\*?|\d*))?   # Precision
+            [hlL]?                          # Length modifier (ignored)
+            (?P<format>[diouxXeEfFgGcrsa%]) # Conversion type
+            """,
+            re.VERBOSE,
+        )
 
     class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
         def __init__(
@@ -149,7 +165,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
         usage_spans = [Span(0, len(prefix.rstrip()), "argparse.groups")]
         usage_text = self._format_usage(usage, actions, groups, prefix=prefix)
         if usage is None:  # get colour spans for generated usage
-            actions_start = len(prefix) + len(self._prog) + 1
+            prog = f"{self._prog}"
+            if actions:
+                prog_start = usage_text.index(prog, len(prefix))
+                usage_spans.append(Span(prog_start, prog_start + len(prog), "argparse.prog"))
+            actions_start = len(prefix) + len(prog) + 1
             try:
                 spans = list(self._rich_usage_spans(usage_text, actions_start, actions=actions))
             except ValueError:
@@ -157,8 +177,12 @@ class RichHelpFormatter(argparse.HelpFormatter):
             usage_spans.extend(spans)
             rich_usage = Text(usage_text)
         elif self.usage_markup:  # treat user provided usage as markup
+            usage_spans.extend(self._rich_prog_spans(prefix + Text.from_markup(usage).plain))
             rich_usage = Text.from_markup(usage_text)
+            usage_spans.extend(rich_usage.spans)
+            rich_usage.spans.clear()
         else:  # treat user provided usage as plain text
+            usage_spans.extend(self._rich_prog_spans(prefix + usage))
             rich_usage = Text(usage_text)
         rich_usage.spans.extend(usage_spans)
         self._root_section.rich_items.append(rich_usage)
@@ -180,6 +204,24 @@ class RichHelpFormatter(argparse.HelpFormatter):
     # ===============
     # Utility methods
     # ===============
+    def _rich_prog_spans(self, usage: str) -> Iterator[Span]:
+        from rich.text import Span
+
+        if "%(prog)" not in usage:
+            return
+        params = {"prog": self._prog}
+        formatted_usage = ""
+        last = 0
+        for m in self._printf_style_pattern.finditer(usage):
+            start, end = m.span()
+            formatted_usage += usage[last:start]
+            sub = usage[start:end] % params
+            prog_start = len(formatted_usage)
+            prog_end = prog_start + len(sub)
+            formatted_usage += sub
+            last = end
+            yield Span(prog_start, prog_end, "argparse.prog")
+
     def _rich_usage_spans(self, text: str, start: int, actions: _Actions) -> Iterator[Span]:
         from rich.text import Span
 
@@ -252,23 +294,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
         help_string = self._get_help_string(action)
         assert help_string is not None
         help_string % params  # pyright: ignore[reportUnusedExpression] # raise ValueError if needed
-
-        # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
-        printf_style_pattern = re.compile(
-            r"""
-            %                               # Percent character
-            (?:\((?P<mapping>[^)]*)\))      # Mapping key (not optional for argparse)
-            (?P<flag>[#0\-+ ])?             # Conversion Flags
-            (?P<width>\*|\d+)?              # Minimum field width
-            (?P<precision>\.(?:\*?|\d*))?   # Precision
-            [hlL]?                          # Length modifier (ignored)
-            (?P<format>[diouxXeEfFgGcrsa%]) # Conversion type
-            """,
-            re.VERBOSE,
-        )
         parts = []
         last = 0
-        for m in printf_style_pattern.finditer(help_string):
+        for m in self._printf_style_pattern.finditer(help_string):
             start, end = m.span()
             parts.append(help_string[last:start])
             parts.append(escape(help_string[start:end] % params))
