@@ -69,6 +69,7 @@ line_length = 100
 py_version = 37
 profile = "black"
 line_length = 100
+extra_standard_library = ["typing_extensions"]
 
 [tool.mypy]
 python_version = "3.7"
