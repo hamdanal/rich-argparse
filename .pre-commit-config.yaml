@@ -29,6 +29,7 @@ repos:
         args: [--add-import, "from __future__ import annotations"]
       - id: isort
         types_or: [pyi]
+        args: [--remove-import, "from __future__ import annotations"]
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:
@@ -41,11 +42,11 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        additional_dependencies: [ "flake8-bugbear" ]
-        types: []
+        additional_dependencies: ["flake8-bugbear"]
+        types: [file]
         types_or: [python, pyi]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.0
+    rev: v1.0.1
     hooks:
       - id: mypy
-        additional_dependencies: [ "rich" ]
+        additional_dependencies: ["rich"]
