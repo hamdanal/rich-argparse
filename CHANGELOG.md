@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+- Add a new style for `%(prog)s` in the usage. The style is applied in argparse-generated usage and
+  in user defined usage whether the user usage is plain text or rich markup.
+  * Issue #55, PR #56
+
 ## 1.0.0 - 2023-01-07
 
 ### Fixes
