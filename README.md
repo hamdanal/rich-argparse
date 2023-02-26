@@ -13,7 +13,7 @@
 Format [argparse](https://docs.python.org/3/library/argparse.html) help output with
 [rich](https://pypi.org/project/rich).
 
-![python -m rich_argparse --help](./src/demo.png)
+![python -m rich_argparse --help](https://user-images.githubusercontent.com/85891169/221434468-7f19570f-951d-4d0a-9964-af2a62ccc98b.png)
 
 ## Installation
 
