@@ -49,24 +49,24 @@ class RichHelpFormatter(argparse.HelpFormatter):
     - ``argparse.groups``: for group names (e.g. "positional arguments")
     - ``argparse.help``: for argument's help text (e.g. "show this help message and exit")
     - ``argparse.metavar``: for meta variables (e.g. "FILE" in "--file FILE")
-    - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
-    - ``argparse.text``: for the description, epilog and group descriptions (e.g. "A foo program")
     - ``argparse.prog``: for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
+    - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
+    - ``argparse.text``: for the descriptions and epilog (e.g. "A foo program")
     """
     highlights: ClassVar[list[str]] = [
         r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
-        r"`(?P<syntax>[^`]*)`",  # highlight text in backquotes as syntax
+        r"`(?P<syntax>[^`]*)`",  # highlight `text in backquotes` as syntax
     ]
-    """A list of regex patterns to highlight in help text.
+    """A list of regex patterns to highlight in the help text.
 
-    It is used in the description, epilog, group description, and argument help text. By default,
+    It is used in the description, epilog, groups descriptions, and arguments' help. By default,
     it highlights ``--words-with-dashes`` with the `argparse.args` style and
     ``` `text in backquotes` ``` with the `argparse.syntax` style.
 
     To disable highlighting, clear this list (``RichHelpFormatter.highlights.clear()``).
     """
     usage_markup: ClassVar[bool] = False
-    """Whether to render the usage string passed to ``ArgumentParser(usage=...)`` as markup.
+    """If True, render the usage string passed to ``ArgumentParser(usage=...)`` as markup.
 
     Defaults to ``False`` meaning the text of the usage will be printed verbatim.
 
@@ -122,11 +122,14 @@ class RichHelpFormatter(argparse.HelpFormatter):
         def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
             from rich.text import Text
 
-            if not self.rich_items and not self.rich_actions:  # empty section
+            # empty section
+            if not self.rich_items and not self.rich_actions:
                 return
-            if self is self.formatter._root_section:  # root section
+            # root section
+            if self is self.formatter._root_section:
                 yield from self.rich_items
                 return
+            # group section
             help_pos = min(self.formatter._action_max_length + 2, self.formatter._max_help_position)
             help_width = max(self.formatter._width - help_pos, 11)
             if self.heading:
@@ -205,8 +208,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             self.console.print(self._root_section, highlight=False, soft_wrap=True)
         help = capture.get()
         if help:
-            help = self._long_break_matcher.sub("\n\n", help).strip("\n") + "\n"
-            help = "\n".join(line.rstrip() for line in help.split("\n"))
+            help = self._long_break_matcher.sub("\n\n", help).rstrip() + "\n"
         return help
 
     # ===============
@@ -382,8 +384,6 @@ class MetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, RichHelpFo
 
 
 if __name__ == "__main__":
-    from rich import print
-
     RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
@@ -392,9 +392,8 @@ if __name__ == "__main__":
             "This is a [link https://pypi.org/project/rich]rich[/]-based formatter for "
             "[link https://docs.python.org/3/library/argparse.html#formatter-class]"
             "argparse's help output[/].\n\n"
-            "It makes it easy to use the powers of rich like markup and highlights in your CLI "
-            "help. For example, the first sentence contains clickable hyperlinks thanks to rich's "
-            "\\[link] markup. Read below for a peek at available features."
+            "It enables you to use the powers of rich like markup and highlights in your CLI help. "
+            "Read below for a glance at available features."
         ),
         epilog=":link: Read more at https://github.com/hamdanal/rich-argparse#usage.",
     )
@@ -407,10 +406,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "styles",
-        nargs="*",
         help=(
-            "All the styles used by this formatter are defined in the `RichHelpFormatter.styles` "
-            "dictionary and they can be changed. Any rich style can be used."
+            "All the styles used by this formatter are defined in `RichHelpFormatter.styles`. "
+            "Modify this dictionary with any rich style to change the look of your CLI's help text."
         ),
     )
     parser.add_argument(
@@ -435,22 +433,22 @@ if __name__ == "__main__":
         "--long-option",
         metavar="METAVAR",
         help=(
-            "If an option takes a value and has short and long options, it is printed as "
-            "-s, --long-option METAVAR instead of -s METAVAR, --long-option METAVAR.\n"
-            "You can see also that words that look like command line options are highlighted by "
-            "deafult. This example, adds a highlighter regex for the word 'METAVAR' following an "
-            "option for the sake of demonstrating custom highlights."
+            "Words that look like --command-line-options are highlighted using the `argparse.args` "
+            "style. In addition, this example, adds a highlighter regex for the word 'METAVAR' "
+            "following an option for the sake of demonstrating custom highlights.\n"
+            "Notice also that if an option takes a value and has short and long options, it is "
+            "printed as -s, --long-option METAVAR instead of -s METAVAR, --long-option METAVAR."
         ),
     )
     group = parser.add_argument_group(
-        "more options",
+        "more arguments",
         description=(
-            "This is a custom group. Group names are [italic]*Title Cased*[/] by default and can "
-            "be changed by setting the `RichHelpFormatter.group_name_formatter` function."
+            "This is a custom group. Group names are [italic]*Title Cased*[/] by default. Use the "
+            "`RichHelpFormatter.group_name_formatter` function to change their format."
         ),
     )
     group.add_argument(
-        "--others",
+        "--more",
         nargs="*",
         help="This formatter works with subparsers, mutually exclusive groups and hidden arguments.",
     )
@@ -465,6 +463,16 @@ if __name__ == "__main__":
     )
     mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
 
-    args = parser.parse_args()
-    print("Got the following arguments on the command line:")
-    print(vars(args))
+    if "--generate-rich-argparse-preview" in sys.argv:  # for internal use only
+        from rich.console import Console  # noqa: F811
+        from rich.terminal_theme import DIMMED_MONOKAI
+        from rich.text import Text  # noqa: F811
+
+        width = 128
+        parser.formatter_class = lambda prog: RichHelpFormatter(prog, width=width)
+        text = Text.from_ansi(parser.format_help())
+        console = Console(record=True, width=width)
+        console.print(text)
+        console.save_svg("rich-argparse.svg", title="", theme=DIMMED_MONOKAI)
+    else:
+        parser.print_help()
