@@ -2,7 +2,6 @@
     // Python
     "python.analysis.diagnosticSeverityOverrides": {
         "reportInvalidStringEscapeSequence": "warning",
-        "reportImportCycles": "warning",
         "reportUnusedImport": "warning",
     },
     "python.testing.pytestEnabled": true,
