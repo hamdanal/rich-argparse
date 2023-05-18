@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${file}",
             "purpose": [
-                "debug-test"
+                "debug-test",
+                "debug-in-terminal",
             ],
             "console": "integratedTerminal",
             "justMyCode": false

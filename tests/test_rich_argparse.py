@@ -166,6 +166,17 @@ def test_padding_and_wrapping():
     assert rich_output == dedent(expected_help_output)
 
 
+@pytest.mark.xfail(reason="rich wraps differently")
+@pytest.mark.usefixtures("disable_group_name_formatter")
+def test_wrapping_compatible():
+    # needs fixing rich wrapping to be compatible with textwrap.wrap
+    parser = argparse.ArgumentParser("PROG", description="some text " + "-" * 120)
+    orig_output = parser.format_help()
+    parser.formatter_class = RichHelpFormatter
+    rich_output = parser.format_help()
+    assert rich_output == orig_output
+
+
 @pytest.mark.parametrize("title", (None, "available commands"), ids=("no_title", "title"))
 @pytest.mark.parametrize("description", (None, "subparsers description"), ids=("no_desc", "desc"))
 @pytest.mark.parametrize("dest", (None, "command"), ids=("no_dest", "dest"))
