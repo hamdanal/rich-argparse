@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import io
 import os
+import string
 import sys
 from contextlib import nullcontext
 from textwrap import dedent
@@ -680,3 +681,18 @@ def test_subparsers_usage():
         "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"
     )
     assert orig_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+
+
+@pytest.mark.parametrize("ct", string.printable)
+def test_expand_help_format_specifier(ct):
+    prog = 1 if ct in "cdeEfFgGiouxX*" else "PROG"
+    help_formatter = RichHelpFormatter(prog=prog)
+    action = argparse.Action(["-t"], dest="test", help=f"%(prog){ct}")
+    try:
+        expected = help_formatter._expand_help(action)
+    except ValueError as e:
+        with pytest.raises(ValueError) as exc_info:
+            help_formatter._rich_expand_help(action)
+        assert exc_info.value.args == e.args
+    else:
+        assert help_formatter._rich_expand_help(action).plain == expected
