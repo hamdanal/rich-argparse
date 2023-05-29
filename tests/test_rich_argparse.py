@@ -707,3 +707,22 @@ def test_expand_help_format_specifier(ct):
         assert exc_info.value.args == e.args
     else:
         assert help_formatter._rich_expand_help(action).plain == expected
+
+
+def test_rich_lazy_import():
+    sys_modules_no_rich = {
+        mod_name: mod
+        for mod_name, mod in sys.modules.items()
+        if mod_name != "rich" and not mod_name.startswith("rich.")
+    }
+    with patch.dict(sys.modules, sys_modules_no_rich, clear=True):
+        parser = argparse.ArgumentParser(formatter_class=RichHelpFormatter)
+        parser.add_argument("--foo", help="foo help")
+        args = parser.parse_args(["--foo", "bar"])
+        assert args.foo == "bar"
+        assert sys.modules
+        assert "rich" not in sys.modules  # no help formatting, do not import rich
+        for mod_name in sys.modules:
+            assert not mod_name.startswith("rich.")
+        parser.format_help()
+        assert "rich" in sys.modules  # format help has been called
