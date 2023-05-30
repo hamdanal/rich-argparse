@@ -56,7 +56,9 @@ def force_color():
 
 @pytest.fixture()
 def disable_group_name_formatter():
-    with patch.object(RichHelpFormatter, "group_name_formatter", str):
+    with patch.object(RichHelpFormatter, "group_name_formatter", str), patch.dict(
+        globals(), {"OPTIONS_GROUP_NAME": OPTIONS_GROUP_NAME.lower()}
+    ):
         yield
 
 
@@ -144,7 +146,7 @@ def test_padding_and_wrapping():
     --------------------------------------------------------------------------------------------------
     ----------------------
 
-    {OPTIONS_GROUP_NAME.lower()}:
+    {OPTIONS_GROUP_NAME}:
       -h, --help            show this help message and exit
       --very-long-option-name LONG_METAVAR
                             ..........................................................................
@@ -211,13 +213,14 @@ def test_subparsers(title, description, dest, metavar, help, required):
     assert rich_subparser.format_help() == orig_subparser.format_help()
 
 
+@pytest.mark.usefixtures("disable_group_name_formatter")
 def test_escape_params():
     # params such as %(prog)s and %(default)s must be escaped when substituted
     parser = argparse.ArgumentParser(
         "[underline]",
+        usage="%(prog)s [%%options] %% [args]\n%%%(prog)s %%(prog)s [%%%%options] %%%% [args]",
         description="%(prog)s description.",
         epilog="%(prog)s epilog.",
-        formatter_class=RichHelpFormatter,
     )
 
     class SpecialType(str):
@@ -225,7 +228,7 @@ def test_escape_params():
 
     SpecialType.__name__ = "[link]"
 
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument("--version", action="version", version="%(prog)s %%1.0.0")
     parser.add_argument("pos-arg", metavar="[italic]", help="help of pos arg with special metavar")
     parser.add_argument(
         "--default", default="[default]", help="help with special default: %(default)s"
@@ -238,15 +241,17 @@ def test_escape_params():
         "--float", type=float, default=1.5, help="help with float conversion: %(default).5f"
     )
     parser.add_argument("--repr", type=str, help="help with repr conversion: %(type)r")
+    parser.add_argument(
+        "--percent", help="help with percent escaping: %%(prog)s %%%(prog)s %% %%%% %%%%prog"
+    )
 
     expected_help_output = f"""\
-    Usage: [underline] [-h] [--version] [--default DEFAULT] [--type TYPE] [--metavar [bold]]
-                       [--float FLOAT] [--repr REPR]
-                       [italic]
+    usage: [underline] [%options] % [args]
+    %[underline] %(prog)s [%%options] %% [args]
 
     [underline] description.
 
-    Positional Arguments:
+    positional arguments:
       [italic]           help of pos arg with special metavar
 
     {OPTIONS_GROUP_NAME}:
@@ -257,11 +262,19 @@ def test_escape_params():
       --metavar [bold]   help with special metavar: [bold]
       --float FLOAT      help with float conversion: 1.50000
       --repr REPR        help with repr conversion: 'str'
+      --percent PERCENT  help with percent escaping: %(prog)s %[underline] % %% %%prog
 
     [underline] epilog.
     """
-    assert parser.format_help() == dedent(expected_help_output)
-    assert get_cmd_output(parser, cmd=["--version"]) == "[underline] 1.0.0\n"
+    orig_help = parser.format_help()
+    orig_version = get_cmd_output(parser, cmd=["--version"])
+    parser.formatter_class = RichHelpFormatter
+    rich_help = parser.format_help()
+    rich_version = get_cmd_output(parser, cmd=["--version"])
+    assert rich_help == orig_help
+    assert rich_help == dedent(expected_help_output)
+    assert rich_version == orig_version
+    assert rich_version == "[underline] %1.0.0\n"
 
 
 @pytest.mark.usefixtures("force_color")

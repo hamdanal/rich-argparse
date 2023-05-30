@@ -90,7 +90,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         self._printf_style_pattern = re.compile(
             r"""
             %                               # Percent character
-            (?:\((?P<mapping>[^)]*)\))      # Mapping key (not optional for argparse)
+            (?:\((?P<mapping>[^)]*)\))?     # Mapping key
             (?P<flag>[#0\-+ ])?             # Conversion Flags
             (?P<width>\*|\d+)?              # Minimum field width
             (?P<precision>\.(?:\*?|\d*))?   # Precision
