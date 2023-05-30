@@ -10,6 +10,7 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import pytest
+from rich import get_console
 from rich.text import Text
 
 from rich_argparse import (
@@ -726,3 +727,7 @@ def test_rich_lazy_import():
             assert not mod_name.startswith("rich.")
         parser.format_help()
         assert "rich" in sys.modules  # format help has been called
+        formatter = RichHelpFormatter("PROG")
+        assert formatter._console is None
+        formatter.console = get_console()
+        assert formatter._console is not None
