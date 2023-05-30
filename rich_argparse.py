@@ -83,11 +83,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
         max_help_position: int = 24,
         width: int | None = None,
     ) -> None:
-        from rich.console import Console
-        from rich.theme import Theme
-
         super().__init__(prog, indent_increment, max_help_position, width)
-        self.console = Console(theme=Theme(self.styles))
+        self._console: Console | None = None
 
         # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
         self._printf_style_pattern = re.compile(
@@ -102,6 +99,19 @@ class RichHelpFormatter(argparse.HelpFormatter):
             """,
             re.VERBOSE,
         )
+
+    @property
+    def console(self) -> Console:  # deprecate?
+        if self._console is None:
+            from rich.console import Console
+            from rich.theme import Theme
+
+            self._console = Console(theme=Theme(self.styles))
+        return self._console
+
+    @console.setter
+    def console(self, console: Console) -> None:  # is this needed?
+        self._console = console
 
     class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
         def __init__(

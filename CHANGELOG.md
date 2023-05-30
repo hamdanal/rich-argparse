@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+- Restore lazy loading of `rich`. Delay its import until it is needed.
+  * PR #68
+
 ## 1.1.0 - 2023-03-11
 
 ### Features

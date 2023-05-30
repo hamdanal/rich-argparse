@@ -15,7 +15,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     styles: ClassVar[dict[str, StyleType]]
     highlights: ClassVar[list[str]]
     usage_markup: ClassVar[bool]
-    console: Console
+    _console: Console | None
     _printf_style_pattern: re.Pattern[str]
 
     class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
@@ -26,6 +26,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
         ) -> None: ...
         def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult: ...
 
+    @property
+    def console(self) -> Console: ...
+    @console.setter
+    def console(self, console: Console) -> None: ...
     def _rich_prog_spans(self, usage: str) -> Iterator[Span]: ...
     def _rich_usage_spans(
         self, text: str, start: int, actions: Iterable[Action]
