@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.1.1 - 2023-05-30
+
 ### Fixes
 - Fix `%` not being escaped properly.
   * Issue #67, PR #69
