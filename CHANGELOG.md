@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Fixes
+- Fix `%` not being escaped properly.
+  * Issue #67, PR #69
 - Restore lazy loading of `rich`. Delay its import until it is needed.
   * PR #68
 
