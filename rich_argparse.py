@@ -82,9 +82,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
         indent_increment: int = 2,
         max_help_position: int = 60,
         width: int | None = None,
-        align_options=6,
-        align_metavar=18,
-        argSep="",
+        align_options: int = 6,
+        align_metavar: int = 18,
+        argSep: str = "",
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._console: Console | None = None
