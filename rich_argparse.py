@@ -80,11 +80,17 @@ class RichHelpFormatter(argparse.HelpFormatter):
         self,
         prog: str,
         indent_increment: int = 2,
-        max_help_position: int = 24,
+        max_help_position: int = 60,
         width: int | None = None,
+        align_options=6,
+        align_metavar=18,
+        argSep="",
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._console: Console | None = None
+        self.left_align_options = align_options
+        self.left_align_metavar = align_metavar
+        self.argSep = argSep
 
         # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
         self._printf_style_pattern = re.compile(
@@ -354,12 +360,35 @@ class RichHelpFormatter(argparse.HelpFormatter):
         if not action.option_strings:
             return Text().append(self._format_action_invocation(action), style="argparse.args")
         else:
-            action_header = Text(", ").join(Text(o, "argparse.args") for o in action.option_strings)
+            # action_header = Text(", ").join(Text(o, "argparse.args") for o in action.option_strings)
+            action_header = self._left_align_options(action)
             if action.nargs != 0:
                 default = self._get_default_metavar_for_optional(action)
                 args_string = self._format_args(action, default)
-                action_header.append_tokens(((" ", None), (args_string, "argparse.metavar")))
+                spacingStr = self._left_align_metavar(action_header)
+                action_header.append_tokens(((spacingStr, None), (args_string, "argparse.metavar")))
             return action_header
+
+    def _left_align_options(self, action) -> Text:
+        from rich.text import Text
+
+        parts = [x for x in action.option_strings]
+        length = self.left_align_options
+        if parts[0].startswith("--"):
+            parts[0] = (
+                "{message:{fill}>{width}}".format(message="", fill=" ", width=length) + parts[0]
+            )
+        length = max(2, (self.left_align_options - len(parts[0])))
+
+        # actually create the text
+        separation = "{message:{fill}<{width}}".format(message=self.argSep, fill=" ", width=length)
+        # end changes
+        txt = Text(separation)
+        return txt.join([Text(o, "argparse.args") for o in parts])
+
+    def _left_align_metavar(self, optionsTxt):
+        length = max(2, (self.left_align_metavar - len(optionsTxt)))
+        return "{message:{fill}<{width}}".format(message="", fill=" ", width=length)
 
     def _rich_split_lines(self, text: Text, width: int) -> Lines:
         return self._rich_whitespace_sub(text).wrap(self.console, width)

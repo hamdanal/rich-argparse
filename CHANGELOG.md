@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.2.0 - 2023-06-23
+
+### Added
+- added left align functions
+- added argument separator option
+
 ## 1.1.1 - 2023-05-30
 
 ### Fixes
