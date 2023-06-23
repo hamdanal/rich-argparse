@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 1.2.0 - 2023-06-23
+## 1.2.1 - 2023-06-23
 
 ### Added
 - added left align functions

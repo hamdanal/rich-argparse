@@ -80,17 +80,17 @@ class RichHelpFormatter(argparse.HelpFormatter):
         self,
         prog: str,
         indent_increment: int = 2,
-        max_help_position: int = 60,
+        max_help_position: int = 24,
         width: int | None = None,
         align_options: int = 6,
         align_metavar: int = 18,
-        argSep: str = "",
+        arg_separator: str = ",",
     ) -> None:
         super().__init__(prog, indent_increment, max_help_position, width)
         self._console: Console | None = None
         self.left_align_options = align_options
         self.left_align_metavar = align_metavar
-        self.argSep = argSep
+        self.arg_sep = arg_separator
 
         # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
         self._printf_style_pattern = re.compile(
@@ -381,7 +381,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         length = max(2, (self.left_align_options - len(parts[0])))
 
         # actually create the text
-        separation = "{message:{fill}<{width}}".format(message=self.argSep, fill=" ", width=length)
+        separation = "{message:{fill}<{width}}".format(message=self.arg_sep, fill=" ", width=length)
         # end changes
         txt = Text(separation)
         return txt.join([Text(o, "argparse.args") for o in parts])
