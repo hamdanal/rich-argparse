@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 import optparse
-from typing import ClassVar
 
-from rich.console import Console, RenderableType
-from rich.containers import Lines
-from rich.markup import escape
-from rich.style import StyleType
-from rich.text import Span, Text
-from rich.theme import Theme
+import rich_argparse._lazy_rich as r
+from rich_argparse._common import _HIGHLIGHTS, _rich_fill, _rich_wrap
+
+__all__ = [
+    "RichHelpFormatter",
+    "IndentedRichHelpFormatter",
+    "TitledRichHelpFormatter",
+]
 
 
 class RichHelpFormatter(optparse.HelpFormatter):
     """An optparse HelpFormatter class that renders using rich."""
 
-    styles: ClassVar[dict[str, StyleType]] = {
+    styles: dict[str, r.StyleType] = {
         "optparse.args": "cyan",
         "optparse.groups": "dark_orange",
         "optparse.help": "default",
@@ -26,18 +27,14 @@ class RichHelpFormatter(optparse.HelpFormatter):
 
     The following styles are used:
 
-    - ``optparse.args``: for positional-arguments and --options (e.g "--help")
-    - ``optparse.groups``: for group names (e.g. "positional arguments")
-    - ``optparse.help``: for argument's help text (e.g. "show this help message and exit")
-    - ``optparse.metavar``: for meta variables (e.g. "FILE" in "--file FILE")
-    - ``optparse.prog``: for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
+    - ``optparse.args``: for --options (e.g "--help")
+    - ``optparse.groups``: for group names (e.g. "Options")
+    - ``optparse.help``: for options's help text (e.g. "show this help message and exit")
+    - ``optparse.metavar``: for meta variables (e.g. "FILE" in "--file=FILE")
     - ``optparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
     - ``optparse.text``: for the descriptions and epilog (e.g. "A foo program")
     """
-    highlights: ClassVar[list[str]] = [
-        r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
-        r"`(?P<syntax>[^`]*)`",  # highlight `text in backquotes` as syntax
-    ]
+    highlights: list[str] = _HIGHLIGHTS[:]
     """A list of regex patterns to highlight in the help text.
 
     It is used in the description, epilog, groups descriptions, and arguments' help. By default,
@@ -55,35 +52,34 @@ class RichHelpFormatter(optparse.HelpFormatter):
         short_first: int,
     ) -> None:
         super().__init__(indent_increment, max_help_position, width, short_first)
-        self.console = Console(theme=Theme(self.styles))
-        self.rich_option_strings: dict[optparse.Option, Text] = {}
+        self._console: r.Console | None = None
+        self.rich_option_strings: dict[optparse.Option, r.Text] = {}
 
-    def _stringify(self, text: RenderableType) -> str:
+    @property
+    def console(self) -> r.Console:  # deprecate?
+        if self._console is None:
+            self._console = r.Console(theme=r.Theme(self.styles))
+        return self._console
+
+    @console.setter
+    def console(self, console: r.Console) -> None:  # is this needed?
+        self._console = console
+
+    def _stringify(self, text: r.RenderableType) -> str:
         # Render a rich object to a string
         with self.console.capture() as capture:
             self.console.print(text, highlight=False, soft_wrap=True, end="")
         help = capture.get()
         return "\n".join(line.rstrip() for line in help.split("\n"))
 
-    def _rich_textwrap(self, text: Text, width: int) -> Lines:
-        # textwrap.wrap() equivalent for rich.text.Text
-        text = text.copy()
-        text.expand_tabs(8)  # textwrap expands tabs first
-        whitespace_trans = dict.fromkeys(map(ord, "\t\n\x0b\x0c\r "), ord(" "))
-        text.plain = text.plain.translate(whitespace_trans)
-        return text.wrap(self.console, width)
-
-    def _rich_format_text(self, text: str) -> Text:
+    def _rich_format_text(self, text: str) -> r.Text:
         # HelpFormatter._format_text() equivalent that produces rich.text.Text
         text_width = max(self.width - 2 * self.current_indent, 11)
-        indent = Text(" " * self.current_indent)
-
-        rich_text = Text.from_markup(text, style="optparse.text")
+        indent = r.Text(" " * self.current_indent)
+        rich_text = r.Text.from_markup(text, style="optparse.text")
         for highlight in self.highlights:
             rich_text.highlight_regex(highlight, style_prefix="optparse.")
-
-        lines = self._rich_textwrap(rich_text, text_width)
-        return Text("\n").join(indent + line for line in lines)
+        return _rich_fill(self.console, rich_text, text_width, indent)
 
     def format_description(self, description: str) -> str:
         if not description:
@@ -95,7 +91,7 @@ class RichHelpFormatter(optparse.HelpFormatter):
             return ""
         return "\n" + self._stringify(self._rich_format_text(epilog)) + "\n"
 
-    def rich_expand_default(self, option: optparse.Option) -> Text:
+    def rich_expand_default(self, option: optparse.Option) -> r.Text:
         assert option.help is not None
         if self.parser is None or not self.default_tag:
             help = option.help
@@ -103,14 +99,14 @@ class RichHelpFormatter(optparse.HelpFormatter):
             default_value = self.parser.defaults.get(option.dest)  # type: ignore[arg-type]
             if default_value is optparse.NO_DEFAULT or default_value is None:
                 default_value = self.NO_DEFAULT_VALUE
-            help = option.help.replace(self.default_tag, escape(str(default_value)))
-        rich_help = Text.from_markup(help, style="optparse.help")
+            help = option.help.replace(self.default_tag, r.escape(str(default_value)))
+        rich_help = r.Text.from_markup(help, style="optparse.help")
         for highlight in self.highlights:
             rich_help.highlight_regex(highlight, style_prefix="optparse.")
         return rich_help
 
     def format_option(self, option: optparse.Option) -> str:
-        result: list[Text] = []
+        result: list[r.Text] = []
         opts = self.rich_option_strings[option]
         opt_width = self.help_position - self.current_indent - 2
         if len(opts) > opt_width:
@@ -123,16 +119,16 @@ class RichHelpFormatter(optparse.HelpFormatter):
         result.append(opts)
         if option.help:
             help_text = self.rich_expand_default(option)
-            help_lines = self._rich_textwrap(help_text, self.help_width)
-            result.append(Text(" " * indent_first) + help_lines[0] + "\n")
-            indent = Text(" " * self.help_position)
+            help_lines = _rich_wrap(self.console, help_text, self.help_width)
+            result.append(r.Text(" " * indent_first) + help_lines[0] + "\n")
+            indent = r.Text(" " * self.help_position)
             for line in help_lines[1:]:
                 result.append(indent + line + "\n")
         elif opts.plain[-1] != "\n":
-            result.append(Text("\n"))
+            result.append(r.Text("\n"))
         else:
             pass  # pragma: no cover
-        return self._stringify(Text().join(result))
+        return self._stringify(r.Text().join(result))
 
     def store_option_strings(self, parser: optparse.OptionParser) -> None:
         self.indent()
@@ -154,7 +150,7 @@ class RichHelpFormatter(optparse.HelpFormatter):
         self.help_position = min(max_len + 2, self.max_help_position)
         self.help_width = max(self.width - self.help_position, 11)
 
-    def rich_format_option_strings(self, option: optparse.Option) -> Text:
+    def rich_format_option_strings(self, option: optparse.Option) -> r.Text:
         if option.takes_value():
             if option.metavar:
                 metavar = option.metavar
@@ -163,24 +159,28 @@ class RichHelpFormatter(optparse.HelpFormatter):
                 metavar = option.dest.upper()
             s_delim = self._short_opt_fmt.replace("%s", "")
             short_opts = [
-                Text(s_delim).join([Text(o, "optparse.args"), Text(metavar, "optparse.metavar")])
+                r.Text(s_delim).join(
+                    [r.Text(o, "optparse.args"), r.Text(metavar, "optparse.metavar")]
+                )
                 for o in option._short_opts
             ]
             l_delim = self._long_opt_fmt.replace("%s", "")
             long_opts = [
-                Text(l_delim).join([Text(o, "optparse.args"), Text(metavar, "optparse.metavar")])
+                r.Text(l_delim).join(
+                    [r.Text(o, "optparse.args"), r.Text(metavar, "optparse.metavar")]
+                )
                 for o in option._long_opts
             ]
         else:
-            short_opts = [Text(o, style="optparse.args") for o in option._short_opts]
-            long_opts = [Text(o, style="optparse.args") for o in option._long_opts]
+            short_opts = [r.Text(o, style="optparse.args") for o in option._short_opts]
+            long_opts = [r.Text(o, style="optparse.args") for o in option._long_opts]
 
         if self.short_first:
             opts = short_opts + long_opts
         else:
             opts = long_opts + short_opts
 
-        return Text(", ").join(opts)
+        return r.Text(", ").join(opts)
 
 
 class IndentedRichHelpFormatter(RichHelpFormatter, optparse.IndentedHelpFormatter):
@@ -198,11 +198,11 @@ class IndentedRichHelpFormatter(RichHelpFormatter, optparse.IndentedHelpFormatte
     def format_usage(self, usage: str) -> str:
         usage = super().format_usage(usage)
         prefix = super().format_usage("").rstrip()
-        spans = [Span(0, len(prefix), "optparse.groups")]
-        return self._stringify(Text(usage, spans=spans))
+        spans = [r.Span(0, len(prefix), "optparse.groups")]
+        return self._stringify(r.Text(usage, spans=spans))
 
     def format_heading(self, heading: str) -> str:
-        text = Text(" " * self.current_indent).append(f"{heading}:", "optparse.groups")
+        text = r.Text(" " * self.current_indent).append(f"{heading}:", "optparse.groups")
         return self._stringify(text) + "\n"
 
 
@@ -223,7 +223,7 @@ class TitledRichHelpFormatter(RichHelpFormatter, optparse.TitledHelpFormatter):
         return f"{usage_heading}{usage}\n"
 
     def format_heading(self, heading: str) -> str:
-        text = Text().append_tokens(
+        text = r.Text().append_tokens(
             [
                 (heading, "optparse.groups"),
                 ("\n", None),

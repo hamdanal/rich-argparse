@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from optparse import (
     SUPPRESS_HELP,
     HelpFormatter,
@@ -9,8 +10,10 @@ from optparse import (
     TitledHelpFormatter,
 )
 from textwrap import dedent
+from unittest.mock import patch
 
 import pytest
+from rich import get_console
 
 from rich_argparse.optparse import (
     IndentedRichHelpFormatter,
@@ -303,3 +306,28 @@ def test_titled_help_formatter_colors():
     \x1b[39mEpilog.\x1b[0m
     """
     assert parser.format_help() == dedent(expected_help_output)
+
+
+def test_rich_lazy_import():
+    sys_modules_no_rich = {
+        mod_name: mod
+        for mod_name, mod in sys.modules.items()
+        if mod_name != "rich" and not mod_name.startswith("rich.")
+    }
+    with patch.dict(sys.modules, sys_modules_no_rich, clear=True):
+        parser = OptionParser(formatter=IndentedRichHelpFormatter())
+        parser.add_option("--foo", help="foo help")
+        values, args = parser.parse_args(["--foo", "bar"])
+        assert values.foo == "bar"
+        assert not args
+        assert sys.modules
+        assert "rich" not in sys.modules  # no help formatting, do not import rich
+        for mod_name in sys.modules:
+            assert not mod_name.startswith("rich.")
+        parser.format_help()
+        assert "rich" in sys.modules  # format help has been called
+
+    formatter = IndentedRichHelpFormatter()
+    assert formatter._console is None
+    formatter.console = get_console()
+    assert formatter._console is not None
