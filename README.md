@@ -22,8 +22,6 @@ Install from PyPI with pip or your favorite tool.
 pip install rich-argparse
 ```
 
-Or copy the file `rich_argparse.py` to your project provided you have `rich` already installed.
-
 ## Usage
 
 Simply pass `formatter_class` to the argument parser
