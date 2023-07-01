@@ -37,12 +37,14 @@ from tests.conftest import Parsers, get_cmd_output
 
 # helpers
 # =======
-def clean(text: str) -> str:
+def clean(text: str, dedent: bool = True) -> str:
     if sys.version_info >= (3, 10):  # pragma: >=3.10 cover
         # replace "optional arguments:" with "options:"
         pos = text.lower().index("optional arguments:")
         text = text[: pos + 6] + text[pos + 17 :]
-    return textwrap.dedent(text)
+    if dedent:
+        text = textwrap.dedent(text)
+    return text
 
 
 class ArgumentParsers(Parsers[ArgumentParser, _ArgumentGroup, Type[HelpFormatter]]):
@@ -758,3 +760,30 @@ def test_rich_lazy_import():
 
     with pytest.raises(AttributeError, match="Foo"):
         _ = r.Foo
+
+
+def test_help_with_control_codes():
+    parsers = ArgumentParsers(HelpFormatter, RichHelpFormatter, prog="PROG\r\nRAM")
+    parsers.add_argument(
+        "--long-option-with-control-codes-in-metavar", metavar="META\r\nVAR", help="%(metavar)s"
+    )
+    orig_parser, rich_parser = parsers.parsers
+    orig_help = orig_parser.format_help().lower()
+    rich_help = rich_parser.format_help().lower()
+    assert rich_help == orig_help.replace("\r", "")  # rich strips \r and other control codes
+
+    expected_help_text = """\
+\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
+\x1b[38;5;244mRAM\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--long-option-with-control-codes-in-metavar\x1b[0m \x1b[38;5;36mMETA\x1b[0m
+\x1b[38;5;36mVAR\x1b[0m]
+
+\x1b[38;5;208mOptional Arguments:\x1b[0m
+  \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m            \x1b[39mshow this help message and exit\x1b[0m
+  \x1b[36m--long-option-with-control-codes-in-metavar\x1b[0m \x1b[38;5;36mMETA\x1b[0m
+\x1b[38;5;36mVAR\x1b[0m
+                        \x1b[39mMETA VAR\x1b[0m
+"""
+    with patch("rich.console.Console.is_terminal", return_value=True):
+        colored_help_text = rich_parser.format_help()
+    # cannot use textwrap.dedent because of the control codes
+    assert colored_help_text == clean(expected_help_text, dedent=False)

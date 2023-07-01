@@ -14,6 +14,7 @@ __all__ = [
     "Span",
     "Text",
     "Theme",
+    "CONTROL_STRIP_TRANSLATE",
 ]
 
 if TYPE_CHECKING:
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
     from rich.text import Text as Text
     from rich.theme import Theme as Theme
 
+    CONTROL_STRIP_TRANSLATE: dict[int, None]
+
 
 def __getattr__(name: str) -> Any:
     if name not in __all__:
@@ -38,6 +41,7 @@ def __getattr__(name: str) -> Any:
     import rich.style
     import rich.text
     import rich.theme
+    from rich.control import STRIP_CONTROL_CODES
 
     globals().update(
         {
@@ -51,6 +55,7 @@ def __getattr__(name: str) -> Any:
             "Span": rich.text.Span,
             "Text": rich.text.Text,
             "Theme": rich.theme.Theme,
+            "CONTROL_STRIP_TRANSLATE": dict.fromkeys(STRIP_CONTROL_CODES),
         }
     )
     return globals()[name]
