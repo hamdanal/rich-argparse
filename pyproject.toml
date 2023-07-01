@@ -3,7 +3,7 @@ requires = ["hatchling>=1.11.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "rich_argparse"
+name = "rich-argparse"
 version = "1.1.1"
 description = "A rich help formatter for argparse"
 authors = [
@@ -37,12 +37,8 @@ Documentation = "https://github.com/hamdanal/rich-argparse#rich-argparse"
 Issue-Tracker = "https://github.com/hamdanal/rich-argparse/issues"
 Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 
-[tool.hatch.build]
-sources = ["stubs"]
-include = [
-  "rich_argparse-stubs",
-  "rich_argparse.py",
-]
+[tool.hatch]
+build.packages = ["rich_argparse"]
 
 [tool.tox]
 legacy_tox_ini = """
@@ -70,7 +66,6 @@ extra_standard_library = ["typing_extensions"]
 [tool.mypy]
 python_version = "3.7"
 strict = true
-explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]
@@ -78,17 +73,9 @@ check_untyped_defs = false
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 
-[tool.pyright]
-stubPath = "stubs"
-include = ["rich_argparse.py"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
 source = ["rich_argparse", "tests"]
-
-[tool.coverage.report]
-ignore_errors = true
-fail_under = 100
