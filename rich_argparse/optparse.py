@@ -240,7 +240,7 @@ if __name__ == "__main__":
         description="I [link https://pypi.org/project/rich]rich[/]ify:trade_mark: optparse help.",
         formatter=IndentedRichHelpFormatter(),
         prog="python -m rich_arparse.optparse",
-        epilog=":link: https://github.com/hamdanal/rich-argparse#optparse.",
+        epilog=":link: https://github.com/hamdanal/rich-argparse#optparse-support.",
     )
     parser.add_option("--formatter", metavar="rich", help="A piece of :cake: isn't it? :wink:")
     parser.add_option(
