@@ -24,6 +24,7 @@ import pytest
 from rich import get_console
 from rich.text import Text
 
+import rich_argparse._lazy_rich as r
 from rich_argparse import (
     ArgumentDefaultsRichHelpFormatter,
     MetavarTypeRichHelpFormatter,
@@ -735,7 +736,10 @@ def test_rich_lazy_import():
         for mod_name, mod in sys.modules.items()
         if mod_name != "rich" and not mod_name.startswith("rich.")
     }
-    with patch.dict(sys.modules, sys_modules_no_rich, clear=True):
+    lazy_rich = {k: v for k, v in r.__dict__.items() if k not in r.__all__}
+    with patch.dict(sys.modules, sys_modules_no_rich, clear=True), patch.dict(
+        r.__dict__, lazy_rich, clear=True
+    ):
         parser = ArgumentParser(formatter_class=RichHelpFormatter)
         parser.add_argument("--foo", help="foo help")
         args = parser.parse_args(["--foo", "bar"])
@@ -751,3 +755,6 @@ def test_rich_lazy_import():
     assert formatter._console is None
     formatter.console = get_console()
     assert formatter._console is not None
+
+    with pytest.raises(AttributeError, match="Foo"):
+        _ = r.Foo

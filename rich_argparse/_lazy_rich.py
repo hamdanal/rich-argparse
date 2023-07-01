@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 def __getattr__(name: str) -> Any:
     if name not in __all__:
-        raise AttributeError(name)  # pragma: no cover
+        raise AttributeError(name)
     import rich.console
     import rich.containers
     import rich.markup
@@ -39,16 +39,18 @@ def __getattr__(name: str) -> Any:
     import rich.text
     import rich.theme
 
-    exported = {
-        "Console": rich.console.Console,
-        "ConsoleOptions": rich.console.ConsoleOptions,
-        "RenderableType": rich.console.RenderableType,
-        "RenderResult": rich.console.RenderResult,
-        "Lines": rich.containers.Lines,
-        "escape": rich.markup.escape,
-        "StyleType": rich.style.StyleType,
-        "Span": rich.text.Span,
-        "Text": rich.text.Text,
-        "Theme": rich.theme.Theme,
-    }
-    return exported[name]
+    globals().update(
+        {
+            "Console": rich.console.Console,
+            "ConsoleOptions": rich.console.ConsoleOptions,
+            "RenderableType": rich.console.RenderableType,
+            "RenderResult": rich.console.RenderResult,
+            "Lines": rich.containers.Lines,
+            "escape": rich.markup.escape,
+            "StyleType": rich.style.StyleType,
+            "Span": rich.text.Span,
+            "Text": rich.text.Text,
+            "Theme": rich.theme.Theme,
+        }
+    )
+    return globals()[name]

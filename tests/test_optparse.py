@@ -15,6 +15,7 @@ from unittest.mock import patch
 import pytest
 from rich import get_console
 
+import rich_argparse._lazy_rich as r
 from rich_argparse.optparse import (
     IndentedRichHelpFormatter,
     RichHelpFormatter,
@@ -314,7 +315,10 @@ def test_rich_lazy_import():
         for mod_name, mod in sys.modules.items()
         if mod_name != "rich" and not mod_name.startswith("rich.")
     }
-    with patch.dict(sys.modules, sys_modules_no_rich, clear=True):
+    lazy_rich = {k: v for k, v in r.__dict__.items() if k not in r.__all__}
+    with patch.dict(sys.modules, sys_modules_no_rich, clear=True), patch.dict(
+        r.__dict__, lazy_rich, clear=True
+    ):
         parser = OptionParser(formatter=IndentedRichHelpFormatter())
         parser.add_option("--foo", help="foo help")
         values, args = parser.parse_args(["--foo", "bar"])
@@ -331,3 +335,6 @@ def test_rich_lazy_import():
     assert formatter._console is None
     formatter.console = get_console()
     assert formatter._console is not None
+
+    with pytest.raises(AttributeError, match="Foo"):
+        _ = r.Foo
