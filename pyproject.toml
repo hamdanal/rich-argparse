@@ -57,11 +57,13 @@ commands =
 [tool.black]
 line_length = 100
 
-[tool.isort]
-py_version = 37
-profile = "black"
-line_length = 100
-extra_standard_library = ["typing_extensions"]
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "C", "B", "UP", "RUF100", "TID"]
+unfixable = ["B"]
+ignore = ["E501"]
+isort.required-imports = ["from __future__ import annotations"]
+flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.mypy]
 python_version = "3.7"

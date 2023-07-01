@@ -10,13 +10,13 @@ from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
 # rich is only used to display help. It is imported inside the functions in order
 # not to add delays to command line tools that use this formatter.
 if TYPE_CHECKING:
-    from argparse import Action, _ArgumentGroup
-    from typing_extensions import Self
+    from argparse import Action, _MutuallyExclusiveGroup
 
     from rich.console import Console, ConsoleOptions, RenderableType, RenderResult
     from rich.containers import Lines
     from rich.style import StyleType
     from rich.text import Span, Text
+    from typing_extensions import Self
 
 __all__ = [
     "RichHelpFormatter",
@@ -113,21 +113,18 @@ class RichHelpFormatter(argparse.HelpFormatter):
     def console(self, console: Console) -> None:  # is this needed?
         self._console = console
 
-    class _Section(argparse.HelpFormatter._Section):  # type: ignore[misc]
+    class _Section(argparse.HelpFormatter._Section):
         def __init__(
             self, formatter: RichHelpFormatter, parent: Self | None, heading: str | None = None
         ) -> None:
             if heading is not None:
                 heading = f"{type(formatter).group_name_formatter(heading)}:"
             super().__init__(formatter, parent, heading)
+            self.formatter: RichHelpFormatter
             self.rich_items: list[RenderableType] = []
             self.rich_actions: list[tuple[Text, Text | None]] = []
             if parent is not None:
                 parent.rich_items.append(self)
-            if TYPE_CHECKING:  # already assigned in super().__init__ but not present in typeshed
-                self.formatter = formatter
-                self.heading = heading
-                self.parent = parent
 
         def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
             from rich.text import Text
@@ -170,7 +167,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         self,
         usage: str | None,
         actions: Iterable[Action],
-        groups: Iterable[_ArgumentGroup],
+        groups: Iterable[_MutuallyExclusiveGroup],
         prefix: str | None = None,
     ) -> None:
         if usage is argparse.SUPPRESS:

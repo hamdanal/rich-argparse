@@ -47,8 +47,8 @@ activated. You can also run a individual tests with `pytest -k the_name_of_your_
 ### Code quality
 
 After staging your work with `git add`, you can run `pre-commit run --all-files` to run all the
-code quality tools. These include [black] and [isort] for formatting, [flake8] for linting, and
-[mypy] for type checking. You can also run each tool individually with `pre-commit run <tool>`.
+code quality tools. These include [black] and [ruff] for formatting and linting, and [mypy] for
+type checking. You can also run each tool individually with `pre-commit run <tool> --all-files`.
 
 ## Creating a Pull Request
 
@@ -59,7 +59,6 @@ your pull request, and link it to any relevant issues or discussions.
 [Discussions]: https://github.com/hamdanal/rich-argparse/discussions
 [mypy]: https://mypy.readthedocs.io/en/stable/
 [black]: https://black.readthedocs.io/en/stable/
-[isort]: https://pycqa.github.io/isort/
-[flake8]: https://flake8.pycqa.org/en/latest/
+[ruff]: https://beta.ruff.rs/docs/
 [PR]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork
 [venv-guide]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
