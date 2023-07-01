@@ -43,4 +43,5 @@ repos:
     rev: v1.3.0
     hooks:
       - id: mypy
-        additional_dependencies: ["rich"]
+        # markdown-it-py 3.0 uses Python 3.8 syntax
+        additional_dependencies: ["rich", "markdown-it-py<3.0.0"]
