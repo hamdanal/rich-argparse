@@ -14,6 +14,19 @@ https://user-images.githubusercontent.com/93259987/224482407-ea1de764-09f7-415e-
 
 Format argparse help output using [rich](https://pypi.org/project/rich).
 
+## Table of contents
+
+* [Installation](#installation)
+* [Usage](#usage)
+* [Output styles](#output-styles)
+  * [Colors](#customize-the-colors)
+  * [Group names](#customize-group-name-formatting)
+  * [Syntax highlighting](#special-text-highlighting)
+  * [Usage colors](#colors-in-the-usage)
+* [Subparsers](#working-with-subparsers)
+* [Third party formatters](#working-with-third-party-formatters)
+* [Optparse](#optparse-support) (experimental)
+
 ## Installation
 
 Install from PyPI with pip or your favorite tool.
@@ -200,3 +213,31 @@ index 7fb6855..5e5d48a 100755
 
 Now try out some command like: `python manage.py runserver --help`. Notice how the special
 ordering of the arguments applied by django is respected by the new help formatter.
+
+## Optparse support
+rich-argparse now ships with experimental support for [optparse]. Import optparse help formatters
+from `rich_argparse.optparse`:
+
+```python
+import optparse
+from rich_argparse.optparse import IndentedRichHelpFormatter
+
+parser = optparse.OptionParser(formatter=IndentedRichHelpFormatter())
+...
+```
+
+Similar to `argparse`, you can customize the styles used by the formatter by modifying the
+`RichHelpFormatter.styles` dictionary. These are the same styles used by `argparse` but with
+the `optparse.` prefix. For example, to change the style used for the metavar of an option:
+
+```python
+RichHelpFormatter.styles["optparse.metavar"] = "italic"
+```
+
+Syntax highlighting works the same way as `argparse`.
+
+Colors in the `usage` are not supported yet.
+
+Customizing the group name format is not supported. optparse uses title case by default.
+
+[optparse]: https://docs.python.org/3/library/optparse.html

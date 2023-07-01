@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths-ignore:
       - ".vscode/**"
+      - ".pre-commit-config.yaml"
+      - "*.md"
 
 jobs:
   build:
