@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Features
+- Add experimental support for `optparse`. Import optparse formatters from `rich_argparse.optparse`.
+  * PR #73
+
+### Changes
+- The project now uses `ruff` for linting and import sorting.
+  * PR #72
+- `rich_argparse` is now a package instead of a module. This should not affect users.
+  * PR #71
+
 ## 1.1.1 - 2023-05-30
 
 ### Fixes
