@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.2.0 - 2023-07-02
+
 ### Features
 - Add experimental support for `optparse`. Import optparse formatters from `rich_argparse.optparse`.
   * PR #73

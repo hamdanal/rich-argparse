@@ -12,7 +12,7 @@ https://user-images.githubusercontent.com/93259987/224482407-ea1de764-09f7-415e-
 ![Downloads](https://pepy.tech/badge/rich-argparse/month)
 ](https://pypi.org/project/rich-argparse/)
 
-Format argparse help output using [rich](https://pypi.org/project/rich).
+Format argparse and optparse help using [rich](https://pypi.org/project/rich).
 
 ## Table of contents
 
