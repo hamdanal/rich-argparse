@@ -14,6 +14,7 @@ __all__ = [
     "Span",
     "Text",
     "Theme",
+    "CONTROL_STRIP_TRANSLATE",
 ]
 
 if TYPE_CHECKING:
@@ -28,27 +29,33 @@ if TYPE_CHECKING:
     from rich.text import Text as Text
     from rich.theme import Theme as Theme
 
+    CONTROL_STRIP_TRANSLATE: dict[int, None]
+
 
 def __getattr__(name: str) -> Any:
     if name not in __all__:
-        raise AttributeError(name)  # pragma: no cover
+        raise AttributeError(name)
     import rich.console
     import rich.containers
     import rich.markup
     import rich.style
     import rich.text
     import rich.theme
+    from rich.control import STRIP_CONTROL_CODES
 
-    exported = {
-        "Console": rich.console.Console,
-        "ConsoleOptions": rich.console.ConsoleOptions,
-        "RenderableType": rich.console.RenderableType,
-        "RenderResult": rich.console.RenderResult,
-        "Lines": rich.containers.Lines,
-        "escape": rich.markup.escape,
-        "StyleType": rich.style.StyleType,
-        "Span": rich.text.Span,
-        "Text": rich.text.Text,
-        "Theme": rich.theme.Theme,
-    }
-    return exported[name]
+    globals().update(
+        {
+            "Console": rich.console.Console,
+            "ConsoleOptions": rich.console.ConsoleOptions,
+            "RenderableType": rich.console.RenderableType,
+            "RenderResult": rich.console.RenderResult,
+            "Lines": rich.containers.Lines,
+            "escape": rich.markup.escape,
+            "StyleType": rich.style.StyleType,
+            "Span": rich.text.Span,
+            "Text": rich.text.Text,
+            "Theme": rich.theme.Theme,
+            "CONTROL_STRIP_TRANSLATE": dict.fromkeys(STRIP_CONTROL_CODES),
+        }
+    )
+    return globals()[name]

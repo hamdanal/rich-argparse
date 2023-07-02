@@ -12,6 +12,10 @@
 - `rich_argparse` is now a package instead of a module. This should not affect users.
   * PR #71
 
+### Fixes
+- Fix crash when a metavar following a long option contains control codes.
+  * PR #74
+
 ## 1.1.1 - 2023-05-30
 
 ### Fixes
