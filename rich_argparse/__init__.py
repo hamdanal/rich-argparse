@@ -163,17 +163,14 @@ class RichHelpFormatter(argparse.HelpFormatter):
             prefix = self._format_usage(usage="", actions=(), groups=(), prefix=None).rstrip("\n")
         prefix_end = ": " if prefix.endswith(": ") else ""
         prefix = prefix[: len(prefix) - len(prefix_end)]
-        prefix = (
-            type(self).group_name_formatter(prefix).translate(r.CONTROL_STRIP_TRANSLATE)
-            + prefix_end
-        )
+        prefix = r.strip_control_codes(type(self).group_name_formatter(prefix)) + prefix_end
 
         usage_spans = [r.Span(0, len(prefix.rstrip()), "argparse.groups")]
-        usage_text = self._format_usage(usage, actions, groups, prefix=prefix).translate(
-            r.CONTROL_STRIP_TRANSLATE
+        usage_text = r.strip_control_codes(
+            self._format_usage(usage, actions, groups, prefix=prefix)
         )
         if usage is None:  # get colour spans for generated usage
-            prog = f"{self._prog}".translate(r.CONTROL_STRIP_TRANSLATE)
+            prog = r.strip_control_codes(f"{self._prog}")
             if actions:
                 prog_start = usage_text.index(prog, len(prefix))
                 usage_spans.append(r.Span(prog_start, prog_start + len(prog), "argparse.prog"))
@@ -238,7 +235,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         pos = start
 
         def find_span(_string: str) -> tuple[int, int]:
-            stripped = _string.translate(r.CONTROL_STRIP_TRANSLATE)
+            stripped = r.strip_control_codes(_string)
             _start = text.index(stripped, pos)
             _end = _start + len(stripped)
             return _start, _end
