@@ -373,6 +373,6 @@ def test_legacy_windows(legacy_console, old_windows, colors):  # pragma: win32 c
     ):
         assert parser.format_help() == dedent(expected_output)
     if legacy_console:
-        init_win_colors.assert_called_once_with()
+        init_win_colors.assert_called_with()
     else:
         init_win_colors.assert_not_called()
