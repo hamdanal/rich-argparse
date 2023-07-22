@@ -28,7 +28,7 @@ def _rich_fill(console: r.Console, text: r.Text, width: int, indent: r.Text) -> 
     return r.Text("\n").join(indent + line for line in lines)
 
 
-def _initialize_win_colors() -> bool:  # pragma: win32 cover
+def _initialize_win_colors() -> bool:  # pragma: no cover
     global _windows_console_fixed
     assert sys.platform == "win32"
     if _windows_console_fixed is None:
