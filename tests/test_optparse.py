@@ -10,7 +10,7 @@ from optparse import (
     TitledHelpFormatter,
 )
 from textwrap import dedent
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from rich import get_console
@@ -338,3 +338,41 @@ def test_rich_lazy_import():
 
     with pytest.raises(AttributeError, match="Foo"):
         _ = r.Foo
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="windows-only test")
+@pytest.mark.usefixtures("force_color")
+@pytest.mark.parametrize(
+    ("legacy_console", "old_windows", "colors"),
+    (
+        pytest.param(True, False, True, id="legacy_console-new_windows"),
+        pytest.param(True, True, False, id="legacy_console-old_windows"),
+        pytest.param(False, None, True, id="new_console"),
+    ),
+)
+def test_legacy_windows(legacy_console, old_windows, colors):  # pragma: win32 cover
+    expected_output = {
+        False: """\
+        Usage: PROG [options]
+
+        Options:
+          -h, --help  show this help message and exit
+        """,
+        True: """\
+        \x1b[38;5;208mUsage:\x1b[0m PROG [options]
+
+        \x1b[38;5;208mOptions:\x1b[0m
+          \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+        """,
+    }[colors]
+
+    init_win_colors = Mock(return_value=not old_windows)
+    parser = OptionParser(prog="PROG", formatter=IndentedRichHelpFormatter())
+    with patch("rich.console.detect_legacy_windows", return_value=legacy_console), patch(
+        "rich_argparse._common._initialize_win_colors", init_win_colors
+    ):
+        assert parser.format_help() == dedent(expected_output)
+    if legacy_console:
+        init_win_colors.assert_called_with()
+    else:
+        init_win_colors.assert_not_called()
