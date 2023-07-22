@@ -1,15 +1,16 @@
-# for private use only
+# for internal use only
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
 __all__ = [
+    "re_ansi",
     "Console",
     "ConsoleOptions",
     "RenderableType",
     "RenderResult",
-    "strip_control_codes",
     "Lines",
+    "strip_control_codes",
     "escape",
     "StyleType",
     "Span",
@@ -18,6 +19,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
+    from rich.ansi import re_ansi as re_ansi
     from rich.console import Console as Console
     from rich.console import ConsoleOptions as ConsoleOptions
     from rich.console import RenderableType as RenderableType
@@ -34,6 +36,7 @@ if TYPE_CHECKING:
 def __getattr__(name: str) -> Any:
     if name not in __all__:
         raise AttributeError(name)
+    import rich.ansi
     import rich.console
     import rich.containers
     import rich.control
@@ -44,6 +47,7 @@ def __getattr__(name: str) -> Any:
 
     globals().update(
         {
+            "re_ansi": rich.ansi.re_ansi,
             "Console": rich.console.Console,
             "ConsoleOptions": rich.console.ConsoleOptions,
             "RenderableType": rich.console.RenderableType,

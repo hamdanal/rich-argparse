@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+- Fix ansi escape codes on legacy Windows console
+  * Issue #79, PR #80
+
 ## 1.2.0 - 2023-07-02
 
 ### Features

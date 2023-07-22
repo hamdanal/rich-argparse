@@ -18,7 +18,7 @@ from argparse import (
 )
 from contextlib import nullcontext
 from typing import Type
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from rich import get_console
@@ -32,6 +32,7 @@ from rich_argparse import (
     RawTextRichHelpFormatter,
     RichHelpFormatter,
 )
+from rich_argparse._common import _fix_legacy_win_text
 from tests.conftest import Parsers, get_cmd_output
 
 
@@ -787,3 +788,74 @@ def test_help_with_control_codes():
         colored_help_text = rich_parser.format_help()
     # cannot use textwrap.dedent because of the control codes
     assert colored_help_text == clean(expected_help_text, dedent=False)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="windows-only test")
+@pytest.mark.usefixtures("force_color")
+def test_legacy_windows():  # pragma: win32 cover
+    expected_output = """\
+    Usage: PROG [-h]
+
+    Optional Arguments:
+      -h, --help  show this help message and exit
+    """
+    expected_colored_output = """\
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
+
+    \x1b[38;5;208mOptional Arguments:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+    """
+
+    # New windows console => colors: YES, initialization: NO
+    init_win_colors = Mock(return_value=True)
+    parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    with patch("rich_argparse._common._initialize_win_colors", init_win_colors):
+        help = parser.format_help()
+    assert help == clean(expected_colored_output)
+    init_win_colors.assert_not_called()
+
+    # Legacy windows console on new windows => colors: YES, initialization: YES
+    init_win_colors = Mock(return_value=True)
+    parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
+        "rich_argparse._common._initialize_win_colors", init_win_colors
+    ):
+        help = parser.format_help()
+    assert help == clean(expected_colored_output)
+    init_win_colors.assert_called_once_with()
+
+    # Legacy windows console on old windows => colors: NO, initialization: YES
+    init_win_colors = Mock(return_value=False)
+    parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
+        "rich_argparse._common._initialize_win_colors", init_win_colors
+    ):
+        help = parser.format_help()
+    assert help == clean(expected_output)
+    init_win_colors.assert_called_once_with()
+
+    # Legacy windows, but colors disabled in formatter => colors: NO, initialization: NO
+    def fmt_no_color(prog):
+        fmt = RichHelpFormatter(prog)
+        fmt.console = r.Console(theme=r.Theme(fmt.styles), color_system=None)
+        return fmt
+
+    init_win_colors = Mock(return_value=True)
+    no_colors_parser = ArgumentParser("PROG", formatter_class=fmt_no_color)
+    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
+        "rich_argparse._common._initialize_win_colors", init_win_colors
+    ):
+        help = no_colors_parser.format_help()
+    assert help == clean(expected_output)
+    init_win_colors.assert_not_called()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="non-windows test")
+def test_no_win_console_init_on_unix():  # pragma: win32 no cover
+    text = "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]"
+    console = r.Console(legacy_windows=True, force_terminal=True)
+    init_win_colors = Mock(return_value=True)
+    with patch("rich_argparse._common._initialize_win_colors", init_win_colors):
+        out = _fix_legacy_win_text(console, text)
+    assert out == text
+    init_win_colors.assert_not_called()

@@ -8,7 +8,7 @@ import sys
 from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
 
 import rich_argparse._lazy_rich as r
-from rich_argparse._common import _HIGHLIGHTS, _rich_fill, _rich_wrap
+from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, _rich_fill, _rich_wrap
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -203,6 +203,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         help = capture.get()
         if help:
             help = self._long_break_matcher.sub("\n\n", help).rstrip() + "\n"
+            help = _fix_legacy_win_text(self.console, help)
         return help
 
     # ===============
