@@ -56,6 +56,9 @@ formatter classes are equivalent to argparse's built-in formatters:
 | `RawTextRichHelpFormatter` | `RawTextHelpFormatter` |
 | `ArgumentDefaultsRichHelpFormatter` | `ArgumentDefaultsHelpFormatter` |
 | `MetavarTypeRichHelpFormatter` | `MetavarTypeHelpFormatter` |
+| `MarkdownDescriptionRichHelpFormatter` | `HelpFormatter` |
+| `MarkdownArgumentDefaultsRichHelpFormatter` | `ArgumentDefaultsHelpFormatter` |
+| `MarkdownMetavarTypeRichHelpFormatter` | `MetavarTypeHelpFormatter` |
 
 For more information on how these formatters work, check the [argparse documentation](
 https://docs.python.org/3/library/argparse.html#formatter-class).
