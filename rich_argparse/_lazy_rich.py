@@ -12,6 +12,7 @@ __all__ = [
     "Lines",
     "strip_control_codes",
     "escape",
+    "Markdown",
     "StyleType",
     "Span",
     "Text",
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
     from rich.containers import Lines as Lines
     from rich.control import strip_control_codes as strip_control_codes
     from rich.markup import escape as escape
+    from rich.markdown import Markdown
     from rich.style import StyleType as StyleType
     from rich.text import Span as Span
     from rich.text import Text as Text
