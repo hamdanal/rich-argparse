@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import os
 import re
 import sys
 from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
@@ -380,6 +381,7 @@ class MarkdownDescriptionMixin:
     """Mixin for rendering markdown description to the terminal"""
 
     MD_HYPERLINKS: bool = False
+    _width: int
 
     def _rich_format_text(self, text: str) -> r.Text:
         with io.StringIO() as fp:
