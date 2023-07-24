@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import sys
 from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
@@ -371,5 +372,37 @@ class ArgumentDefaultsRichHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, 
 
 class MetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, RichHelpFormatter):
     """Rich help message formatter which uses the argument 'type' as the default
+    metavar value (instead of the argument 'dest').
+    """
+
+class MarkdownDescriptionMixin:
+    """Mixin for rendering markdown description to the terminal
+    """
+
+    MD_HYPERLINKS: bool = False
+
+    def _rich_format_text(self, text: str) -> r.Text:
+        with io.StringIO() as fp:
+            console = r.Console(
+                file=fp,
+                # `somescript --help | less` friendly hack
+                force_terminal=os.isatty(sys.stdout.fileno()),
+                stderr=True,
+                width=self._width,
+            )
+            console.print(r.Markdown(text, hyperlinks=self.MD_HYPERLINKS))
+            return r.Text(fp.getvalue())
+
+
+class MarkdownDescriptionRichHelpFormatter(MarkdownDescriptionMixin, RichHelpFormatter):
+    """Markdown description help message formatter which retains any formatting in descriptions."""
+
+
+class ArgumentDefaultsRichHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, MarkdownDescriptionRichHelpFormatter):
+    """Markdown description help message formatter which adds default values to argument help."""
+
+
+class MetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, MarkdownDescriptionRichHelpFormatter):
+    """Markdown description rich message formatter which uses the argument 'type' as the default
     metavar value (instead of the argument 'dest').
     """
