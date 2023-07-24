@@ -375,9 +375,9 @@ class MetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, RichHelpFo
     metavar value (instead of the argument 'dest').
     """
 
+
 class MarkdownDescriptionMixin:
-    """Mixin for rendering markdown description to the terminal
-    """
+    """Mixin for rendering markdown description to the terminal"""
 
     MD_HYPERLINKS: bool = False
 
@@ -398,11 +398,15 @@ class MarkdownDescriptionRichHelpFormatter(MarkdownDescriptionMixin, RichHelpFor
     """Markdown description help message formatter which retains any formatting in descriptions."""
 
 
-class MarkdownArgumentDefaultsRichHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, MarkdownDescriptionRichHelpFormatter):
+class MarkdownArgumentDefaultsRichHelpFormatter(
+    argparse.ArgumentDefaultsHelpFormatter, MarkdownDescriptionRichHelpFormatter
+):
     """Markdown description help message formatter which adds default values to argument help."""
 
 
-class MarkdownMetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, MarkdownDescriptionRichHelpFormatter):
+class MarkdownMetavarTypeRichHelpFormatter(
+    argparse.MetavarTypeHelpFormatter, MarkdownDescriptionRichHelpFormatter
+):
     """Markdown description rich message formatter which uses the argument 'type' as the default
     metavar value (instead of the argument 'dest').
     """
