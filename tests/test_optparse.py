@@ -209,7 +209,7 @@ def test_default_highlights():
     parser = OptionParser(
         "PROG",
         formatter=IndentedRichHelpFormatter(),
-        description="Descritpion with `syntax` and --options.",
+        description="Description with `syntax` and --options.",
         epilog="Epilog with `syntax` and --options.",
     )
     # syntax highlights
@@ -226,7 +226,7 @@ def test_default_highlights():
     parser.add_option("--option-short", action="store_true", help="Start -middle end")
 
     expected_help_output = """
-    \x1b[39mDescritpion with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
+    \x1b[39mDescription with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
 
     \x1b[38;5;208mOptions:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m       \x1b[39mshow this help message and exit\x1b[0m
@@ -273,7 +273,7 @@ def test_titled_help_formatter():
         TitledHelpFormatter(),
         TitledRichHelpFormatter(),
         prog="PROG",
-        description="Descritpion.",
+        description="Description.",
         epilog="Epilog.",
     )
     parsers.add_option("--option", help="help")
@@ -287,7 +287,7 @@ def test_titled_help_formatter():
 def test_titled_help_formatter_colors():
     parser = OptionParser(
         prog="PROG",
-        description="Descritpion.",
+        description="Description.",
         epilog="Epilog.",
         formatter=TitledRichHelpFormatter(),
     )
@@ -297,7 +297,7 @@ def test_titled_help_formatter_colors():
     \x1b[38;5;208m=====\x1b[0m
       PROG [options]
 
-    \x1b[39mDescritpion.\x1b[0m
+    \x1b[39mDescription.\x1b[0m
 
     \x1b[38;5;208mOptions\x1b[0m
     \x1b[38;5;208m=======\x1b[0m

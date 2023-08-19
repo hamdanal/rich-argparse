@@ -258,7 +258,7 @@ if __name__ == "__main__":
         "--syntax", action="store_true", help="`backquotes` may be bold, but they are :muscle:"
     )
     parser.add_option(
-        "-s", "--long", metavar="METAVAR", help="Thats a lot of metavars for an option!"
+        "-s", "--long", metavar="METAVAR", help="That's a lot of metavars for an option!"
     )
 
     group = parser.add_option_group("Magic", description=":sparkles: :sparkles: :sparkles:")
