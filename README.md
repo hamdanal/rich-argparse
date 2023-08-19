@@ -30,6 +30,7 @@ changes to the code.
 * [Subparsers](#working-with-subparsers)
 * [Third party formatters](#working-with-third-party-formatters) (ft. django)
 * [Optparse](#optparse-support) (experimental)
+* [Legacy Windows](#legacy-windows-support)
 
 ## Installation
 
@@ -239,3 +240,19 @@ Syntax highlighting works the same as `argparse`.
 Colors in the `usage` are not supported yet.
 
 Customizing the group name format is not supported. optparse uses Title Case format by default.
+
+## Legacy Windows support
+
+If your application still runs on legacy Windows versions (older than Windows 10), you'll need to
+enable ANSI escape sequences by calling `colorama.init()` otherwise colors will be disabled:
+
+```python
+import argparse
+import colorama
+from rich_argparse import RichHelpFormatter
+
+colorama.init()
+parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
+...
+```
+This is **not** required on Windows 10 and newer or on other operating systems.

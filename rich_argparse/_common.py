@@ -34,7 +34,12 @@ def _initialize_win_colors() -> bool:  # pragma: no cover
     if _windows_console_fixed is None:
         winver = sys.getwindowsversion()  # type: ignore[attr-defined]
         if winver.major < 10 or winver.build < 10586:
-            _windows_console_fixed = False
+            try:
+                import colorama
+
+                _windows_console_fixed = isinstance(sys.stdout, colorama.ansitowin32.StreamWrapper)
+            except Exception:
+                _windows_console_fixed = False
         else:
             import ctypes
 
