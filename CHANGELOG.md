@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.0 - 2023-08-19
+
 ### Features
 - Add `optparse.GENERATE_USAGE` to auto generate a usage similar to argparse.
   * PR #87
