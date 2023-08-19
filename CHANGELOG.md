@@ -4,7 +4,7 @@
 
 ### Fixes
 - Fix ansi escape codes on legacy Windows console
-  * Issue #79, PR #80
+  * Issue #79, PR #80, PR #85
 
 ## 1.2.0 - 2023-07-02
 

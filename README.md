@@ -241,7 +241,6 @@ Colors in the `usage` are not supported yet.
 
 Customizing the group name format is not supported. optparse uses Title Case format by default.
 
-
 ## Legacy Windows support
 
 If your application still runs on legacy Windows versions (older than Windows 10), you'll need to
