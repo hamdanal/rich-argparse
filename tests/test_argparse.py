@@ -653,7 +653,7 @@ def test_default_highlights():
     parser = ArgumentParser(
         "PROG",
         formatter_class=RichHelpFormatter,
-        description="Descritpion with `syntax` and --options.",
+        description="Description with `syntax` and --options.",
         epilog="Epilog with `syntax` and --options.",
     )
     # syntax highlights
@@ -670,7 +670,7 @@ def test_default_highlights():
     parser.add_argument("--option-short", action="store_true", help="Start -middle end")
 
     expected_help_output = """
-    \x1b[39mDescritpion with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
+    \x1b[39mDescription with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
 
     \x1b[38;5;208mOptional Arguments:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m       \x1b[39mshow this help message and exit\x1b[0m
