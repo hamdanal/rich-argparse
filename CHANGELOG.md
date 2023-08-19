@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+- Add `optparse.GENERATE_USAGE` to auto generate a usage similar to argparse.
+  * PR #87
+- Add `rich_format_*` methods to optparse formatters. These return a `rich.text.Text` object.
+  * PR #87
+
 ### Fixes
 - Fix ansi escape codes on legacy Windows console
   * Issue #79, PR #80, PR #85

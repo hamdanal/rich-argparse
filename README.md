@@ -227,6 +227,15 @@ parser = optparse.OptionParser(formatter=IndentedRichHelpFormatter())
 ...
 ```
 
+You can also generated a more helpful usage message by passing `usage=GENERATE_USAGE` to the
+parser. This is similar to the default behavior of `argparse`.
+
+```python
+from rich_argparse.optparse import GENERATE_USAGE, IndentedRichHelpFormatter
+
+parser = optparse.OptionParser(usage=GENERATE_USAGE, formatter=IndentedRichHelpFormatter())
+```
+
 Similar to `argparse`, you can customize the styles used by the formatter by modifying the
 `RichHelpFormatter.styles` dictionary. These are the same styles used by `argparse` but with
 the `optparse.` prefix instead:
@@ -235,9 +244,9 @@ the `optparse.` prefix instead:
 RichHelpFormatter.styles["optparse.metavar"] = "bold magenta"
 ```
 
-Syntax highlighting works the same as `argparse`.
+Syntax highlighting works the same as with `argparse`.
 
-Colors in the `usage` are not supported yet.
+Colors in the `usage` are only supported when using `GENERATE_USAGE`.
 
 Customizing the group name format is not supported. optparse uses Title Case format by default.
 

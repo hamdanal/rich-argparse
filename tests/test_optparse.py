@@ -17,6 +17,7 @@ from rich import get_console
 
 import rich_argparse._lazy_rich as r
 from rich_argparse.optparse import (
+    GENERATE_USAGE,
     IndentedRichHelpFormatter,
     RichHelpFormatter,
     TitledRichHelpFormatter,
@@ -376,3 +377,84 @@ def test_legacy_windows(legacy_console, old_windows, colors):  # pragma: win32 c
         init_win_colors.assert_called_with()
     else:
         init_win_colors.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("formatter", "description", "nb_o", "expected"),
+    (
+        pytest.param(
+            IndentedRichHelpFormatter(),
+            None,
+            2,
+            """\
+            \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m]
+
+            \x1b[38;5;208mOptions:\x1b[0m
+              \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+              \x1b[36m--foo\x1b[0m=\x1b[38;5;36mFOO\x1b[0m   \x1b[39mfoo help\x1b[0m
+            """,
+            id="indented",
+        ),
+        pytest.param(
+            IndentedRichHelpFormatter(),
+            "A description.",
+            2,
+            """\
+            \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m]
+
+            \x1b[39mA description.\x1b[0m
+
+            \x1b[38;5;208mOptions:\x1b[0m
+              \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+              \x1b[36m--foo\x1b[0m=\x1b[38;5;36mFOO\x1b[0m   \x1b[39mfoo help\x1b[0m
+            """,
+            id="indented-desc",
+        ),
+        pytest.param(
+            IndentedRichHelpFormatter(),
+            None,
+            30,
+            """\
+            \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
+                        [\x1b[36m--foooooooooooooooooooooooooooooo\x1b[0m \x1b[38;5;36mFOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\x1b[0m]
+
+            \x1b[38;5;208mOptions:\x1b[0m
+              \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m            \x1b[39mshow this help message and exit\x1b[0m
+              \x1b[36m--foooooooooooooooooooooooooooooo\x1b[0m=\x1b[38;5;36mFOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\x1b[0m
+                                    \x1b[39mfoo help\x1b[0m
+            """,
+            id="indented-long",
+        ),
+        pytest.param(
+            TitledRichHelpFormatter(),
+            None,
+            2,
+            """\
+            \x1b[38;5;208mUsage\x1b[0m
+            \x1b[38;5;208m=====\x1b[0m
+              \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m]
+
+            \x1b[38;5;208mOptions\x1b[0m
+            \x1b[38;5;208m=======\x1b[0m
+            \x1b[36m--help\x1b[0m, \x1b[36m-h\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+            \x1b[36m--foo\x1b[0m=\x1b[38;5;36mFOO\x1b[0m   \x1b[39mfoo help\x1b[0m
+            """,
+            id="titled",
+        ),
+    ),
+)
+@pytest.mark.usefixtures("force_color")
+def test_generated_usage(formatter, description, nb_o, expected):
+    parser = OptionParser(
+        prog="PROG", formatter=formatter, usage=GENERATE_USAGE, description=description
+    )
+    parser.add_option("--f" + "o" * nb_o, help="foo help")
+    parser.add_option("--bar", help=SUPPRESS_HELP)
+    assert parser.format_help() == dedent(expected)
+
+
+def test_generated_usage_no_parser():
+    formatter = IndentedRichHelpFormatter()
+    with pytest.raises(TypeError) as exc_info:
+        formatter.format_usage(GENERATE_USAGE)
+    assert str(exc_info.value) == "Cannot generate usage if parser is not set"
