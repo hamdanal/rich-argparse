@@ -95,7 +95,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     @property
     def console(self) -> r.Console:  # deprecate?
         if self._console is None:
-            self._console = r.Console(theme=r.Theme(self.styles))
+            self._console = r.Console(theme=r.Theme(self.styles), width=self._width)
         return self._console
 
     @console.setter
@@ -115,40 +115,93 @@ class RichHelpFormatter(argparse.HelpFormatter):
             if parent is not None:
                 parent.rich_items.append(self)
 
+        def _render_items(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
+            generated_options = options.update(no_wrap=True, overflow="ignore")
+            new_line = r.Segment.line()
+            for item in self.rich_items:
+                if isinstance(item, r.Padding):  # user added rich renderable
+                    item_options = options.update(width=options.max_width - item.left)
+                    lines = r.Segment.split_lines(console.render(item.renderable, item_options))
+                    pad = r.Segment(" " * item.left)
+                    for line_segments in lines:
+                        yield pad
+                        yield from line_segments
+                        yield new_line
+                    else:
+                        yield new_line
+                else:  # argparse generated rich renderable
+                    yield from console.render(item, generated_options)
+
+        def _render_actions(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
+            options = options.update(no_wrap=True, overflow="ignore")
+            help_pos = min(self.formatter._action_max_length + 2, self.formatter._max_help_position)
+            help_width = max(self.formatter._width - help_pos, 11)
+            indent = r.Text(" " * help_pos)
+            for action_header, action_help in self.rich_actions:
+                if not action_help:
+                    # no help, yield the header and finish
+                    yield from console.render(action_header, options)
+                    continue
+                action_help_lines = self.formatter._rich_split_lines(action_help, help_width)
+                if len(action_header) > help_pos - 2:
+                    # the header is too long, put it on its own line
+                    yield from console.render(action_header, options)
+                    action_header = indent
+                action_header.set_length(help_pos)
+                action_help_lines[0].rstrip()
+                yield from console.render(action_header + action_help_lines[0], options)
+                for line in action_help_lines[1:]:
+                    line.rstrip()
+                    yield from console.render(indent + line, options)
+            yield ""
+
         def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
             # empty section
             if not self.rich_items and not self.rich_actions:
                 return
             # root section
             if self is self.formatter._root_section:
-                yield from self.rich_items
+                yield from self._render_items(console, options)
                 return
             # group section
-            help_pos = min(self.formatter._action_max_length + 2, self.formatter._max_help_position)
-            help_width = max(self.formatter._width - help_pos, 11)
             if self.heading:
                 yield r.Text(self.heading, style="argparse.groups")
-            yield from self.rich_items  # (optional) group description
-            indent = r.Text(" " * help_pos)
-            for action_header, action_help in self.rich_actions:
-                if not action_help:
-                    yield action_header  # no help, yield the header and finish
-                    continue
-                action_help_lines = self.formatter._rich_split_lines(action_help, help_width)
-                if len(action_header) > help_pos - 2:
-                    yield action_header  # the header is too long, put it on its own line
-                    action_header = indent
-                action_header.set_length(help_pos)
-                action_help_lines[0].rstrip()
-                yield action_header + action_help_lines[0]
-                for line in action_help_lines[1:]:
-                    line.rstrip()
-                    yield indent + line
-            yield "\n"
+            if self.rich_items:
+                yield from self._render_items(console, options)
+                if self.rich_actions:
+                    yield ""
+            yield from self._render_actions(console, options)
+
+    def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
+        root_renderable = console.render(self._root_section, options)
+        new_line = r.Segment.line()
+        add_empty_line = False
+        for line_segments in r.Segment.split_lines(root_renderable):
+            if len(line_segments) > 1 or (line_segments and line_segments[0]):
+                if add_empty_line:
+                    yield new_line
+                add_empty_line = False
+                for i, segment in enumerate(reversed(line_segments), start=1):
+                    stripped = segment.text.rstrip()
+                    if stripped:
+                        yield from line_segments[:-i]
+                        yield r.Segment(stripped, style=segment.style, control=segment.control)
+                        break
+                yield new_line
+            else:  # empty line
+                add_empty_line = True
 
     def add_text(self, text: str | None) -> None:
-        if text is not argparse.SUPPRESS and text is not None:
+        if text is argparse.SUPPRESS or text is None:
+            return
+        elif isinstance(text, str):
             self._current_section.rich_items.append(self._rich_format_text(text))
+        else:
+            self.add_renderable(text)
+
+    def add_renderable(self, renderable: r.RenderableType) -> None:
+        padded = r.Padding.indent(renderable, self._current_indent)
+        self._current_section.rich_items.append(padded)
 
     def add_usage(
         self,
@@ -199,10 +252,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
     def format_help(self) -> str:
         with self.console.capture() as capture:
-            self.console.print(self._root_section, highlight=False, soft_wrap=True)
+            self.console.print(self, highlight=False, crop=False)
         help = capture.get()
         if help:
-            help = self._long_break_matcher.sub("\n\n", help).rstrip() + "\n"
             help = _fix_legacy_win_text(self.console, help)
         return help
 

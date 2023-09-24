@@ -22,6 +22,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 from rich import get_console
+from rich.console import Group
+from rich.markdown import Markdown
+from rich.table import Table
 from rich.text import Text
 
 import rich_argparse._lazy_rich as r
@@ -357,7 +360,7 @@ def test_generated_usage():
             (
                 "PROG "
                 "\x1b[38;5;244mPROG\x1b[0m "
-                "\x1b[1m \x1b[0m\x1b[1;38;5;244mPROG\x1b[0m\x1b[1m \x1b[0m"
+                "\x1b[1m \x1b[0m\x1b[1;38;5;244mPROG\x1b[0m"  # "\x1b[1m \x1b[0m"
                 "\n\x1b[38;5;244m'PROG'\x1b[0m"
             ),
             True,
@@ -859,3 +862,51 @@ def test_no_win_console_init_on_unix():  # pragma: win32 no cover
         out = _fix_legacy_win_text(console, text)
     assert out == text
     init_win_colors.assert_not_called()
+
+
+@pytest.mark.usefixtures("force_color")
+def test_rich_renderables():
+    table = Table("foo", "bar")
+    table.add_row("1", "2")
+    parser = ArgumentParser(
+        "PROG",
+        formatter_class=RichHelpFormatter,
+        description=Markdown(
+            textwrap.dedent(
+                """\
+                This is a **description**
+                _________________________
+
+                | foo | bar |
+                | --- | --- |
+                | 1   | 2   |
+                """
+            )
+        ),
+        epilog=Group(Markdown("This is an *epilog*"), table, Text("The end.", style="red")),
+    )
+    expected_help = """\
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
+
+    This is a \x1b[1mdescription\x1b[0m
+
+    \x1b[33m──────────────────────────────────────────────────────────────────────────────────────────────────\x1b[0m
+
+
+     \x1b[1m \x1b[0m\x1b[1mfoo\x1b[0m\x1b[1m \x1b[0m \x1b[1m \x1b[0m\x1b[1mbar\x1b[0m
+     ━━━━━━━━━━━
+      1     2
+
+
+    \x1b[38;5;208mOptional Arguments:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+
+    This is an \x1b[3mepilog\x1b[0m
+    ┏━━━━━┳━━━━━┓
+    ┃\x1b[1m \x1b[0m\x1b[1mfoo\x1b[0m\x1b[1m \x1b[0m┃\x1b[1m \x1b[0m\x1b[1mbar\x1b[0m\x1b[1m \x1b[0m┃
+    ┡━━━━━╇━━━━━┩
+    │ 1   │ 2   │
+    └─────┴─────┘
+    \x1b[31mThe end.\x1b[0m
+    """
+    assert parser.format_help() == clean(expected_help)
