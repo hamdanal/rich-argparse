@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+- Make `RichHelpFormatter` itself a rich renderable.
+  * PR #90
+
 ## 1.3.0 - 2023-08-19
 
 ### Features
