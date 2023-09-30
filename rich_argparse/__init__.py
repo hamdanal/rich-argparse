@@ -94,13 +94,13 @@ class RichHelpFormatter(argparse.HelpFormatter):
         )
 
     @property
-    def console(self) -> r.Console:  # deprecate?
+    def console(self) -> r.Console:
         if self._console is None:
             self._console = r.Console()
         return self._console
 
     @console.setter
-    def console(self, console: r.Console) -> None:  # is this needed?
+    def console(self, console: r.Console) -> None:
         self._console = console
 
     class _Section(argparse.HelpFormatter._Section):
@@ -174,23 +174,24 @@ class RichHelpFormatter(argparse.HelpFormatter):
             yield from self._render_actions(console, options)
 
     def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
-        root_renderable = console.render(self._root_section, options.update_width(self._width))
-        new_line = r.Segment.line()
-        add_empty_line = False
-        for line_segments in r.Segment.split_lines(root_renderable):
-            if len(line_segments) > 1 or (line_segments and line_segments[0]):
-                if add_empty_line:
+        with console.use_theme(r.Theme(self.styles)):
+            root = console.render(self._root_section, options.update_width(self._width))
+            new_line = r.Segment.line()
+            add_empty_line = False
+            for line_segments in r.Segment.split_lines(root):
+                if len(line_segments) > 1 or (line_segments and line_segments[0]):
+                    if add_empty_line:
+                        yield new_line
+                    add_empty_line = False
+                    for i, segment in enumerate(reversed(line_segments), start=1):
+                        stripped = segment.text.rstrip()
+                        if stripped:
+                            yield from line_segments[:-i]
+                            yield r.Segment(stripped, style=segment.style, control=segment.control)
+                            break
                     yield new_line
-                add_empty_line = False
-                for i, segment in enumerate(reversed(line_segments), start=1):
-                    stripped = segment.text.rstrip()
-                    if stripped:
-                        yield from line_segments[:-i]
-                        yield r.Segment(stripped, style=segment.style, control=segment.control)
-                        break
-                yield new_line
-            else:  # empty line
-                add_empty_line = True
+                else:  # empty line
+                    add_empty_line = True
 
     def add_text(self, text: str | None) -> None:
         if text is argparse.SUPPRESS or text is None:
@@ -252,7 +253,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             self._current_section.rich_actions.extend(self._rich_format_action(action))
 
     def format_help(self) -> str:
-        with self.console.use_theme(r.Theme(self.styles)), self.console.capture() as capture:
+        with self.console.capture() as capture:
             self.console.print(self, crop=False)
         help = capture.get()
         if help:
