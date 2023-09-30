@@ -255,10 +255,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     def format_help(self) -> str:
         with self.console.capture() as capture:
             self.console.print(self, crop=False)
-        help = capture.get()
-        if help:
-            help = _fix_legacy_win_text(self.console, help)
-        return help
+        return _fix_legacy_win_text(self.console, capture.get())
 
     # ===============
     # Utility methods

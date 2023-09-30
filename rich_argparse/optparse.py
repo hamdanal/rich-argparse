@@ -75,10 +75,8 @@ class RichHelpFormatter(optparse.HelpFormatter):
         with self.console.capture() as capture:
             self.console.print(text, highlight=False, soft_wrap=True, end="")
         help = capture.get()
-        if help:  # pragma: no branch
-            help = "\n".join(line.rstrip() for line in help.split("\n"))
-            help = _fix_legacy_win_text(self.console, help)
-        return help
+        help = "\n".join(line.rstrip() for line in help.split("\n"))
+        return _fix_legacy_win_text(self.console, help)
 
     def rich_format_usage(self, usage: str) -> r.Text:
         raise NotImplementedError("subclasses must implement")
