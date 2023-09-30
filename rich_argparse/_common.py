@@ -61,7 +61,8 @@ def _initialize_win_colors() -> bool:  # pragma: no cover
 def _fix_legacy_win_text(console: r.Console, text: str) -> str:
     # activate legacy Windows console colors if needed (and available) or strip ANSI escape codes
     if (
-        sys.platform == "win32"
+        text
+        and sys.platform == "win32"
         and console.legacy_windows
         and console.color_system is not None
         and not _initialize_win_colors()

@@ -5,6 +5,8 @@
 ### Features
 - Make `RichHelpFormatter` itself a rich renderable.
   * PR #90
+- Allow passing custom console to `RichHelpFormatter`.
+  * Issue #91, PR #92
 
 ## 1.3.0 - 2023-08-19
 
