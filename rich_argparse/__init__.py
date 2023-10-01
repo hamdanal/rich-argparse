@@ -5,12 +5,14 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from typing import TYPE_CHECKING, Callable, ClassVar, Iterable, Iterator
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import rich_argparse._lazy_rich as r
 from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, _rich_fill, _rich_wrap
 
 if TYPE_CHECKING:
+    from argparse import Action, ArgumentParser, Namespace, _MutuallyExclusiveGroup
+    from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
     from typing_extensions import Self
 
 __all__ = [
@@ -19,6 +21,7 @@ __all__ = [
     "RawTextRichHelpFormatter",
     "ArgumentDefaultsRichHelpFormatter",
     "MetavarTypeRichHelpFormatter",
+    "HelpPreviewAction",
 ]
 
 
@@ -208,8 +211,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
     def add_usage(
         self,
         usage: str | None,
-        actions: Iterable[argparse.Action],
-        groups: Iterable[argparse._MutuallyExclusiveGroup],
+        actions: Iterable[Action],
+        groups: Iterable[_MutuallyExclusiveGroup],
         prefix: str | None = None,
     ) -> None:
         if usage is argparse.SUPPRESS:
@@ -247,7 +250,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         rich_usage.spans.extend(usage_spans)
         self._root_section.rich_items.append(rich_usage)
 
-    def add_argument(self, action: argparse.Action) -> None:
+    def add_argument(self, action: Action) -> None:
         super().add_argument(action)
         if action.help is not argparse.SUPPRESS:
             self._current_section.rich_actions.extend(self._rich_format_action(action))
@@ -277,10 +280,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
             yield r.Span(prog_start, prog_end, "argparse.prog")
 
     def _rich_usage_spans(
-        self, text: str, start: int, actions: Iterable[argparse.Action]
+        self, text: str, start: int, actions: Iterable[Action]
     ) -> Iterator[r.Span]:
-        options: list[argparse.Action] = []
-        positionals: list[argparse.Action] = []
+        options: list[Action] = []
+        positionals: list[Action] = []
         for action in actions:
             if action.help is not argparse.SUPPRESS:
                 options.append(action) if action.option_strings else positionals.append(action)
@@ -336,7 +339,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
     # =====================================
     # Rich version of HelpFormatter methods
     # =====================================
-    def _rich_expand_help(self, action: argparse.Action) -> r.Text:
+    def _rich_expand_help(self, action: Action) -> r.Text:
         params = dict(vars(action), prog=self._prog)
         for name in list(params):
             if params[name] is argparse.SUPPRESS:
@@ -372,9 +375,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         indent = r.Text(" " * self._current_indent)
         return self._rich_fill_text(rich_text, text_width, indent)
 
-    def _rich_format_action(
-        self, action: argparse.Action
-    ) -> Iterator[tuple[r.Text, r.Text | None]]:
+    def _rich_format_action(self, action: Action) -> Iterator[tuple[r.Text, r.Text | None]]:
         header = self._rich_format_action_invocation(action)
         header.pad_left(self._current_indent)
         help = self._rich_expand_help(action) if action.help and action.help.strip() else None
@@ -382,7 +383,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         for subaction in self._iter_indented_subactions(action):
             yield from self._rich_format_action(subaction)
 
-    def _rich_format_action_invocation(self, action: argparse.Action) -> r.Text:
+    def _rich_format_action_invocation(self, action: Action) -> r.Text:
         if not action.option_strings:
             return r.Text().append(self._format_action_invocation(action), style="argparse.args")
         else:
@@ -424,3 +425,52 @@ class MetavarTypeRichHelpFormatter(argparse.MetavarTypeHelpFormatter, RichHelpFo
     """Rich help message formatter which uses the argument 'type' as the default
     metavar value (instead of the argument 'dest').
     """
+
+
+class HelpPreviewAction(argparse.Action):
+    """Action that renders the help to SVG, HTML, or text file and exits."""
+
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: str = argparse.SUPPRESS,
+        default: str = argparse.SUPPRESS,
+        help: str = argparse.SUPPRESS,
+        *,
+        console: r.Console,
+        path: str | None = None,
+        save_kwds: MutableMapping[str, Any] | None = None,
+    ) -> None:
+        super().__init__(option_strings, dest, nargs="?", const=path, default=default, help=help)
+        self.console = console
+        self.save_kwds = save_kwds or {}
+
+    def __call__(
+        self,
+        parser: ArgumentParser,
+        namespace: Namespace,
+        values: str | Sequence[Any] | None,
+        option_string: str | None = None,
+    ) -> None:
+        path = values
+        if path is None:
+            parser.exit(1, "error: help preview path is not provided\n")
+        if not isinstance(path, str):
+            parser.exit(1, "error: help preview path must be a string\n")
+        if not path.endswith((".svg", ".html", ".text")):
+            parser.exit(1, "error: help preview path must end with .svg, .html, or .text\n")
+
+        old_record = self.console.record
+        self.console.record = True
+        try:
+            parser.format_help()
+            if path.endswith(".svg"):
+                self.save_kwds.setdefault("title", parser.prog)
+                self.console.save_svg(path, **self.save_kwds)
+            elif path.endswith(".html"):
+                self.console.save_html(path, **self.save_kwds)
+            elif path.endswith(".text"):
+                self.console.save_text(path, **self.save_kwds)
+        finally:
+            self.console.record = old_record
+        parser.exit(0, f"Help preview saved to {path}\n")
