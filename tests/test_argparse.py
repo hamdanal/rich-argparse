@@ -926,7 +926,6 @@ def test_help_preview_generation(tmp_path):
     assert exc_info.value.code == 1
 
     # Default file, ok
-    default_path.unlink(missing_ok=True)
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate-with-default"])
     assert exc_info.value.code == 0
@@ -934,7 +933,6 @@ def test_help_preview_generation(tmp_path):
 
     # SVG file
     svg_file = tmp_path / "preview.svg"
-    svg_file.unlink(missing_ok=True)
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate", str(svg_file)])
     assert exc_info.value.code == 0
@@ -944,7 +942,6 @@ def test_help_preview_generation(tmp_path):
     # HTML file
     preview_action.export_kwds = {}
     html_file = tmp_path / "preview.html"
-    html_file.unlink(missing_ok=True)
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate", str(html_file)])
     assert exc_info.value.code == 0
@@ -954,7 +951,6 @@ def test_help_preview_generation(tmp_path):
     # TXT file
     preview_action.export_kwds = {}
     txt_file = tmp_path / "preview.txt"
-    txt_file.unlink(missing_ok=True)
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate", str(txt_file)])
     assert exc_info.value.code == 0
