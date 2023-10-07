@@ -2,6 +2,10 @@ name: tests
 
 on:
   pull_request:
+    paths-ignore:
+      - ".vscode/**"
+      - ".pre-commit-config.yaml"
+      - "*.md"
   push:
     branches: [main]
     paths-ignore:
