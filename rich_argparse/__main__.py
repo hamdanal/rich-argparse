@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import sys
 
-from rich_argparse import RichHelpFormatter
+from rich.terminal_theme import DIMMED_MONOKAI
+
+from rich_argparse import HelpPreviewAction, RichHelpFormatter
 
 if __name__ == "__main__":
     RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
@@ -84,17 +86,15 @@ if __name__ == "__main__":
         "--poor", action="store_false", dest="rich", help="Does poor mean --not-rich 😉?"
     )
     mutex.add_argument("--not-rich", action="store_false", dest="rich", help=argparse.SUPPRESS)
-
-    if "--generate-rich-argparse-preview" in sys.argv:  # for internal use only
-        from rich.console import Console
-        from rich.terminal_theme import DIMMED_MONOKAI
-        from rich.text import Text
-
-        width = 128
-        parser.formatter_class = lambda prog: RichHelpFormatter(prog, width=width)
-        text = Text.from_ansi(parser.format_help())
-        console = Console(record=True, width=width)
-        console.print(text)
-        console.save_svg("rich-argparse.svg", title="", theme=DIMMED_MONOKAI)
+    parser.add_argument(
+        "--generate-rich-argparse-preview",
+        action=HelpPreviewAction,
+        path="rich-argparse.svg",
+        export_kwds={"theme": DIMMED_MONOKAI},
+    )
+    # There is no program to run, always print help (except for the hidden --generate option)
+    # You probably don't want to do this in your own code.
+    if any(arg.startswith("--generate") for arg in sys.argv):
+        parser.parse_args()
     else:
         parser.print_help()

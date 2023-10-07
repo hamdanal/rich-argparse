@@ -30,6 +30,7 @@ from rich.text import Text
 import rich_argparse._lazy_rich as r
 from rich_argparse import (
     ArgumentDefaultsRichHelpFormatter,
+    HelpPreviewAction,
     MetavarTypeRichHelpFormatter,
     RawDescriptionRichHelpFormatter,
     RawTextRichHelpFormatter,
@@ -910,3 +911,65 @@ def test_rich_renderables():
     \x1b[31mThe end.\x1b[0m
     """
     assert parser.format_help() == clean(expected_help)
+
+
+def test_help_preview_generation(tmp_path):
+    parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
+    parser.add_argument("--foo", help="foo help")
+    preview_action = parser.add_argument("--generate", action=HelpPreviewAction)
+    default_path = tmp_path / "default-preview.svg"
+    parser.add_argument("--generate-with-default", action=HelpPreviewAction, path=str(default_path))
+
+    # No namespace pollution
+    args = parser.parse_args(["--foo", "FOO"])
+    assert vars(args) == {"foo": "FOO"}
+
+    # No help pollution
+    assert "--generate" not in parser.format_help()
+
+    # No file, error
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate"])
+    assert exc_info.value.code == 1
+
+    # Default file, ok
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate-with-default"])
+    assert exc_info.value.code == 0
+    assert default_path.exists()
+
+    # SVG file
+    svg_file = tmp_path / "preview.svg"
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate", str(svg_file)])
+    assert exc_info.value.code == 0
+    assert svg_file.exists()
+    assert svg_file.read_text().startswith("<svg")
+
+    # HTML file
+    preview_action.export_kwds = {}
+    html_file = tmp_path / "preview.html"
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate", str(html_file)])
+    assert exc_info.value.code == 0
+    assert html_file.exists()
+    assert html_file.read_text().startswith("<!DOCTYPE html>")
+
+    # TXT file
+    preview_action.export_kwds = {}
+    txt_file = tmp_path / "preview.txt"
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate", str(txt_file)])
+    assert exc_info.value.code == 0
+    assert txt_file.exists()
+    assert txt_file.read_text().startswith("Usage:")
+
+    # Wrong file extension
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate", str(tmp_path / "preview.png")])
+    assert exc_info.value.code == 1
+
+    # Wrong type
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate", ("",)])
+    assert exc_info.value.code == 1

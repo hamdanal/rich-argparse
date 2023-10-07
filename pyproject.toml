@@ -63,6 +63,7 @@ select = ["E", "F", "C", "B", "UP", "RUF100", "TID"]
 unfixable = ["B"]
 ignore = ["E501"]
 isort.required-imports = ["from __future__ import annotations"]
+isort.extra-standard-library = ["typing_extensions"]
 flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.mypy]

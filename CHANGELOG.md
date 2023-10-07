@@ -7,6 +7,8 @@
   * PR #90
 - Allow passing custom console to `RichHelpFormatter`.
   * Issue #91, PR #92
+- Add `HelpPreviewAction` to generate a preview of the help output in SVG, HTML, or TXT formats.
+  * Issue #91, PR #93
 
 ## 1.3.0 - 2023-08-19
 
