@@ -49,7 +49,7 @@ if __name__ == "__main__":
         default=RichHelpFormatter.styles["argparse.syntax"],
         help=(
             "Text inside backticks is highlighted using the `argparse.syntax` style "
-            "(default: '%(default)s')"
+            "(default: %(default)r)"
         ),
     )
     parser.add_argument(

@@ -82,6 +82,7 @@ class. *rich-argparse* defines the following styles:
     'argparse.prog': 'grey50',  # for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
     'argparse.syntax': 'bold',  # for highlights of back-tick quoted text (e.g. "`some text`")
     'argparse.text': 'default',  # for descriptions, epilog, and --version (e.g. "A program to foo")
+    'argparse.default': 'italic',  # for %(default)s in the help (e.g. "Value" in "(default: Value)")
 }
 ```
 

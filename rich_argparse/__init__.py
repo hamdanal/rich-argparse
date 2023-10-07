@@ -40,6 +40,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         "argparse.syntax": "bold",
         "argparse.text": "default",
         "argparse.prog": "grey50",
+        "argparse.default": "italic",
     }
     """A dict of rich styles to control the formatter styles.
 
@@ -50,8 +51,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
     - ``argparse.help``: for argument's help text (e.g. "show this help message and exit")
     - ``argparse.metavar``: for meta variables (e.g. "FILE" in "--file FILE")
     - ``argparse.prog``: for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
-    - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
+    - ``argparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```")
     - ``argparse.text``: for the descriptions and epilog (e.g. "A foo program")
+    - ``argparse.default``: for %(default)s in the help (e.g. "Value" in "(default: Value)")
     """
     highlights: ClassVar[list[str]] = _HIGHLIGHTS[:]
     """A list of regex patterns to highlight in the help text.
@@ -359,7 +361,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
         for m in self._printf_style_pattern.finditer(help_string):
             start, end = m.span()
             parts.append(help_string[last:start])
-            parts.append(r.escape(help_string[start:end] % params))
+            sub = r.escape(help_string[start:end] % params)
+            if m.group("mapping") == "default":
+                sub = f"[argparse.default]{sub}[/argparse.default]"
+            parts.append(sub)
             last = end
         parts.append(help_string[last:])
         rich_help = r.Text.from_markup("".join(parts), style="argparse.help")
