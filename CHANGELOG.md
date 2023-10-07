@@ -11,6 +11,8 @@
 - Add `HelpPreviewAction` to generate a preview of the help output in SVG, HTML, or TXT formats.
   * Issue [#91](https://github.com/hamdanal/rich-argparse/issues/91),
     PR [#93](https://github.com/hamdanal/rich-argparse/pull/93)
+- Avoid importing `typing` to improve startup time by about 35%.
+  * PR [#97](https://github.com/hamdanal/rich-argparse/pull/97)
 
 ## 1.3.0 - 2023-08-19
 
