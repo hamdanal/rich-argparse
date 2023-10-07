@@ -161,7 +161,7 @@ p2 = subparsers.add_parser(..., formatter_class=parser.formatter_class)
 You can generate a preview of the help message for your CLI in SVG, HTML, or TXT formats using the
 `HelpPreviewAction` action. This is useful for including the help message in the documentation of
 your app. The action uses the
-[rich exporting API](https://rich.readthedocs.io/en/stable/console.html#exporting).
+[rich exporting API](https://rich.readthedocs.io/en/stable/console.html#exporting) internally.
 
 ```python
 import argparse

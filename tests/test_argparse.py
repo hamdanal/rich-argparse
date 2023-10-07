@@ -920,6 +920,13 @@ def test_help_preview_generation(tmp_path):
     default_path = tmp_path / "default-preview.svg"
     parser.add_argument("--generate-with-default", action=HelpPreviewAction, path=str(default_path))
 
+    # No namespace pollution
+    args = parser.parse_args(["--foo", "FOO"])
+    assert vars(args) == {"foo": "FOO"}
+
+    # No help pollution
+    assert "--generate" not in parser.format_help()
+
     # No file, error
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate"])
