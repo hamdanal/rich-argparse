@@ -5,15 +5,17 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from typing import TYPE_CHECKING, Any, ClassVar
 
 import rich_argparse._lazy_rich as r
 from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, _rich_fill, _rich_wrap
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
     from argparse import Action, ArgumentParser, Namespace, _MutuallyExclusiveGroup
     from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
+    from typing import Any, ClassVar
     from typing_extensions import Self
+del TYPE_CHECKING
 
 __all__ = [
     "RichHelpFormatter",
