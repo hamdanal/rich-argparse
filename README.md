@@ -1,7 +1,7 @@
 # rich-argparse
 
 ![python -m rich_argparse](
-https://user-images.githubusercontent.com/93259987/224482407-ea1de764-09f7-415e-acaa-259466ba9c18.svg)
+https://github.com/hamdanal/rich-argparse/assets/93259987/ae4a4968-1008-4fcd-8131-7a90292a7f3f)
 
 [![tests](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml/badge.svg)
 ](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)

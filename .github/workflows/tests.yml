@@ -4,12 +4,14 @@ on:
   pull_request:
     paths-ignore:
       - ".vscode/**"
+      - "scripts/**"
       - ".pre-commit-config.yaml"
       - "*.md"
   push:
     branches: [main]
     paths-ignore:
       - ".vscode/**"
+      - "scripts/**"
       - ".pre-commit-config.yaml"
       - "*.md"
 

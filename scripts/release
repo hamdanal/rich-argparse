@@ -1,0 +1,18 @@
+#!/bin/env bash
+set -euxo pipefail
+
+# clear the dist directory
+rm -rf dist/
+
+# build the sdist and wheel
+pyproject-build .
+
+# check the contents of the sdist and wheel
+tar -tvf dist/rich_argparse-*.tar.gz
+unzip -l dist/rich_argparse-*.whl
+
+# continue?
+[[ "$(read -e -p 'Release? [y/N]> '; echo $REPLY)" == [Yy]* ]] || exit 1;
+
+# upload the new artifacts to pypi
+twine upload -r pypi dist/*
