@@ -28,6 +28,7 @@ changes to the code.
   * ["usage"](#colors-in-the-usage)
   * [--version](#colors-in---version)
 * [Subparsers](#working-with-subparsers)
+* [Documenting your CLI](#generate-help-preview)
 * [Third party formatters](#working-with-third-party-formatters) (ft. django)
 * [Optparse](#optparse-support) (experimental)
 * [Legacy Windows](#legacy-windows-support)
@@ -153,6 +154,39 @@ the formatter class explicitly:
 subparsers = parser.add_subparsers(...)
 p1 = subparsers.add_parser(..., formatter_class=parser.formatter_class)
 p2 = subparsers.add_parser(..., formatter_class=parser.formatter_class)
+```
+
+## Generate help preview
+
+You can generate a preview of the help message for your CLI in SVG, HTML, or TXT formats using the
+`HelpPreviewAction` action. This is useful for including the help message in the documentation of
+your app. The action uses the
+[rich exporting API](https://rich.readthedocs.io/en/stable/console.html#exporting).
+
+```python
+import argparse
+from rich.terminal_theme import DIMMED_MONOKAI
+from rich_argparse import HelpPreviewAction, RichHelpFormatter
+
+parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
+...
+parser.add_argument(
+    "--generate-help-preview",
+    action=HelpPreviewAction,
+    path="help-preview.svg",  # (optional) or "help-preview.html" or "help-preview.txt"
+    export_kwds={"theme": DIMMED_MONOKAI},  # (optional) keywords passed to console.save_... methods
+)
+```
+This action is hidden, it won't show up in the help message or in the parsed arguments namespace.
+
+Use it like this:
+
+```sh
+python my_cli.py --generate-help-preview  # generates help-preview.svg (default path specified above)
+# or
+python my_cli.py --generate-help-preview my-help.svg  # generates my-help.svg
+# or
+COLUMNS=120 python my_cli.py --generate-help-preview  # force the width of the output to 120 columns
 ```
 
 ## Working with third party formatters

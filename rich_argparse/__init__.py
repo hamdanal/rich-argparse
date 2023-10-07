@@ -437,13 +437,11 @@ class HelpPreviewAction(argparse.Action):
         default: str = argparse.SUPPRESS,
         help: str = argparse.SUPPRESS,
         *,
-        console: r.Console,
         path: str | None = None,
-        save_kwds: MutableMapping[str, Any] | None = None,
+        export_kwds: MutableMapping[str, Any] | None = None,
     ) -> None:
         super().__init__(option_strings, dest, nargs="?", const=path, default=default, help=help)
-        self.console = console
-        self.save_kwds = save_kwds or {}
+        self.export_kwds = export_kwds or {}
 
     def __call__(
         self,
@@ -457,20 +455,21 @@ class HelpPreviewAction(argparse.Action):
             parser.exit(1, "error: help preview path is not provided\n")
         if not isinstance(path, str):
             parser.exit(1, "error: help preview path must be a string\n")
-        if not path.endswith((".svg", ".html", ".text")):
-            parser.exit(1, "error: help preview path must end with .svg, .html, or .text\n")
+        if not path.endswith((".svg", ".html", ".txt")):
+            parser.exit(1, "error: help preview path must end with .svg, .html, or .txt\n")
 
-        old_record = self.console.record
-        self.console.record = True
-        try:
-            parser.format_help()
-            if path.endswith(".svg"):
-                self.save_kwds.setdefault("title", parser.prog)
-                self.console.save_svg(path, **self.save_kwds)
-            elif path.endswith(".html"):
-                self.console.save_html(path, **self.save_kwds)
-            elif path.endswith(".text"):
-                self.console.save_text(path, **self.save_kwds)
-        finally:
-            self.console.record = old_record
+        text = r.Text.from_ansi(parser.format_help())
+        console = r.Console(record=True)
+        with console.capture():
+            console.print(text, crop=False)
+
+        if path.endswith(".svg"):
+            self.export_kwds.setdefault("title", "")
+            console.save_svg(path, **self.export_kwds)
+        elif path.endswith(".html"):
+            console.save_html(path, **self.export_kwds)
+        elif path.endswith(".txt"):
+            console.save_text(path, **self.export_kwds)
+        else:
+            raise AssertionError("unreachable")
         parser.exit(0, f"Help preview saved to {path}\n")
