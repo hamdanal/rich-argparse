@@ -16,6 +16,8 @@
 - Add a style for default values when using `%(default)s` in the help text.
   * Issue [#84](https://github.com/hamdanal/rich-argparse/issues/84),
     PR [#98](https://github.com/hamdanal/rich-argparse/pull/98)
+- Allow arbitrary renderables in the descriptions and epilog
+  * PR [#99](https://github.com/hamdanal/rich-argparse/pull/99)
 
 ## 1.3.0 - 2023-08-19
 

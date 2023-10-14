@@ -896,11 +896,9 @@ def test_rich_renderables():
 
     \x1b[33m──────────────────────────────────────────────────────────────────────────────────────────────────\x1b[0m
 
-
      \x1b[1m \x1b[0m\x1b[1mfoo\x1b[0m\x1b[1m \x1b[0m \x1b[1m \x1b[0m\x1b[1mbar\x1b[0m
      ━━━━━━━━━━━
       1     2
-
 
     \x1b[38;5;208mOptional Arguments:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m

@@ -124,23 +124,22 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 parent.rich_items.append(self)
 
         def _render_items(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
+            if not self.rich_items:
+                return
             generated_options = options.update(no_wrap=True, overflow="ignore")
             new_line = r.Segment.line()
             for item in self.rich_items:
-                if isinstance(item, r.Padding):  # user added rich renderable
-                    item_options = options.update(width=options.max_width - item.left)
-                    lines = r.Segment.split_lines(console.render(item.renderable, item_options))
-                    pad = r.Segment(" " * item.left)
-                    for line_segments in lines:
-                        yield pad
-                        yield from line_segments
-                        yield new_line
-                    else:
-                        yield new_line
+                if isinstance(item, RichHelpFormatter._Section):
+                    yield from console.render(item, options)
+                elif isinstance(item, r.Padding):  # user added rich renderable
+                    yield from console.render(item, options)
+                    yield new_line
                 else:  # argparse generated rich renderable
                     yield from console.render(item, generated_options)
 
         def _render_actions(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
+            if not self.rich_actions:
+                return
             options = options.update(no_wrap=True, overflow="ignore")
             help_pos = min(self.formatter._action_max_length + 2, self.formatter._max_help_position)
             help_width = max(self.formatter._width - help_pos, 11)
@@ -164,20 +163,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
             yield ""
 
         def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
-            # empty section
             if not self.rich_items and not self.rich_actions:
-                return
-            # root section
-            if self is self.formatter._root_section:
-                yield from self._render_items(console, options)
-                return
-            # group section
+                return  # empty section
             if self.heading:
                 yield r.Text(self.heading, style="argparse.groups")
-            if self.rich_items:
-                yield from self._render_items(console, options)
-                if self.rich_actions:
-                    yield ""
+            yield from self._render_items(console, options)
             yield from self._render_actions(console, options)
 
     def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
@@ -186,17 +176,16 @@ class RichHelpFormatter(argparse.HelpFormatter):
             new_line = r.Segment.line()
             add_empty_line = False
             for line_segments in r.Segment.split_lines(root):
-                if len(line_segments) > 1 or (line_segments and line_segments[0]):
-                    if add_empty_line:
+                for i, segment in enumerate(reversed(line_segments), start=1):
+                    stripped = segment.text.rstrip()
+                    if stripped:
+                        if add_empty_line:
+                            yield new_line
+                        add_empty_line = False
+                        yield from line_segments[:-i]
+                        yield r.Segment(stripped, style=segment.style, control=segment.control)
                         yield new_line
-                    add_empty_line = False
-                    for i, segment in enumerate(reversed(line_segments), start=1):
-                        stripped = segment.text.rstrip()
-                        if stripped:
-                            yield from line_segments[:-i]
-                            yield r.Segment(stripped, style=segment.style, control=segment.control)
-                            break
-                    yield new_line
+                        break
                 else:  # empty line
                     add_empty_line = True
 
