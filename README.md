@@ -27,6 +27,7 @@ changes to the code.
   * [Highlighting patterns](#special-text-highlighting)
   * ["usage"](#colors-in-the-usage)
   * [--version](#colors-in---version)
+  * [Rich renderables](#rich-descriptions-and-epilog)
 * [Subparsers](#working-with-subparsers)
 * [Documenting your CLI](#generate-help-preview)
 * [Third party formatters](#working-with-third-party-formatters) (ft. django)
@@ -145,6 +146,44 @@ parser.add_argument(
 
 Note that the `argparse.text` style is applied to the `version` string similar to the description
 and epilog.
+
+### Rich descriptions and epilog
+
+You can use any rich renderable in the descriptions and epilog. This includes all built-in rich
+renderables like `Table` and `Markdown` and any custom renderables defined using the
+[Console Protcol](https://rich.readthedocs.io/en/stable/protocol.html#console-protocol).
+
+```python
+import argparse
+from rich.markdown import Markdown
+from rich_argparse import RichHelpFormatter
+
+description = """
+# My program
+
+This is a markdown description of my program.
+
+* It has a list
+* And a table
+
+| Column 1 | Column 2 |
+| -------- | -------- |
+| Value 1  | Value 2  |
+"""
+parser = argparse.ArgumentParser(
+    description=Markdown(description, style="argparse.text"),
+    formatter_class=RichHelpFormatter,
+)
+...
+```
+Certain features are **disabled** for arbitrary renderables other than strings, including:
+
+* Syntax highlighting with `RichHelpFormatter.highlights`
+* Styling with the `"argparse.text"` style defined in `RichHelpFormatter.styles`
+* Replacement of `%(prog)s` with the program name
+
+Arbitrary renderables are displayed "as is" except for long runs of empty lines that get truncated
+to two empty lines following the behavior of argparse.
 
 ## Working with subparsers
 
