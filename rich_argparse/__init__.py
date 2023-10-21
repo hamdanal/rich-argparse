@@ -317,7 +317,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
             elif action.nargs in (None, argparse.OPTIONAL, argparse.PARSER):
                 nargs = 1
             elif action.nargs == argparse.ZERO_OR_MORE:
-                nargs = 2 if len(metavar_tuple) == 2 else 1
+                if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
+                    nargs = 2 if len(metavar_tuple) == 2 else 1
+                else:  # pragma: <3.9 cover
+                    nargs = 2
             elif action.nargs == argparse.ONE_OR_MORE:
                 nargs = 2
             else:  # pragma: no cover
