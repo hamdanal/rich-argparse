@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0 - 2023-10-21
+
 ### Features
 - Make `RichHelpFormatter` itself a rich renderable.
   * PR [#90](https://github.com/hamdanal/rich-argparse/pull/90)
@@ -23,6 +25,7 @@
 - Fix color of brackets surrounding positional arguments in the usage.
   * Issue [#100](https://github.com/hamdanal/rich-argparse/issues/100),
     PR [#101](https://github.com/hamdanal/rich-argparse/pull/101)
+
 ## 1.3.0 - 2023-08-19
 
 ### Features
