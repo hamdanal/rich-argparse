@@ -383,28 +383,43 @@ def test_user_usage(usage, expected, usage_markup):
 @pytest.mark.usefixtures("force_color")
 def test_actions_spans_in_usage():
     parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
-    parser.add_argument("arg", nargs="*")
+    parser.add_argument("required")
+    parser.add_argument("int", nargs=2)
+    parser.add_argument("optional", nargs=argparse.OPTIONAL)
+    parser.add_argument("zom", nargs=argparse.ZERO_OR_MORE)
+    parser.add_argument("oom", nargs=argparse.ONE_OR_MORE)
+    parser.add_argument("remainder", nargs=argparse.REMAINDER)
+    parser.add_argument("parser", nargs=argparse.PARSER)
+    parser.add_argument("suppress", nargs=argparse.SUPPRESS)
     mut_ex = parser.add_mutually_exclusive_group()
     mut_ex.add_argument("--opt", nargs="?")
     mut_ex.add_argument("--opts", nargs="+")
 
     # https://github.com/python/cpython/issues/82619
     if sys.version_info < (3, 9):  # pragma: <3.9 cover
-        arg_metavar = "[arg [arg ...]]"
+        zom_metavar = "[\x1b[36mzom\x1b[0m [\x1b[36mzom\x1b[0m ...]]"
     else:  # pragma: >=3.9 cover
-        arg_metavar = "[arg ...]"
+        zom_metavar = "[\x1b[36mzom\x1b[0m ...]"
 
     usage_text = (
         f"\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
         f"[\x1b[36m--opt\x1b[0m \x1b[38;5;36m[OPT]\x1b[0m | "
-        f"\x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m] "
-        f"\x1b[36m{arg_metavar}\x1b[0m"
+        f"\x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS [OPTS ...]\x1b[0m]\n                "
+        f"\x1b[36mrequired\x1b[0m \x1b[36mint\x1b[0m \x1b[36mint\x1b[0m [\x1b[36moptional\x1b[0m] "
+        f"{zom_metavar} \x1b[36moom\x1b[0m [\x1b[36moom\x1b[0m ...] ... \x1b[36mparser\x1b[0m ..."
     )
     expected_help_output = f"""\
     {usage_text}
 
     \x1b[38;5;208mPositional Arguments:\x1b[0m
-      \x1b[36marg\x1b[0m
+      \x1b[36mrequired\x1b[0m
+      \x1b[36mint\x1b[0m
+      \x1b[36moptional\x1b[0m
+      \x1b[36mzom\x1b[0m
+      \x1b[36moom\x1b[0m
+      \x1b[36mremainder\x1b[0m
+      \x1b[36mparser\x1b[0m
+      \x1b[36msuppress\x1b[0m
 
     \x1b[38;5;208mOptional Arguments:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m            \x1b[39mshow this help message and exit\x1b[0m
@@ -706,7 +721,7 @@ def test_subparsers_usage():
     rich_child2 = rich_subparsers.add_parser("sp2")
     assert rich_parent.format_usage() == (
         "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
-        "\x1b[36m{sp1,sp2} ...\x1b[0m\n"
+        "\x1b[36m{sp1,sp2}\x1b[0m ...\n"
     )
     assert rich_child1.format_usage() == (
         "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"

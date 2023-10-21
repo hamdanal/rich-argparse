@@ -272,7 +272,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             last = end
             yield r.Span(prog_start, prog_end, "argparse.prog")
 
-    def _rich_usage_spans(
+    def _rich_usage_spans(  # noqa: C901
         self, text: str, start: int, actions: Iterable[Action]
     ) -> Iterator[r.Span]:
         options: list[Action] = []
@@ -307,10 +307,30 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 yield r.Span(start, end, "argparse.metavar")
             pos = end + 1
         for action in positionals:  # positionals come at the end
-            usage = self._format_args(action, self._get_default_metavar_for_positional(action))
-            start, end = find_span(usage)
-            yield r.Span(start, end, "argparse.args")
-            pos = end + 1
+            metavar = self._get_default_metavar_for_positional(action)
+            metavar_tuple = self._metavar_formatter(action, metavar)(1)
+            usage = metavar_tuple[0]
+            if isinstance(action.nargs, int):
+                nargs = action.nargs
+            elif action.nargs in (argparse.REMAINDER, argparse.SUPPRESS):
+                nargs = 0
+            elif action.nargs in (None, argparse.OPTIONAL, argparse.PARSER):
+                nargs = 1
+            elif action.nargs == argparse.ZERO_OR_MORE:
+                if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
+                    nargs = 2 if len(metavar_tuple) == 2 else 1
+                else:  # pragma: <3.9 cover
+                    nargs = 2
+            elif action.nargs == argparse.ONE_OR_MORE:
+                nargs = 2
+            else:  # pragma: no cover
+                # unknown nargs, fallback to coloring the whole thing
+                usage = self._format_args(action, metavar)
+                nargs = 1
+            for _ in range(nargs):
+                start, end = find_span(usage)
+                yield r.Span(start, end, "argparse.args")
+                pos = end + 1
 
     def _rich_whitespace_sub(self, text: r.Text) -> r.Text:
         # do this `self._whitespace_matcher.sub(' ', text).strip()` but text is Text
