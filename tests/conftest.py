@@ -3,15 +3,10 @@ from __future__ import annotations
 import io
 import os
 import sys
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Protocol, TypeVar
 from unittest.mock import patch
 
 import pytest
-
-if sys.version_info >= (3, 8):  # pragma: >=3.8 cover
-    from typing import Protocol
-else:  # pragma: <3.8 cover
-    from typing_extensions import Protocol
 
 
 class Parser(Protocol):
