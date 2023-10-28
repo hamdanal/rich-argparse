@@ -1,4 +1,3 @@
 pytest
 coverage[toml]
 covdefaults
-typing_extensions;python_version<"3.8"
