@@ -1,18 +1,16 @@
 {
-    // Python
     "python.analysis.diagnosticSeverityOverrides": {
         "reportInvalidStringEscapeSequence": "warning",
         "reportUnusedImport": "warning",
     },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "python.formatting.provider": "none",
     "[python]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports.ruff": true,
+            "source.organizeImports.ruff": "explicit",
         },
     },
     "[yaml][toml]": {
