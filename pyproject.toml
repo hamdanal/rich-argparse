@@ -54,9 +54,6 @@ commands =
   coverage html
 """
 
-[tool.black]
-line_length = 100
-
 [tool.ruff]
 line-length = 100
 select = ["E", "F", "C", "B", "UP", "RUF100", "TID"]
