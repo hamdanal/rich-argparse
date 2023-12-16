@@ -1,3 +1,3 @@
 pytest
-coverage[toml]
+coverage[toml]!=7.3.3
 covdefaults
