@@ -56,7 +56,7 @@ commands =
 
 [tool.ruff]
 line-length = 100
-select = ["E", "F", "C", "B", "UP", "RUF100", "TID"]
+select = ["E", "F", "C", "B", "UP", "RUF100", "TID", "T10"]
 unfixable = ["B"]
 ignore = ["E501"]
 isort.required-imports = ["from __future__ import annotations"]
