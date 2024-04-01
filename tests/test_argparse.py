@@ -244,8 +244,7 @@ def test_escape_params():
         epilog="%(prog)s epilog.",
     )
 
-    class SpecialType(str):
-        ...
+    class SpecialType(str): ...
 
     SpecialType.__name__ = "[link]"
 
