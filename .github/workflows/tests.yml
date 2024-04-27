@@ -35,7 +35,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - name: Install tox
-        run: pipx install tox
+        run: pipx install tox && pipx inject tox tox-uv
       - name: Run the test suite
         run: tox run -e py${{ matrix.python-version }} -- -vv --color=yes
       - name: Upload coverage report if tests fail.

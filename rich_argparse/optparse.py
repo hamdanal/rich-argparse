@@ -50,24 +50,20 @@ class RichHelpFormatter(optparse.HelpFormatter):
     """
 
     def __init__(
-        self,
-        indent_increment: int,
-        max_help_position: int,
-        width: int | None,
-        short_first: int,
+        self, indent_increment: int, max_help_position: int, width: int | None, short_first: int
     ) -> None:
         super().__init__(indent_increment, max_help_position, width, short_first)
         self._console: r.Console | None = None
         self.rich_option_strings: dict[optparse.Option, r.Text] = {}
 
     @property
-    def console(self) -> r.Console:  # deprecate?
+    def console(self) -> r.Console:
         if self._console is None:
             self._console = r.Console(theme=r.Theme(self.styles))
         return self._console
 
     @console.setter
-    def console(self, console: r.Console) -> None:  # is this needed?
+    def console(self, console: r.Console) -> None:
         self._console = console
 
     def _stringify(self, text: r.RenderableType) -> str:
@@ -93,12 +89,12 @@ class RichHelpFormatter(optparse.HelpFormatter):
             rich_text.highlight_regex(highlight, style_prefix="optparse.")
         return _rich_fill(self.console, rich_text, text_width, indent)
 
-    def rich_format_description(self, description: str) -> r.Text:
+    def rich_format_description(self, description: str | None) -> r.Text:
         if not description:
             return r.Text()
         return self._rich_format_text(description) + r.Text("\n")
 
-    def rich_format_epilog(self, epilog: str) -> r.Text:
+    def rich_format_epilog(self, epilog: str | None) -> r.Text:
         if not epilog:
             return r.Text()
         return r.Text("\n") + self._rich_format_text(epilog) + r.Text("\n")
@@ -113,10 +109,10 @@ class RichHelpFormatter(optparse.HelpFormatter):
     def format_heading(self, heading: str) -> str:
         return self._stringify(self.rich_format_heading(heading))
 
-    def format_description(self, description: str) -> str:
+    def format_description(self, description: str | None) -> str:
         return self._stringify(self.rich_format_description(description))
 
-    def format_epilog(self, epilog: str) -> str:
+    def format_epilog(self, epilog: str | None) -> str:
         return self._stringify(self.rich_format_epilog(epilog))
 
     def rich_expand_default(self, option: optparse.Option) -> r.Text:

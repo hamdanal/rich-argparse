@@ -48,6 +48,8 @@ skip_missing_interpreters = true
 
 [testenv]
 deps = -rtests/requirements.txt
+set_env =
+  COLUMNS=80
 commands =
   coverage run -m pytest {posargs}
   coverage report
@@ -56,9 +58,11 @@ commands =
 
 [tool.ruff]
 line-length = 100
-select = ["E", "F", "C", "B", "UP", "RUF100", "TID", "T10"]
+
+[tool.ruff.lint]
+extend-select = ["C4", "B", "UP", "RUF100", "TID", "T10"]
+extend-ignore = ["E501"]
 unfixable = ["B"]
-ignore = ["E501"]
 isort.required-imports = ["from __future__ import annotations"]
 isort.extra-standard-library = ["typing_extensions"]
 flake8-tidy-imports.ban-relative-imports = "all"

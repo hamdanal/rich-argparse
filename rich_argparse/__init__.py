@@ -272,7 +272,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             last = end
             yield r.Span(prog_start, prog_end, "argparse.prog")
 
-    def _rich_usage_spans(  # noqa: C901
+    def _rich_usage_spans(
         self, text: str, start: int, actions: Iterable[Action]
     ) -> Iterator[r.Span]:
         options: list[Action] = []
