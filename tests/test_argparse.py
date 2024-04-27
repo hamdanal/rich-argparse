@@ -244,8 +244,7 @@ def test_escape_params():
         epilog="%(prog)s epilog.",
     )
 
-    class SpecialType(str):
-        ...
+    class SpecialType(str): ...
 
     SpecialType.__name__ = "[link]"
 
@@ -316,6 +315,8 @@ def test_generated_usage():
         "(\x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m | \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m) "
         "\x1b[36mfile\x1b[0m"
     )
+    if sys.version_info >= (3, 11):  # pragma: >=3.11 cover
+        usage_text = usage_text.replace("  ", " ")
 
     expected_help_output = f"""\
     \x1b[38;5;208mUsage:\x1b[0m {usage_text}

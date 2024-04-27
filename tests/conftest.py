@@ -10,11 +10,9 @@ import pytest
 
 
 class Parser(Protocol):
-    def format_help(self) -> str:
-        ...
+    def format_help(self) -> str: ...
 
-    def parse_args(self, *args, **kwds) -> Any:
-        ...
+    def parse_args(self, *args, **kwds) -> Any: ...
 
 
 PT = TypeVar("PT", bound=Parser)  # parser type
