@@ -114,7 +114,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         def __init__(
             self, formatter: RichHelpFormatter, parent: Self | None, heading: str | None = None
         ) -> None:
-            if heading is not None:
+            if heading is not argparse.SUPPRESS and heading is not None:
                 heading = f"{type(formatter).group_name_formatter(heading)}:"
             super().__init__(formatter, parent, heading)
             self.formatter: RichHelpFormatter
@@ -165,7 +165,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         def __rich_console__(self, console: r.Console, options: r.ConsoleOptions) -> r.RenderResult:
             if not self.rich_items and not self.rich_actions:
                 return  # empty section
-            if self.heading:
+            if self.heading is not argparse.SUPPRESS and self.heading is not None:
                 yield r.Text(self.heading, style="argparse.groups")
             yield from self._render_items(console, options)
             yield from self._render_actions(console, options)

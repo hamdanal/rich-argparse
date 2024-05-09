@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Breaking changes
+- Drop support for Python 3.7
+  * Issue [#95](https://github.com/hamdanal/rich-argparse/issues/95),
+    PR [#103](https://github.com/hamdanal/rich-argparse/pull/103)
+
+### Features
+- Python 3.13 is now officially supported
+  * PR [#103](https://github.com/hamdanal/rich-argparse/pull/103)
+
+### Fixes
+- Do not print suppressed group names
+  * Issue [#115](https://github.com/hamdanal/rich-argparse/issues/115),
+    PR [#116](https://github.com/hamdanal/rich-argparse/pull/116)
+
 ## 1.4.0 - 2023-10-21
 
 ### Features

@@ -147,6 +147,8 @@ def test_overall_structure(prog, usage, description, epilog):
     parsers.add_argument_group("", description="empty_name_empty_group description")
     parsers.add_argument_group(description="no_name_empty_group description")
     parsers.add_argument_group("spaces group", description=" \tspaces_group description  ")
+    parsers.add_argument_group(SUPPRESS, description="suppressed_name_group description")
+    parsers.add_argument_group(SUPPRESS, description=SUPPRESS)
 
     # all types of non-empty groups
     groups = parsers.add_argument_group("group name", description="group description")
@@ -159,6 +161,14 @@ def test_overall_structure(prog, usage, description, epilog):
     no_name_groups.add_argument("arg", help="arg help inside no_name_group")
     no_name_no_desc_groups = parsers.add_argument_group()
     no_name_no_desc_groups.add_argument("arg", help="arg help inside no_name_no_desc_group")
+    suppressed_name_groups = parsers.add_argument_group(
+        SUPPRESS, description="suppressed_name_group description"
+    )
+    suppressed_name_groups.add_argument("arg", help="arg help inside suppressed_name_group")
+    suppressed_name_desc_groups = parsers.add_argument_group(SUPPRESS, description=SUPPRESS)
+    suppressed_name_desc_groups.add_argument(
+        "arg", help="arg help inside suppressed_name_desc_group"
+    )
 
     parsers.assert_format_help_equal()
 
