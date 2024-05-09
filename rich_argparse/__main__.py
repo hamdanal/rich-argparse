@@ -8,7 +8,6 @@ from rich.terminal_theme import DIMMED_MONOKAI
 from rich_argparse import HelpPreviewAction, RichHelpFormatter
 
 if __name__ == "__main__":
-    RichHelpFormatter.highlights.append(r"(?:^|\s)-{1,2}[\w]+[\w-]* (?P<metavar>METAVAR)\b")
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
         formatter_class=RichHelpFormatter,
@@ -17,23 +16,19 @@ if __name__ == "__main__":
             "[link https://docs.python.org/3/library/argparse.html#formatter-class]"
             "argparse's help output[/].\n\n"
             "It enables you to use the powers of rich like markup and highlights in your CLI help. "
-            "Read below for a glance at available features."
         ),
         epilog=":link: Read more at https://github.com/hamdanal/rich-argparse#usage.",
     )
     parser.add_argument(
         "formatter-class",
         help=(
-            "All you need to make your argparse.ArgumentParser output colorful text like this is to "
-            "pass it `formatter_class=RichHelpFormatter` or any of the available variants."
+            "Simply pass `formatter_class=RichHelpFormatter` to the argument parser to get a "
+            "colorful help like this."
         ),
     )
     parser.add_argument(
         "styles",
-        help=(
-            "All the styles used by this formatter are defined in `RichHelpFormatter.styles`. "
-            "Modify this dictionary with any rich style to change the look of your CLI's help text."
-        ),
+        help="Customize your CLI's help with the `RichHelpFormatter.styles` dictionary.",
     )
     parser.add_argument(
         "--highlights",
@@ -53,16 +48,10 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
-        "-s",
-        "--long-option",
+        "-o",
+        "--option",
         metavar="METAVAR",
-        help=(
-            "Words that look like --command-line-options are highlighted using the `argparse.args` "
-            "style. In addition, this example, adds a highlighter regex for the word 'METAVAR' "
-            "following an option for the sake of demonstrating custom highlights.\n"
-            "Notice also that if an option takes a value and has short and long options, it is "
-            "printed as -s, --long-option METAVAR instead of -s METAVAR, --long-option METAVAR."
-        ),
+        help="Text that looks like an --option is highlighted using the `argparse.args` style.",
     )
     group = parser.add_argument_group(
         "more arguments",
