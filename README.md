@@ -69,10 +69,10 @@ https://docs.python.org/3/library/argparse.html#formatter-class):
 The default styles used by *rich-argparse* are carefully chosen to work in different light and dark
 themes.
 
-### Customize the colors
+### Customize the font style and colors
 
-You can customize the colors in the output by modifying the `styles` dictionary on the formatter
-class. *rich-argparse* defines the following styles:
+You can customize the font style and colors of the output by modifying the values of the `styles` dictionary on the formatter
+class:
 
 ```python
 {
@@ -86,6 +86,8 @@ class. *rich-argparse* defines the following styles:
     'argparse.default': 'italic',  # for %(default)s in the help (e.g. "Value" in "(default: Value)")
 }
 ```
+
+Any color supported by [Rich](https://github.com/Textualize/rich) works here ([this list of color names is currently supplied](https://rich.readthedocs.io/en/latest/appendix/colors.html#appendix-colors)).
 
 For example, to make the description and epilog *italic*, change the `argparse.text` style:
 
