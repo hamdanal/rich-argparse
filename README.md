@@ -1,7 +1,7 @@
 # rich-argparse
 
 ![python -m rich_argparse](
-https://github.com/hamdanal/rich-argparse/assets/93259987/ed51127f-944c-4ac3-8c94-8033bd1edb10)
+https://github.com/hamdanal/rich-argparse/assets/93259987/8b90e62e-d6e4-4df0-9ced-0d6aac65337e)
 
 [![tests](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml/badge.svg)
 ](https://github.com/hamdanal/rich-argparse/actions/workflows/tests.yml)
@@ -72,8 +72,9 @@ themes.
 
 ### Customize the colors
 
-You can customize the colors in the output by modifying the `styles` dictionary on the formatter
-class. *rich-argparse* defines the following styles:
+You can customize the colors of the output by modifying the `styles` dictionary on the formatter
+class. You can use any rich style as defined [here](https://rich.readthedocs.io/en/latest/style.html).
+*rich-argparse* defines and uses the following styles:
 
 ```python
 {
