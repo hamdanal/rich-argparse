@@ -26,6 +26,7 @@ changes to the code.
   * [Group names](#customize-the-group-name-format)
   * [Highlighting patterns](#special-text-highlighting)
   * ["usage"](#colors-in-the-usage)
+  * [Console markup](#disable-console-markup)
   * [--version](#colors-in---version)
   * [Rich renderables](#rich-descriptions-and-epilog)
 * [Subparsers](#working-with-subparsers)
@@ -133,6 +134,17 @@ will **not** be colored by default. You can enable colors in user defined usage 
 [console markup](https://rich.readthedocs.io/en/stable/markup.html) by setting
 `RichHelpFormatter.usage_markup = True`. If you enable this option, make sure to [escape](
 https://rich.readthedocs.io/en/stable/markup.html#escaping) any square brackets in the usage text.
+
+### Disable console markup
+
+The text of the descriptions and epilog is interpreted as
+[console markup](https://rich.readthedocs.io/en/stable/markup.html) by default. If this conflicts
+with your usage of square brackets, make sure to [escape](
+https://rich.readthedocs.io/en/stable/markup.html#escaping) the square brackets or to disable
+markup globally with `RichHelpFormatter.text_markup = False`.
+
+Similarly the help text of arguments is interpreted as markup by default. It can be disabled using
+`RichHelpFormatter.help_markup = False`.
 
 ### Colors in `--version`
 

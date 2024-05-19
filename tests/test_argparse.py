@@ -1000,3 +1000,41 @@ def test_help_preview_generation(tmp_path):
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--generate", ("",)])
     assert exc_info.value.code == 1
+
+
+def test_disable_help_markup():
+    parser = ArgumentParser(
+        prog="PROG", formatter_class=RichHelpFormatter, description="[red]Description text.[/]"
+    )
+    parser.add_argument("--foo", help="[red]Help text.[/]")
+    with patch.object(RichHelpFormatter, "help_markup", False):
+        help_text = parser.format_help()
+    expected_help_text = """\
+    Usage: PROG [-h] [--foo FOO]
+
+    Description text.
+
+    Optional Arguments:
+      -h, --help  show this help message and exit
+      --foo FOO   [red]Help text.[/]
+    """
+    assert help_text == clean(expected_help_text)
+
+
+def test_disable_text_markup():
+    parser = ArgumentParser(
+        prog="PROG", formatter_class=RichHelpFormatter, description="[red]Description text.[/]"
+    )
+    parser.add_argument("--foo", help="[red]Help text.[/]")
+    with patch.object(RichHelpFormatter, "text_markup", False):
+        help_text = parser.format_help()
+    expected_help_text = """\
+    Usage: PROG [-h] [--foo FOO]
+
+    [red]Description text.[/]
+
+    Optional Arguments:
+      -h, --help  show this help message and exit
+      --foo FOO   Help text.
+    """
+    assert help_text == clean(expected_help_text)

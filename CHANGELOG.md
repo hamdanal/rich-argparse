@@ -10,6 +10,11 @@
 ### Features
 - Python 3.13 is now officially supported
   * PR [#103](https://github.com/hamdanal/rich-argparse/pull/103)
+- Add options `help_markup` and `text_markup` to globally disable console markup in the help text
+  and the description text respectively
+  * Issue [#120](https://github.com/hamdanal/rich-argparse/issues/120),
+    Issue [#121](https://github.com/hamdanal/rich-argparse/issues/121),
+    PR [#122](https://github.com/hamdanal/rich-argparse/pull/122)
 
 ### Fixes
 - Do not print suppressed group names

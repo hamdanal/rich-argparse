@@ -71,6 +71,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
     Note that the auto-generated usage string is always colored.
     """
+    help_markup: ClassVar[bool] = True
+    """If True (default), render the help message of arguments as console markup."""
+    text_markup: ClassVar[bool] = True
+    """If True (default), render the descriptions and epilog as console markup."""
 
     _root_section: _Section
     _current_section: _Section
@@ -376,7 +380,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
             parts.append(sub)
             last = end
         parts.append(help_string[last:])
-        rich_help = r.Text.from_markup("".join(parts), style="argparse.help")
+        rich_help = (
+            r.Text.from_markup("".join(parts), style="argparse.help")
+            if self.help_markup
+            else r.Text("".join(parts), style="argparse.help")
+        )
         for highlight in self.highlights:
             rich_help.highlight_regex(highlight, style_prefix="argparse.")
         return rich_help
@@ -384,7 +392,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
     def _rich_format_text(self, text: str) -> r.Text:
         if "%(prog)" in text:
             text = text % {"prog": r.escape(self._prog)}
-        rich_text = r.Text.from_markup(text, style="argparse.text")
+        rich_text = (
+            r.Text.from_markup(text, style="argparse.text")
+            if self.text_markup
+            else r.Text(text, style="argparse.text")
+        )
         for highlight in self.highlights:
             rich_text.highlight_regex(highlight, style_prefix="argparse.")
         text_width = max(self._width - self._current_indent * 2, 11)
