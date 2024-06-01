@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.5.0 - 2024-06-01
+
 ### Features
 - [PR-103](https://github.com/hamdanal/rich-argparse/pull/103)
   Python 3.13 is now officially supported
