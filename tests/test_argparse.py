@@ -1006,7 +1006,7 @@ def test_disable_help_markup():
     parser = ArgumentParser(
         prog="PROG", formatter_class=RichHelpFormatter, description="[red]Description text.[/]"
     )
-    parser.add_argument("--foo", help="[red]Help text.[/]")
+    parser.add_argument("--foo", default="def", help="[red]Help text (default: %(default)s).[/]")
     with patch.object(RichHelpFormatter, "help_markup", False):
         help_text = parser.format_help()
     expected_help_text = """\
@@ -1016,7 +1016,7 @@ def test_disable_help_markup():
 
     Optional Arguments:
       -h, --help  show this help message and exit
-      --foo FOO   [red]Help text.[/]
+      --foo FOO   [red]Help text (default: def).[/]
     """
     assert help_text == clean(expected_help_text)
 
