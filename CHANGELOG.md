@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## 1.5.1 - 2024-06-06
+
 ### Fixes
-- [GH-121](https://github.com/hamdanal/rich-argparse/issues/115),
-  [PR-123](https://github.com/hamdanal/rich-argparse/pull/116)
+- [GH-121](https://github.com/hamdanal/rich-argparse/issues/121),
+  [PR-123](https://github.com/hamdanal/rich-argparse/pull/123)
   Fix `%(default)s` style when help markup is deactivated.
 
 ## 1.5.0 - 2024-06-01
