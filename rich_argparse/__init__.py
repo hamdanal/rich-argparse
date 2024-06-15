@@ -376,10 +376,12 @@ class RichHelpFormatter(argparse.HelpFormatter):
         for m in self._printf_style_pattern.finditer(help_string):
             start, end = m.span()
             parts.append(help_string[last:start])
-            sub = r.escape(help_string[start:end] % params)
+            sub = help_string[start:end] % params
             if m.group("mapping") == "default":
                 defaults.append(sub)
                 sub = default_repl
+            else:
+                sub = r.escape(sub)
             parts.append(sub)
             last = end
         parts.append(help_string[last:])
