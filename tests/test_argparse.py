@@ -1038,3 +1038,22 @@ def test_disable_text_markup():
       --foo FOO   Help text.
     """
     assert help_text == clean(expected_help_text)
+
+
+@pytest.mark.usefixtures("force_color")
+def test_arg_default_spans():
+    parser = ArgumentParser(prog="PROG", formatter_class=RichHelpFormatter)
+    parser.add_argument(
+        "--foo",
+        default="def",
+        help="(default: %(default)r) [red](default: %(default)s)[/] (default: %(default)s)",
+    )
+    expected_help_text = """\
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] [\x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m]
+
+    \x1b[38;5;208mOptional Arguments:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
+      \x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m   \x1b[39m(default: \x1b[0m\x1b[3;39m'def'\x1b[0m\x1b[39m) \x1b[0m\x1b[31m(default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[31m)\x1b[0m\x1b[39m (default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[39m)\x1b[0m
+    """
+    help_text = parser.format_help()
+    assert help_text == clean(expected_help_text)

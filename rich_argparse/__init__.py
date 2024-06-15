@@ -370,14 +370,18 @@ class RichHelpFormatter(argparse.HelpFormatter):
         # raise ValueError if needed
         help_string % params  # pyright: ignore[reportUnusedExpression]
         parts = []
-        default_span: r.Span | None = None
+        defaults: list[str] = []
+        default_repl = "rich-argparse-f3ae8b55df34d5d83a8189d2e4766e68-argparse-rich"
         last = 0
         for m in self._printf_style_pattern.finditer(help_string):
             start, end = m.span()
             parts.append(help_string[last:start])
-            sub = r.escape(help_string[start:end] % params)
+            sub = help_string[start:end] % params
             if m.group("mapping") == "default":
-                default_span = r.Span(start, start + len(sub), "argparse.default")
+                defaults.append(sub)
+                sub = default_repl
+            else:
+                sub = r.escape(sub)
             parts.append(sub)
             last = end
         parts.append(help_string[last:])
@@ -386,8 +390,14 @@ class RichHelpFormatter(argparse.HelpFormatter):
             if self.help_markup
             else r.Text("".join(parts), style="argparse.help")
         )
-        if default_span:
-            rich_help.spans.append(default_span)
+        default_repl_len = len(default_repl)
+        for default in reversed(defaults):
+            default_index = rich_help.plain.rindex(default_repl)
+            rich_help = (
+                rich_help[:default_index]
+                .append(default, style="argparse.default")
+                .append(rich_help[default_index + default_repl_len :])
+            )
         for highlight in self.highlights:
             rich_help.highlight_regex(highlight, style_prefix="argparse.")
         return rich_help
