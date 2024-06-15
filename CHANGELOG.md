@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+- [PR-124](https://github.com/hamdanal/rich-argparse/pull/124)
+  Fix a regression in `%(default)s` style that was introduced in #123.
+
 ## 1.5.1 - 2024-06-06
 
 ### Fixes
