@@ -288,8 +288,13 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
         def find_span(_string: str) -> tuple[int, int]:
             stripped = r.strip_control_codes(_string)
-            _start = text.index(stripped, pos)
-            _end = _start + len(stripped)
+            pattern = re.escape(stripped).replace('\\ ','(?:\n\\s*)?\s')
+            try:
+                match = list(filter(lambda match: match.start() >= pos, re.finditer(pattern,text)))[0]
+                _start = match.start()
+                _end = match.end()
+            except IndexError:
+                raise ValueError(f"'{stripped}' not in usage text")
             return _start, _end
 
         for action in options:  # start with the options
