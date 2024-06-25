@@ -286,36 +286,49 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 options.append(action) if action.option_strings else positionals.append(action)
         pos = start
 
-        def find_span(_string: str) -> tuple[int, int]:
+        def find_span(_string: str) -> list[tuple[int, int]]:
             stripped = r.strip_control_codes(_string)
-            pattern = re.escape(stripped).replace("\\ ", "(?:\n\\s*)?\\s")
+            # Create regex pattern
+            pattern = re.escape(stripped).replace("\\ ", "((?:\n\\s*))?\\s", 1)
             try:
                 match = list(
                     filter(lambda match: match.start() >= pos, re.finditer(pattern, text))
                 )[0]
-                _start = match.start()
-                _end = match.end()
+                if len(match.groups()) == 0 or match.groups() == (
+                    None,
+                ):  # Metavar not in multiple lines
+                    boundaries = [(match.start(), match.end())]
+                else:  # Metavar in multiple lines
+                    boundaries = [(match.start(), match.start(1)), (match.end(1) + 1, match.end())]
             except IndexError as err:
                 raise ValueError(f"'{stripped}' not in usage text") from err
-            return _start, _end
+            return boundaries
 
         for action in options:  # start with the options
             if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
                 usage = action.format_usage()
                 if isinstance(action, argparse.BooleanOptionalAction):
                     for option_string in action.option_strings:
-                        start, end = find_span(option_string)
+                        start, end = find_span(option_string)[0]
                         yield r.Span(start, end, "argparse.args")
                         pos = end + 1
                     continue
             else:  # pragma: <3.9 cover
                 usage = action.option_strings[0]
-            start, end = find_span(usage)
+            start, end = find_span(usage)[0]
             yield r.Span(start, end, "argparse.args")
             if action.nargs != 0:
                 metavar = self._format_args(action, self._get_default_metavar_for_optional(action))
-                start, end = find_span(metavar)
-                yield r.Span(start, end, "argparse.metavar")
+                boundaries_metavar = find_span(metavar)
+                if len(boundaries_metavar) == 1:
+                    end = boundaries_metavar[0][1]
+                    yield r.Span(boundaries_metavar[0][0], end, "argparse.metavar")
+                else:
+                    end = boundaries_metavar[1][1]
+                    yield r.Span(
+                        boundaries_metavar[0][0], boundaries_metavar[0][1], "argparse.metavar"
+                    )
+                    yield r.Span(boundaries_metavar[1][0], end, "argparse.metavar")
             pos = end + 1
         for action in positionals:  # positionals come at the end
             metavar = self._get_default_metavar_for_positional(action)
@@ -339,7 +352,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 usage = self._format_args(action, metavar)
                 nargs = 1
             for _ in range(nargs):
-                start, end = find_span(usage)
+                start, end = find_span(usage)[0]
                 yield r.Span(start, end, "argparse.args")
                 pos = end + 1
 
