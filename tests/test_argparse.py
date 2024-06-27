@@ -462,7 +462,7 @@ def test_usage_spans_errors():
     groups = [parser._optionals]
 
     formatter = RichHelpFormatter("PROG")
-    with patch.object(RichHelpFormatter, "_rich_usage_spans", side_effect=ValueError):
+    with patch.object(RichHelpFormatter, "_rich_usage_spans", side_effect=IndexError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
     (usage,) = formatter._root_section.rich_items
     assert isinstance(usage, Text)

@@ -232,7 +232,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             actions_start = len(prefix) + len(prog) + 1
             try:
                 spans = list(self._rich_usage_spans(usage_text, actions_start, actions=actions))
-            except ValueError:
+            except IndexError:
                 spans = []
             usage_spans.extend(spans)
             rich_usage = r.Text(usage_text)
@@ -290,18 +290,13 @@ class RichHelpFormatter(argparse.HelpFormatter):
             stripped = r.strip_control_codes(_string)
             # Create regex pattern
             pattern = re.escape(stripped).replace("\\ ", "((?:\n\\s*))?\\s", 1)
-            try:
-                match = list(
-                    filter(lambda match: match.start() >= pos, re.finditer(pattern, text))
-                )[0]
-                if len(match.groups()) == 0 or match.groups() == (
-                    None,
-                ):  # Metavar not in multiple lines
-                    boundaries = [(match.start(), match.end())]
-                else:  # Metavar in multiple lines
-                    boundaries = [(match.start(), match.start(1)), (match.end(1) + 1, match.end())]
-            except IndexError as err:
-                raise ValueError(f"'{stripped}' not in usage text") from err
+            match = list(filter(lambda match: match.start() >= pos, re.finditer(pattern, text)))[0]
+            if len(match.groups()) == 0 or match.groups() == (
+                None,
+            ):  # Metavar not in multiple lines
+                boundaries = [(match.start(), match.end())]
+            else:  # Metavar in multiple lines
+                boundaries = [(match.start(), match.start(1)), (match.end(1) + 1, match.end())]
             return boundaries
 
         for action in options:  # start with the options
