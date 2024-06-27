@@ -1068,27 +1068,65 @@ def test_usage_metavar_multiple_lines():
     parser = argparse.ArgumentParser(prog="PROG", formatter_class=FormatterClass)
     meg = parser.add_mutually_exclusive_group()
     meg.add_argument(
-        "--option1",
-        metavar=("metavar1", "metavar2"),
+        "--op1",
+        metavar="MET",
+        nargs="?",
+    )
+    meg.add_argument(
+        "--op2",
+        metavar=("MET1", "MET2"),
+        nargs="*",
+    )
+    meg.add_argument(
+        "--op3",
+        nargs="*",
+    )
+    meg.add_argument(
+        "--op4",
+        metavar=("MET1", "MET2"),
         nargs="+",
     )
     meg.add_argument(
-        "--option2",
-        metavar=("metavar3", "metavar4"),
+        "--op5",
         nargs="+",
     )
-    parser.add_argument(
-        "--option3",
+    meg.add_argument(
+        "--op6",
+        nargs=3,
+    )
+    meg.add_argument(
+        "--op7",
+        metavar=("MET1", "MET2", "MET3"),
+        nargs=3,
     )
 
     usage_text = parser.format_usage()
     # Cannot use "clean" as indentation is part of the string itself
     expected_usage_text = """\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
        [\x1b[36m-h\x1b[0m]
-       [\x1b[36m--option1\x1b[0m \x1b[38;5;36mmetavar1 [metavar2 ...]\x1b[0m
+       [\x1b[36m--op1\x1b[0m \x1b[38;5;36m[MET]\x1b[0m
        |
-       \x1b[36m--option2\x1b[0m
-       \x1b[38;5;36mmetavar3\x1b[0m
-       \x1b[38;5;36m[metavar4 ...]\x1b[0m]
-       [\x1b[36m--option3\x1b[0m \x1b[38;5;36mOPTION3\x1b[0m]\n"""
+       \x1b[36m--op2\x1b[0m
+       \x1b[38;5;36m[MET1 [MET2 ...]]\x1b[0m
+       |
+       \x1b[36m--op3\x1b[0m
+       \x1b[38;5;36m[OP3 ...]\x1b[0m
+       |
+       \x1b[36m--op4\x1b[0m
+       \x1b[38;5;36mMET1\x1b[0m
+       \x1b[38;5;36m[MET2 ...]\x1b[0m
+       |
+       \x1b[36m--op5\x1b[0m
+       \x1b[38;5;36mOP5\x1b[0m
+       \x1b[38;5;36m[OP5 ...]\x1b[0m
+       |
+       \x1b[36m--op6\x1b[0m
+       \x1b[38;5;36mOP6\x1b[0m
+       \x1b[38;5;36mOP6\x1b[0m
+       \x1b[38;5;36mOP6\x1b[0m
+       |
+       \x1b[36m--op7\x1b[0m
+       \x1b[38;5;36mMET1\x1b[0m
+       \x1b[38;5;36mMET2\x1b[0m
+       \x1b[38;5;36mMET3\x1b[0m]\n"""
     assert usage_text == expected_usage_text
