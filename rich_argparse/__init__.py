@@ -289,12 +289,19 @@ class RichHelpFormatter(argparse.HelpFormatter):
         def find_span(_string: str, pos: int) -> list[tuple[int, int]]:
             stripped = r.strip_control_codes(_string)
             escaped = re.escape(stripped)
-            splitted = escaped.split('\\ ')
+            splitted = escaped.split("\\ ")
             # Create regex pattern
-            pattern = '(\n\\s*)?\\s'.join([f'{met}' for met in splitted])
+            pattern = "(\n\\s*)?\\s".join([f"{met}" for met in splitted])
             match = list(filter(lambda match: match.start() >= pos, re.finditer(pattern, text)))[0]
-            internal_boundaries = [[match.start(i+1),match.end(i+1)+1] if mg is not None else [] for i,mg in enumerate(match.groups())]
-            flat_boundaries = [match.start(0)]+[bound for boundaries in internal_boundaries for bound in boundaries]+[match.end(0)]
+            internal_boundaries = [
+                [match.start(i + 1), match.end(i + 1) + 1] if mg is not None else []
+                for i, mg in enumerate(match.groups())
+            ]
+            flat_boundaries = (
+                [match.start(0)]
+                + [bound for boundaries in internal_boundaries for bound in boundaries]
+                + [match.end(0)]
+            )
             boundaries = list(zip(flat_boundaries[::2], flat_boundaries[1::2]))
             # breakpoint()
             # if all(mg is None for mg in match.groups()):
