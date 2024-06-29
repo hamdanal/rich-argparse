@@ -1100,9 +1100,14 @@ def test_usage_metavar_multiple_lines():
         nargs=3,
     )
 
+    if sys.version_info < (3, 9):  # pragma: <3.9 cover
+        op3_metavar = "\x1b[38;5;36m[OP3 [OP3 ...]]\x1b[0m"
+    else:  # pragma: >=3.9 cover
+        op3_metavar = "\x1b[38;5;36m[OP3 ...]\x1b[0m"
+
     usage_text = parser.format_usage()
     # Cannot use "clean" as indentation is part of the string itself
-    expected_usage_text = """\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
+    expected_usage_text = f"""\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
        [\x1b[36m-h\x1b[0m]
        [\x1b[36m--op1\x1b[0m \x1b[38;5;36m[MET]\x1b[0m
        |
@@ -1110,7 +1115,7 @@ def test_usage_metavar_multiple_lines():
        \x1b[38;5;36m[MET1 [MET2 ...]]\x1b[0m
        |
        \x1b[36m--op3\x1b[0m
-       \x1b[38;5;36m[OP3 ...]\x1b[0m
+       {op3_metavar}
        |
        \x1b[36m--op4\x1b[0m
        \x1b[38;5;36mMET1\x1b[0m
