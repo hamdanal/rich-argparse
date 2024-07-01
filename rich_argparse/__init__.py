@@ -339,7 +339,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 ("]", False),
             )
         elif action.nargs == argparse.ZERO_OR_MORE:
-            if sys.version_info < (3, 9):
+            if sys.version_info < (3, 9) or len(get_metavar(1)) == 2:
                 metavar = get_metavar(2)
                 # '[%s [%s ...]]' % metavar
                 yield from (
