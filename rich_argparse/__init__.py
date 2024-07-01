@@ -343,13 +343,15 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 yield "%s" % metavar[0], True  # noqa: UP031
                 yield " [", False
                 yield "%s" % metavar[1], True  # noqa: UP031
-                yield " ...", True
+                yield " ", False
+                yield "...", True
                 yield "]]", False
             else:
                 # '[%s ...]' % metavar
                 yield "[", False
                 yield "%s" % metavar, True  # noqa: UP031
-                yield " ...", True
+                yield " ", False
+                yield "...", True
                 yield "]", False
         elif action.nargs == argparse.ONE_OR_MORE:
             # '%s [%s ...]' % get_metavar(2)
@@ -357,7 +359,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
             yield "%s" % metavar[0], True  # noqa: UP031
             yield " [", False
             yield "%s" % metavar[1], True  # noqa: UP031
-            yield " ...", True
+            yield " ", False
+            yield "...", True
             yield "]", False
         elif action.nargs == argparse.REMAINDER:
             # '...'
@@ -365,7 +368,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
         elif action.nargs == argparse.PARSER:
             # '%s ...' % get_metavar(1)
             yield "%s" % get_metavar(1), True  # noqa: UP031
-            yield " ...", True
+            yield " ", False
+            yield "...", True
         elif action.nargs == argparse.SUPPRESS:
             # ''
             yield "", False
