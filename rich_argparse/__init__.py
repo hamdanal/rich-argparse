@@ -332,44 +332,54 @@ class RichHelpFormatter(argparse.HelpFormatter):
             yield "%s" % get_metavar(1), True  # noqa: UP031
         elif action.nargs == argparse.OPTIONAL:
             # '[%s]' % get_metavar(1)
-            yield "[", False
-            yield "%s" % get_metavar(1), True  # noqa: UP031
-            yield "]", False
+            yield from (
+                ("[", False),
+                ("%s" % get_metavar(1), True),  # noqa: UP031
+                ("]", False),
+            )
         elif action.nargs == argparse.ZERO_OR_MORE:
-            metavar = get_metavar(1)
-            if len(metavar) == 2 or sys.version_info < (3, 9):
+            if sys.version_info < (3, 9):
+                metavar = get_metavar(2)
                 # '[%s [%s ...]]' % metavar
-                yield "[", False
-                yield "%s" % metavar[0], True  # noqa: UP031
-                yield " [", False
-                yield "%s" % metavar[1], True  # noqa: UP031
-                yield " ", False
-                yield "...", True
-                yield "]]", False
+                yield from (
+                    ("[", False),
+                    ("%s" % metavar[0], True),  # noqa: UP031
+                    (" [", False),
+                    ("%s" % metavar[1], True),  # noqa: UP031
+                    (" ", False),
+                    ("...", True),
+                    ("]]", False),
+                )
             else:
                 # '[%s ...]' % metavar
-                yield "[", False
-                yield "%s" % metavar, True  # noqa: UP031
-                yield " ", False
-                yield "...", True
-                yield "]", False
+                yield from (
+                    ("[", False),
+                    ("%s" % get_metavar(1), True),  # noqa: UP031
+                    (" ", False),
+                    ("...", True),
+                    ("]", False),
+                )
         elif action.nargs == argparse.ONE_OR_MORE:
             # '%s [%s ...]' % get_metavar(2)
             metavar = get_metavar(2)
-            yield "%s" % metavar[0], True  # noqa: UP031
-            yield " [", False
-            yield "%s" % metavar[1], True  # noqa: UP031
-            yield " ", False
-            yield "...", True
-            yield "]", False
+            yield from (
+                ("%s" % metavar[0], True),  # noqa: UP031
+                (" [", False),
+                ("%s" % metavar[1], True),  # noqa: UP031
+                (" ", False),
+                ("...", True),
+                ("]", False),
+            )
         elif action.nargs == argparse.REMAINDER:
             # '...'
             yield "...", True
         elif action.nargs == argparse.PARSER:
             # '%s ...' % get_metavar(1)
-            yield "%s" % get_metavar(1), True  # noqa: UP031
-            yield " ", False
-            yield "...", True
+            yield from (
+                ("%s" % get_metavar(1), True),  # noqa: UP031
+                (" ", False),
+                ("...", True),
+            )
         elif action.nargs == argparse.SUPPRESS:
             # ''
             yield "", False
