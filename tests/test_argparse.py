@@ -1069,12 +1069,12 @@ def test_usage_metavar_multiple_lines():
     meg = parser.add_mutually_exclusive_group()
     meg.add_argument(
         "--op1",
-        metavar="[MET]]",
+        metavar="MET",
         nargs="?",
     )
     meg.add_argument(
         "--op2",
-        metavar=("[[[MET1", "[MET2"),
+        metavar=("MET1", "MET2"),
         nargs="*",
     )
     meg.add_argument(
@@ -1102,9 +1102,7 @@ def test_usage_metavar_multiple_lines():
     usage_text = parser.format_usage()
 
     if sys.version_info < (3, 9):  # pragma: <3.9 cover
-        op3_metavar = (
-            "[\x1b[38;5;36mOP3\x1b[0m [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]]\x1b[0m"
-        )
+        op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]]"
     else:  # pragma: >=3.9 cover
         op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]"
 
@@ -1122,21 +1120,21 @@ def test_usage_metavar_multiple_lines():
         # Don't use "clean" as indentation is part of the string itself
         expected_usage_text = f"""\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
        [\x1b[36m-h\x1b[0m]
-       [\x1b[36m--op1\x1b[0m \x1b[38;5;36m[MET]\x1b[0m
+       [\x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
        |
        \x1b[36m--op2\x1b[0m
-       \x1b[38;5;36m[MET1 [MET2 ...]]\x1b[0m
+       [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
        |
        \x1b[36m--op3\x1b[0m
        {op3_metavar}
        |
        \x1b[36m--op4\x1b[0m
        \x1b[38;5;36mMET1\x1b[0m
-       \x1b[38;5;36m[MET2 ...]\x1b[0m
+       [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
        |
        \x1b[36m--op5\x1b[0m
        \x1b[38;5;36mOP5\x1b[0m
-       \x1b[38;5;36m[OP5 ...]\x1b[0m
+       [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m]
        |
        \x1b[36m--op6\x1b[0m
        \x1b[38;5;36mOP6\x1b[0m
