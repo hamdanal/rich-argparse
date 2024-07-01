@@ -305,6 +305,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 usage = action.option_strings[0]
             start, end = find_span(usage)
             yield r.Span(start, end, "argparse.args")
+            pos = end + 1
             if action.nargs != 0:
                 default_metavar = self._get_default_metavar_for_optional(action)
                 for metavar_part, colorize in self._rich_metavar_parts(action, default_metavar):
