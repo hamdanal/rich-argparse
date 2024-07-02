@@ -339,7 +339,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 ("]", False),
             )
         elif action.nargs == argparse.ZERO_OR_MORE:
-            if sys.version_info < (3, 9) or len(get_metavar(1)) == 2:
+            if sys.version_info < (3, 9) or len(get_metavar(1)) == 2:  # pragma: <3.9 cover
                 metavar = get_metavar(2)
                 # '[%s [%s ...]]' % metavar
                 yield from (
@@ -351,7 +351,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                     ("...", True),
                     ("]]", False),
                 )
-            else:
+            else:  # pragma: >=3.9 cover
                 # '[%s ...]' % metavar
                 yield from (
                     ("[", False),
@@ -385,10 +385,6 @@ class RichHelpFormatter(argparse.HelpFormatter):
             # ''
             yield "", False
         else:
-            try:
-                list(range(action.nargs))  # type: ignore[arg-type]
-            except TypeError:
-                raise ValueError("invalid nargs value") from None
             metavar = get_metavar(action.nargs)  # type: ignore[arg-type]
             first = True
             for met in metavar:
