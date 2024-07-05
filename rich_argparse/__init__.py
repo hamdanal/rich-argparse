@@ -305,36 +305,94 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 usage = action.option_strings[0]
             start, end = find_span(usage)
             yield r.Span(start, end, "argparse.args")
+            pos = end + 1
             if action.nargs != 0:
-                metavar = self._format_args(action, self._get_default_metavar_for_optional(action))
-                start, end = find_span(metavar)
-                yield r.Span(start, end, "argparse.metavar")
+                default_metavar = self._get_default_metavar_for_optional(action)
+                for metavar_part, colorize in self._rich_metavar_parts(action, default_metavar):
+                    start, end = find_span(metavar_part)
+                    if colorize:
+                        yield r.Span(start, end, "argparse.metavar")
+                    pos = end
             pos = end + 1
         for action in positionals:  # positionals come at the end
-            metavar = self._get_default_metavar_for_positional(action)
-            metavar_tuple = self._metavar_formatter(action, metavar)(1)
-            usage = metavar_tuple[0]
-            if isinstance(action.nargs, int):
-                nargs = action.nargs
-            elif action.nargs in (argparse.REMAINDER, argparse.SUPPRESS):
-                nargs = 0
-            elif action.nargs in (None, argparse.OPTIONAL, argparse.PARSER):
-                nargs = 1
-            elif action.nargs == argparse.ZERO_OR_MORE:
-                if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
-                    nargs = 2 if len(metavar_tuple) == 2 else 1
-                else:  # pragma: <3.9 cover
-                    nargs = 2
-            elif action.nargs == argparse.ONE_OR_MORE:
-                nargs = 2
-            else:  # pragma: no cover
-                # unknown nargs, fallback to coloring the whole thing
-                usage = self._format_args(action, metavar)
-                nargs = 1
-            for _ in range(nargs):
-                start, end = find_span(usage)
-                yield r.Span(start, end, "argparse.args")
-                pos = end + 1
+            default_metavar = self._get_default_metavar_for_positional(action)
+            for metavar_part, colorize in self._rich_metavar_parts(action, default_metavar):
+                start, end = find_span(metavar_part)
+                if colorize:
+                    yield r.Span(start, end, "argparse.args")
+                pos = end
+            pos = end + 1
+
+    def _rich_metavar_parts(
+        self, action: Action, default_metavar: str
+    ) -> Iterator[tuple[str, bool]]:
+        get_metavar = self._metavar_formatter(action, default_metavar)
+        # similar to self._format_args but yields (part, colorize) of the metavar
+        if action.nargs is None:
+            # '%s' % get_metavar(1)
+            yield "%s" % get_metavar(1), True  # noqa: UP031
+        elif action.nargs == argparse.OPTIONAL:
+            # '[%s]' % get_metavar(1)
+            yield from (
+                ("[", False),
+                ("%s" % get_metavar(1), True),  # noqa: UP031
+                ("]", False),
+            )
+        elif action.nargs == argparse.ZERO_OR_MORE:
+            if sys.version_info < (3, 9) or len(get_metavar(1)) == 2:  # pragma: <3.9 cover
+                metavar = get_metavar(2)
+                # '[%s [%s ...]]' % metavar
+                yield from (
+                    ("[", False),
+                    ("%s" % metavar[0], True),  # noqa: UP031
+                    (" [", False),
+                    ("%s" % metavar[1], True),  # noqa: UP031
+                    (" ", False),
+                    ("...", True),
+                    ("]]", False),
+                )
+            else:  # pragma: >=3.9 cover
+                # '[%s ...]' % metavar
+                yield from (
+                    ("[", False),
+                    ("%s" % get_metavar(1), True),  # noqa: UP031
+                    (" ", False),
+                    ("...", True),
+                    ("]", False),
+                )
+        elif action.nargs == argparse.ONE_OR_MORE:
+            # '%s [%s ...]' % get_metavar(2)
+            metavar = get_metavar(2)
+            yield from (
+                ("%s" % metavar[0], True),  # noqa: UP031
+                (" [", False),
+                ("%s" % metavar[1], True),  # noqa: UP031
+                (" ", False),
+                ("...", True),
+                ("]", False),
+            )
+        elif action.nargs == argparse.REMAINDER:
+            # '...'
+            yield "...", True
+        elif action.nargs == argparse.PARSER:
+            # '%s ...' % get_metavar(1)
+            yield from (
+                ("%s" % get_metavar(1), True),  # noqa: UP031
+                (" ", False),
+                ("...", True),
+            )
+        elif action.nargs == argparse.SUPPRESS:
+            # ''
+            yield "", False
+        else:
+            metavar = get_metavar(action.nargs)  # type: ignore[arg-type]
+            first = True
+            for met in metavar:
+                if first:
+                    first = False
+                else:
+                    yield " ", False
+                yield "%s" % met, True  # noqa: UP031
 
     def _rich_whitespace_sub(self, text: r.Text) -> r.Text:
         # do this `self._whitespace_matcher.sub(' ', text).strip()` but text is Text
@@ -433,8 +491,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
             )
             if action.nargs != 0:
                 default = self._get_default_metavar_for_optional(action)
-                args_string = self._format_args(action, default)
-                action_header.append(" ").append(args_string, style="argparse.metavar")
+                action_header.append(" ")
+                for metavar_part, colorize in self._rich_metavar_parts(action, default):
+                    style = "argparse.metavar" if colorize else None
+                    action_header.append(metavar_part, style=style)
             return action_header
 
     def _rich_split_lines(self, text: r.Text, width: int) -> r.Lines:
