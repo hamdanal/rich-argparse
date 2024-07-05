@@ -1060,81 +1060,59 @@ def test_arg_default_spans():
 
 
 @pytest.mark.skipif(
-    sys.version_info >= (3, 13), reason="Argparse usage wrapping not supported in Python 3.13+"
+    sys.version_info >= (3, 13), reason="Mut ex group usage wrapping broken in Python 3.13+"
 )  # CPython issue 121151 (https://github.com/python/cpython/issues/121151)
 @pytest.mark.usefixtures("force_color")
-def test_usage_metavar_multiple_lines():  # pragma: <3.13 cover
-    class FormatterClass(RichHelpFormatter):
-        def __init__(self, prog):
-            super().__init__(prog, width=4)
-
-    parser = argparse.ArgumentParser(prog="PROG", formatter_class=FormatterClass)
+def test_metavar_spans():  # pragma: <3.13 cover
+    # tests exotic metavars (tuples, wrapped, different nargs, etc.) in usage and help text
+    parser = argparse.ArgumentParser(
+        prog="PROG", formatter_class=lambda prog: RichHelpFormatter(prog, width=20)
+    )
     meg = parser.add_mutually_exclusive_group()
-    meg.add_argument(
-        "--op1",
-        metavar="MET",
-        nargs="?",
-    )
-    meg.add_argument(
-        "--op2",
-        metavar=("MET1", "MET2"),
-        nargs="*",
-    )
-    meg.add_argument(
-        "--op3",
-        nargs="*",
-    )
-    meg.add_argument(
-        "--op4",
-        metavar=("MET1", "MET2"),
-        nargs="+",
-    )
-    meg.add_argument(
-        "--op5",
-        nargs="+",
-    )
-    meg.add_argument(
-        "--op6",
-        nargs=3,
-    )
-    meg.add_argument(
-        "--op7",
-        metavar=("MET1", "MET2", "MET3"),
-        nargs=3,
-    )
-    usage_text = parser.format_usage()
+    meg.add_argument("--op1", metavar="MET", nargs="?")
+    meg.add_argument("--op2", metavar=("MET1", "MET2"), nargs="*")
+    meg.add_argument("--op3", nargs="*")
+    meg.add_argument("--op4", metavar=("MET1", "MET2"), nargs="+")
+    meg.add_argument("--op5", nargs="+")
+    meg.add_argument("--op6", nargs=3)
+    meg.add_argument("--op7", metavar=("MET1", "MET2", "MET3"), nargs=3)
+    help_text = parser.format_help()
 
+    op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]"
     if sys.version_info < (3, 9):  # pragma: <3.9 cover
-        op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]]"
-    else:  # pragma: >=3.9 cover
-        op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]"
+        op3_metavar = f"[\x1b[38;5;36mOP3\x1b[0m {op3_metavar}]"
 
-    # Don't use "clean" as indentation is part of the string itself
-    expected_usage_text = f"""\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m
-       [\x1b[36m-h\x1b[0m]
-       [\x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
-       |
-       \x1b[36m--op2\x1b[0m
-       [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
-       |
-       \x1b[36m--op3\x1b[0m
-       {op3_metavar}
-       |
-       \x1b[36m--op4\x1b[0m
-       \x1b[38;5;36mMET1\x1b[0m
-       [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
-       |
-       \x1b[36m--op5\x1b[0m
-       \x1b[38;5;36mOP5\x1b[0m
-       [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m]
-       |
-       \x1b[36m--op6\x1b[0m
-       \x1b[38;5;36mOP6\x1b[0m
-       \x1b[38;5;36mOP6\x1b[0m
-       \x1b[38;5;36mOP6\x1b[0m
-       |
-       \x1b[36m--op7\x1b[0m
-       \x1b[38;5;36mMET1\x1b[0m
-       \x1b[38;5;36mMET2\x1b[0m
-       \x1b[38;5;36mMET3\x1b[0m]\n"""
-    assert usage_text == expected_usage_text
+    expected_help_text = f"""\
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
+                [\x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
+                | \x1b[36m--op2\x1b[0m
+                [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
+                | \x1b[36m--op3\x1b[0m
+                {op3_metavar}
+                | \x1b[36m--op4\x1b[0m
+                \x1b[38;5;36mMET1\x1b[0m
+                [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
+                | \x1b[36m--op5\x1b[0m
+                \x1b[38;5;36mOP5\x1b[0m
+                [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m]
+                | \x1b[36m--op6\x1b[0m
+                \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m
+                \x1b[38;5;36mOP6\x1b[0m |
+                \x1b[36m--op7\x1b[0m
+                \x1b[38;5;36mMET1\x1b[0m
+                \x1b[38;5;36mMET2\x1b[0m
+                \x1b[38;5;36mMET3\x1b[0m]
+
+    \x1b[38;5;208mOptional Arguments:\x1b[0m
+      \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m
+        \x1b[39mshow this help\x1b[0m
+        \x1b[39mmessage and exit\x1b[0m
+      \x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
+      \x1b[36m--op2\x1b[0m [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
+      \x1b[36m--op3\x1b[0m {op3_metavar}
+      \x1b[36m--op4\x1b[0m \x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
+      \x1b[36m--op5\x1b[0m \x1b[38;5;36mOP5\x1b[0m [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m]
+      \x1b[36m--op6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m
+      \x1b[36m--op7\x1b[0m \x1b[38;5;36mMET1\x1b[0m \x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36mMET3\x1b[0m
+    """
+    assert help_text == clean(expected_help_text)
