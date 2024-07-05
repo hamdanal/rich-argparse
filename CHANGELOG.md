@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixes
+- [GH-125](https://github.com/hamdanal/rich-argparse/issues/125),
+  [GH-127](https://github.com/hamdanal/rich-argparse/pull/127),
+  [PR-128](https://github.com/hamdanal/rich-argparse/pull/128)
+  Redesign metavar styling to fix broken colors of usage when some metavars are wrapped to multiple
+  lines. The brackets and spaces of metavars are no longer colored.
+
 ## 1.5.2 - 2024-06-15
 
 ### Fixes
