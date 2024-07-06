@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Fixes
+- [GH-130](https://github.com/hamdanal/rich-argparse/issues/130),
+  [PR-131](https://github.com/hamdanal/rich-argparse/pull/131)
+  Fix a bug that caused long group titles to wrap.
 - [GH-125](https://github.com/hamdanal/rich-argparse/issues/125),
   [GH-127](https://github.com/hamdanal/rich-argparse/pull/127),
   [PR-128](https://github.com/hamdanal/rich-argparse/pull/128)

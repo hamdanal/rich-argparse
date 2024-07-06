@@ -170,7 +170,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
             if not self.rich_items and not self.rich_actions:
                 return  # empty section
             if self.heading is not argparse.SUPPRESS and self.heading is not None:
-                yield r.Text(self.heading, style="argparse.groups")
+                yield r.Text(self.heading, style="argparse.groups", overflow="ignore")
             yield from self._render_items(console, options)
             yield from self._render_actions(console, options)
 

@@ -182,6 +182,10 @@ def test_padding_and_wrapping():
     groups_with_description = parsers.add_argument_group("group", description="*" * 120)
     groups_with_description.add_argument("pos-arg", help="#" * 120)
 
+    parsers.add_argument_group(
+        "= =" * 40, description="group with a very long name that should not wrap"
+    )
+
     expected_help_output = """\
     usage: PROG [-h] [--very-long-option-name LONG_METAVAR] pos-arg
 
@@ -200,6 +204,9 @@ def test_padding_and_wrapping():
 
       pos-arg               ##########################################################################
                             ##############################################
+
+    = == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == =:
+      group with a very long name that should not wrap
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%
