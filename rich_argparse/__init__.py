@@ -193,7 +193,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 else:  # empty line
                     add_empty_line = True
 
-    def add_text(self, text: str | None) -> None:
+    def add_text(self, text: r.RenderableType | None) -> None:
         if text is argparse.SUPPRESS or text is None:
             return
         elif isinstance(text, str):
