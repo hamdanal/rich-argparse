@@ -978,7 +978,9 @@ def test_help_preview_generation(tmp_path):
         parser.parse_args(["--generate", str(svg_file)])
     assert exc_info.value.code == 0
     assert svg_file.exists()
-    assert svg_file.read_text().startswith("<svg")
+    svg_out = svg_file.read_text()
+    assert svg_out.startswith("<svg")
+    assert "Usage" in svg_out
 
     # HTML file
     preview_action.export_kwds = {}
@@ -987,7 +989,9 @@ def test_help_preview_generation(tmp_path):
         parser.parse_args(["--generate", str(html_file)])
     assert exc_info.value.code == 0
     assert html_file.exists()
-    assert html_file.read_text().startswith("<!DOCTYPE html>")
+    html_out = html_file.read_text()
+    assert html_out.startswith("<!DOCTYPE html>")
+    assert "Usage" in html_out
 
     # TXT file
     preview_action.export_kwds = {}
