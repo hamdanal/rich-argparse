@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.6.0 - 2024-11-02
+
 ### Fixes
 - [GH-133](https://github.com/hamdanal/rich-argparse/issues/133),
   [PR-135](https://github.com/hamdanal/rich-argparse/pull/135)
