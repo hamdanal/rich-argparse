@@ -558,11 +558,11 @@ class HelpPreviewAction(argparse.Action):
             parser.exit(1, "error: help preview path must be a string\n")
         if not path.endswith((".svg", ".html", ".txt")):
             parser.exit(1, "error: help preview path must end with .svg, .html, or .txt\n")
+        import io
 
         text = r.Text.from_ansi(parser.format_help())
-        console = r.Console(record=True)
-        with console.capture():
-            console.print(text, crop=False)
+        console = r.Console(file=io.StringIO(), record=True)
+        console.print(text, crop=False)
 
         if path.endswith(".svg"):
             self.export_kwds.setdefault("title", "")
