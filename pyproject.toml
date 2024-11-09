@@ -42,20 +42,16 @@ Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 build.packages = ["rich_argparse"]
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py{38,39,310,311,312,313}
+requires = ["tox>=4.21.0"]
+env_list = ["py38", "py39", "py310", "py311", "py312", "py313", "py314"]
 skip_missing_interpreters = true
-
-[testenv]
-deps = -rtests/requirements.txt
-set_env =
-  COLUMNS=80
-commands =
-  coverage run -m pytest {posargs}
-  coverage report
-  coverage html
-"""
+env_run_base.deps = ["-rtests/requirements.txt"]
+env_run_base.set_env = {COLUMNS="80"}
+env_run_base.commands = [
+  ["coverage", "run", "-m", "pytest", {replace="posargs", extend=true}],
+  ["coverage", "report"],
+  ["coverage", "html"],
+]
 
 [tool.ruff]
 line-length = 100
