@@ -39,7 +39,7 @@ Issue-Tracker = "https://github.com/hamdanal/rich-argparse/issues"
 Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/.github", "/.vscode", "/scripts", "/.pre-commit-config.yaml", "dist*"]
+include = ["CHANGELOG.md", "CONTRIBUTING.md", "requirements-dev.txt", "rich_argparse", "tests", "LICENSE", "README.md", "pyproject.toml" ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["rich_argparse"]
