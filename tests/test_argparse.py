@@ -705,6 +705,8 @@ def test_default_highlights():
     parser.add_argument("--option-multi", action="store_true", help="Start --middle-word end")
     parser.add_argument("--option-not", action="store_true", help="Start middle-word end")
     parser.add_argument("--option-short", action="store_true", help="Start -middle end")
+    # options inside backticks should not be highlighted
+    parser.add_argument("--not-option", action="store_true", help="Start `not --option` end")
     # %(default)s highlights
     parser.add_argument("--default", default=10, help="The default value is %(default)s.")
 
@@ -723,6 +725,7 @@ def test_default_highlights():
       \x1b[36m--option-multi\x1b[0m     \x1b[39mStart \x1b[0m\x1b[36m--middle-word\x1b[0m\x1b[39m end\x1b[0m
       \x1b[36m--option-not\x1b[0m       \x1b[39mStart middle-word end\x1b[0m
       \x1b[36m--option-short\x1b[0m     \x1b[39mStart \x1b[0m\x1b[36m-middle\x1b[0m\x1b[39m end\x1b[0m
+      \x1b[36m--not-option\x1b[0m       \x1b[39mStart `\x1b[0m\x1b[1;39mnot --option\x1b[0m\x1b[39m` end\x1b[0m
       \x1b[36m--default\x1b[0m \x1b[38;5;36mDEFAULT\x1b[0m  \x1b[39mThe default value is \x1b[0m\x1b[3;39m10\x1b[0m\x1b[39m.\x1b[0m
 
     \x1b[39mEpilog with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
