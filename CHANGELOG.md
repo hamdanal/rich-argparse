@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+- [GH-141](https://github.com/hamdanal/rich-argparse/issues/141),
+  [PR-142](https://github.com/hamdanal/rich-argparse/pull/142)
+  Do not highlight --options inside backticks.
+
 ## 1.6.0 - 2024-11-02
 
 ### Fixes

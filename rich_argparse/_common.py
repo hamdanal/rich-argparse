@@ -5,9 +5,11 @@ import sys
 
 import rich_argparse._lazy_rich as r
 
+# Default highlight patterns:
+# - highlight `text in backquotes` as "syntax"
+# - --words-with-dashes outside backticks as "args"
 _HIGHLIGHTS = [
-    r"(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",  # highlight --words-with-dashes as args
-    r"`(?P<syntax>[^`]*)`",  # highlight `text in backquotes` as syntax
+    r"`(?P<syntax>[^`]*)`|(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",
 ]
 
 _windows_console_fixed = None
