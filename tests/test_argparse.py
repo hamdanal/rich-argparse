@@ -1073,11 +1073,8 @@ def test_arg_default_spans():
     assert help_text == clean(expected_help_text)
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 13), reason="Mut ex group usage wrapping broken in Python 3.13+"
-)  # CPython issue 121151 (https://github.com/python/cpython/issues/121151)
 @pytest.mark.usefixtures("force_color")
-def test_metavar_spans():  # pragma: <3.13 cover
+def test_metavar_spans():
     # tests exotic metavars (tuples, wrapped, different nargs, etc.) in usage and help text
     parser = argparse.ArgumentParser(
         prog="PROG", formatter_class=lambda prog: RichHelpFormatter(prog, width=20)
@@ -1096,9 +1093,17 @@ def test_metavar_spans():  # pragma: <3.13 cover
     if sys.version_info < (3, 9):  # pragma: <3.9 cover
         op3_metavar = f"[\x1b[38;5;36mOP3\x1b[0m {op3_metavar}]"
 
-    expected_help_text = f"""\
-    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
-                [\x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
+    if sys.version_info >= (3, 13):  # pragma: >=3.13 cover
+        usage_tail = """ |
+                \x1b[36m--op2\x1b[0m [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]] |
+                \x1b[36m--op3\x1b[0m [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m] |
+                \x1b[36m--op4\x1b[0m \x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m] |
+                \x1b[36m--op5\x1b[0m \x1b[38;5;36mOP5\x1b[0m [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m] |
+                \x1b[36m--op6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m |
+                \x1b[36m--op7\x1b[0m \x1b[38;5;36mMET1\x1b[0m \x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36mMET3\x1b[0m]
+        """
+    else:  # pragma: <3.13 cover
+        usage_tail = f"""
                 | \x1b[36m--op2\x1b[0m
                 [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
                 | \x1b[36m--op3\x1b[0m
@@ -1116,7 +1121,10 @@ def test_metavar_spans():  # pragma: <3.13 cover
                 \x1b[38;5;36mMET1\x1b[0m
                 \x1b[38;5;36mMET2\x1b[0m
                 \x1b[38;5;36mMET3\x1b[0m]
-
+        """
+    expected_help_text = f"""\
+    \x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m]
+                [\x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]{usage_tail}
     \x1b[38;5;208mOptional Arguments:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m
         \x1b[39mshow this help\x1b[0m
