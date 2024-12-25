@@ -15,8 +15,8 @@ _HIGHLIGHTS = [
 _windows_console_fixed = None
 
 
-def _rich_wrap(console: r.Console, text: r.Text, width: int) -> r.Lines:
-    # textwrap.wrap() equivalent for rich.text.Text
+def rich_wrap(console: r.Console, text: r.Text, width: int) -> r.Lines:
+    """`textwrap.wrap()` equivalent for `rich.text.Text`."""
     text = text.copy()
     text.expand_tabs(8)  # textwrap expands tabs first
     whitespace_trans = dict.fromkeys(map(ord, "\t\n\x0b\x0c\r "), ord(" "))
@@ -24,9 +24,9 @@ def _rich_wrap(console: r.Console, text: r.Text, width: int) -> r.Lines:
     return text.wrap(console, width)
 
 
-def _rich_fill(console: r.Console, text: r.Text, width: int, indent: r.Text) -> r.Text:
-    # textwrap.fill() equivalent for rich.text.Text
-    lines = _rich_wrap(console, text, width)
+def rich_fill(console: r.Console, text: r.Text, width: int, indent: r.Text) -> r.Text:
+    """`textwrap.fill()` equivalent for `rich.text.Text`."""
+    lines = rich_wrap(console, text, width)
     return r.Text("\n").join(indent + line for line in lines)
 
 

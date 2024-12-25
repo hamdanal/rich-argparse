@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import argparse
-import sys
-
-from rich.terminal_theme import DIMMED_MONOKAI
-
-from rich_argparse import HelpPreviewAction, RichHelpFormatter
-
 if __name__ == "__main__":
+    import argparse
+    import sys
+
+    from rich.terminal_theme import DIMMED_MONOKAI
+
+    from rich_argparse import HelpPreviewAction, RichHelpFormatter
+
     parser = argparse.ArgumentParser(
         prog="python -m rich_argparse",
         formatter_class=RichHelpFormatter,
