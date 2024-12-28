@@ -15,9 +15,6 @@ on:
       - ".pre-commit-config.yaml"
       - "*.md"
 
-env:
-  UV_SYSTEM_PYTHON: 1
-
 jobs:
   build:
     strategy:
