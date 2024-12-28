@@ -1,4 +1,4 @@
 -e .
 -r tests/requirements.txt
 pre-commit
-tox
+uv

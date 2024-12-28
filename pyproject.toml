@@ -44,18 +44,6 @@ include = ["CHANGELOG.md", "CONTRIBUTING.md", "requirements-dev.txt", "rich_argp
 [tool.hatch.build.targets.wheel]
 packages = ["rich_argparse"]
 
-[tool.tox]
-requires = ["tox>=4.21.0"]
-env_list = ["py38", "py39", "py310", "py311", "py312", "py313", "py314"]
-skip_missing_interpreters = true
-env_run_base.deps = ["-rtests/requirements.txt"]
-env_run_base.set_env = {COLUMNS="80"}
-env_run_base.commands = [
-  ["coverage", "run", "-m", "pytest", {replace="posargs", extend=true}],
-  ["coverage", "report"],
-  ["coverage", "html"],
-]
-
 [tool.ruff]
 line-length = 100
 

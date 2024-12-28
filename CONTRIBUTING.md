@@ -38,11 +38,11 @@ typo fixes where an issue may not be needed).
 
 ## Testing
 
-Running all the tests can be done with `tox run -e py310` (or any other interpreter version). This
-also runs the test coverage to ensure 100% of the code is covered by tests.
+Running all the tests can be done with `pytest --cov`. This also runs the test coverage to ensure
+100% of the code is covered by tests. You can also run individual tests with
+`pytest -k the_name_of_your_test`.
 
-Alternatively, you can run `coverage run -m pytest && coverage report` with the virtual environment
-activated. You can also run a individual tests with `pytest -k the_name_of_your_test`.
+The helper script `scripts/run-tests` runs the tests with coverage on all supported python versions.
 
 ### Code quality
 
