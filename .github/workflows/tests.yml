@@ -15,6 +15,9 @@ on:
       - ".pre-commit-config.yaml"
       - "*.md"
 
+env:
+  UV_SYSTEM_PYTHON: 1
+
 jobs:
   build:
     strategy:
@@ -34,10 +37,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - name: Install tox
-        run: pipx install tox && pipx inject tox tox-uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Install dependencies
+        run: uv pip install -r tests/requirements.txt
       - name: Run the test suite
-        run: tox run -e py${{ matrix.python-version }} -- -vv --color=yes
+        run: uv run pytest -vv --color=yes --cov
       - name: Upload coverage report if tests fail.
         uses: actions/upload-artifact@v4
         with:
