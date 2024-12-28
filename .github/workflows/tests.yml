@@ -40,7 +40,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
       - name: Install dependencies
-        run: uv pip install -r tests/requirements.txt
+        run: |
+          uv venv --python ${{ matrix.python-version }}
+          uv pip install -r tests/requirements.txt
       - name: Run the test suite
         run: uv run pytest -vv --color=yes --cov
       - name: Upload coverage report if tests fail.
