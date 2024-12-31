@@ -1,3 +1,5 @@
+# Source code: https://github.com/hamdanal/rich-argparse
+# MIT license: Copyright (c) Ali Hamdan <ali.hamdan.dev@gmail.com>
 from __future__ import annotations
 
 if __name__ == "__main__":

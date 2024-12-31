@@ -1,14 +1,7 @@
 from __future__ import annotations
 
 import sys
-from optparse import (
-    SUPPRESS_HELP,
-    HelpFormatter,
-    IndentedHelpFormatter,
-    OptionGroup,
-    OptionParser,
-    TitledHelpFormatter,
-)
+from optparse import SUPPRESS_HELP, IndentedHelpFormatter, OptionParser, TitledHelpFormatter
 from textwrap import dedent
 from unittest.mock import Mock, patch
 
@@ -22,18 +15,9 @@ from rich_argparse.optparse import (
     RichHelpFormatter,
     TitledRichHelpFormatter,
 )
-from tests.conftest import Parsers
+from tests.helpers import OptionParsers
 
 
-# helpers
-# =======
-class OptionParsers(Parsers[OptionParser, OptionGroup, HelpFormatter]):
-    parser_class = OptionParser
-    formatter_param_name = "formatter"
-
-
-# tests
-# =====
 def test_default_substitution():
     parser = OptionParser(prog="PROG", formatter=IndentedRichHelpFormatter())
     parser.add_option("--option", default="[bold]", help="help of option (default: %default)")

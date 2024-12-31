@@ -1,5 +1,7 @@
 # Source code: https://github.com/hamdanal/rich-argparse
 # MIT license: Copyright (c) Ali Hamdan <ali.hamdan.dev@gmail.com>
+
+# for internal use only
 from __future__ import annotations
 
 import argparse
