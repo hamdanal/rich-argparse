@@ -1,3 +1,6 @@
+# Source code: https://github.com/hamdanal/rich-argparse
+# MIT license: Copyright (c) Ali Hamdan <ali.hamdan.dev@gmail.com>
+
 # for internal use only
 from __future__ import annotations
 
@@ -13,6 +16,15 @@ _HIGHLIGHTS = [
 ]
 
 _windows_console_fixed = None
+
+
+def rich_strip(text: r.Text) -> r.Text:
+    """Strip leading and trailing whitespace from `rich.text.Text`."""
+    lstrip_at = len(text.plain) - len(text.plain.lstrip())
+    if lstrip_at:  # rich.Text.lstrip() is not available yet!!
+        text = text[lstrip_at:]
+    text.rstrip()
+    return text
 
 
 def rich_wrap(console: r.Console, text: r.Text, width: int) -> r.Lines:

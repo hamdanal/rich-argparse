@@ -13,11 +13,8 @@ from argparse import (
     MetavarTypeHelpFormatter,
     RawDescriptionHelpFormatter,
     RawTextHelpFormatter,
-    _ArgumentGroup,
-    _SubParsersAction,
 )
 from contextlib import nullcontext
-from typing import Type
 from unittest.mock import Mock, patch
 
 import pytest
@@ -37,59 +34,9 @@ from rich_argparse import (
     RichHelpFormatter,
 )
 from rich_argparse._common import _fix_legacy_win_text
-from tests.conftest import Parsers, get_cmd_output
+from tests.helpers import ArgumentParsers, clean_argparse, get_cmd_output
 
 
-# helpers
-# =======
-def clean(text: str, dedent: bool = True) -> str:
-    if sys.version_info >= (3, 10):  # pragma: >=3.10 cover
-        # replace "optional arguments:" with "options:"
-        pos = text.lower().index("optional arguments:")
-        text = text[: pos + 6] + text[pos + 17 :]
-    if dedent:
-        text = textwrap.dedent(text)
-    return text
-
-
-class ArgumentParsers(Parsers[ArgumentParser, _ArgumentGroup, Type[HelpFormatter]]):
-    parser_class = ArgumentParser
-    formatter_param_name = "formatter_class"
-
-    class SubParsers:
-        def __init__(self) -> None:
-            self.parents: list[ArgumentParser] = []
-            self.subparsers: list[_SubParsersAction[ArgumentParser]] = []
-
-        def append(self, p: ArgumentParser, sp: _SubParsersAction[ArgumentParser]) -> None:
-            self.parents.append(p)
-            self.subparsers.append(sp)
-
-        def add_parser(self, *args, **kwds) -> ArgumentParsers:
-            parsers = ArgumentParsers()
-            for parent, subparser in zip(self.parents, self.subparsers):
-                sp = subparser.add_parser(*args, **kwds, formatter_class=parent.formatter_class)
-                parsers.parsers.append(sp)
-            return parsers
-
-    def add_subparsers(self, *args, **kwds) -> SubParsers:
-        subparsers = self.SubParsers()
-        for parser in self.parsers:
-            sp = parser.add_subparsers(*args, **kwds)
-            subparsers.append(parser, sp)
-        return subparsers
-
-
-# fixtures
-# ========
-@pytest.fixture()
-def disable_group_name_formatter():
-    with patch.object(RichHelpFormatter, "group_name_formatter", str):
-        yield
-
-
-# tests
-# =====
 def test_params_substitution():
     # in text (description, epilog, group description) and version: substitute %(prog)s
     # in help message: substitute %(param)s for all param in vars(action)
@@ -114,7 +61,7 @@ def test_params_substitution():
 
     The epilog of awesome_program.
     """
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
     assert get_cmd_output(parser, cmd=["--version"]) == "awesome_program 1.0.0\n"
 
 
@@ -211,7 +158,7 @@ def test_padding_and_wrapping():
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
 
 
 @pytest.mark.xfail(reason="rich wraps differently")
@@ -303,7 +250,7 @@ def test_escape_params():
 
     [underline] epilog.
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
     parsers.assert_cmd_output_equal(cmd=["--version"], expected="[underline] %1.0.0\n")
 
 
@@ -350,7 +297,7 @@ def test_generated_usage():
       \x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m            \x1b[39mYes.\x1b[0m
       \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m            \x1b[39mNo.\x1b[0m
     """
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
 
 
 @pytest.mark.parametrize(
@@ -444,7 +391,7 @@ def test_actions_spans_in_usage():
       \x1b[36m--opt\x1b[0m [\x1b[38;5;36mOPT\x1b[0m]
       \x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS\x1b[0m [\x1b[38;5;36mOPTS\x1b[0m \x1b[38;5;36m...\x1b[0m]
     """
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="not available in 3.8")
@@ -459,7 +406,7 @@ def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m         \x1b[39mshow this help message and exit\x1b[0m
       \x1b[36m--bool\x1b[0m, \x1b[36m--no-bool\x1b[0m
     """
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
 
 
 def test_usage_spans_errors():
@@ -520,7 +467,7 @@ def test_raw_description_rich_help_formatter():
 
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
 
 
 @pytest.mark.usefixtures("disable_group_name_formatter")
@@ -551,7 +498,7 @@ def test_raw_text_rich_help_formatter():
 
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
 
 
 @pytest.mark.usefixtures("disable_group_name_formatter")
@@ -568,7 +515,7 @@ def test_argument_default_rich_help_formatter():
       -h, --help       show this help message and exit
       --option OPTION  help of option (default: def)
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
 
 
 @pytest.mark.usefixtures("disable_group_name_formatter")
@@ -583,7 +530,7 @@ def test_metavar_type_help_formatter():
       -h, --help   show this help message and exit
       --count int  how many?
     """
-    parsers.assert_format_help_equal(expected=clean(expected_help_output))
+    parsers.assert_format_help_equal(expected=clean_argparse(expected_help_output))
 
 
 def test_django_rich_help_formatter():
@@ -639,7 +586,7 @@ def test_django_rich_help_formatter():
       --traceback      show traceback
       --verbosity      verbosity level
     """
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
 
 
 @pytest.mark.parametrize("indent_increment", (1, 3))
@@ -681,7 +628,7 @@ def test_text_highlighter():
     # Make sure we can use a style multiple times in regexes
     pattern_with_duplicate_style = r"'(?P<syntax>[^']*)'"
     RichHelpFormatter.highlights.append(pattern_with_duplicate_style)
-    assert parser.format_help() == clean(expected_help_output)
+    assert parser.format_help() == clean_argparse(expected_help_output)
     RichHelpFormatter.highlights.remove(pattern_with_duplicate_style)
 
 
@@ -730,7 +677,7 @@ def test_default_highlights():
 
     \x1b[39mEpilog with `\x1b[0m\x1b[1;39msyntax\x1b[0m\x1b[39m` and \x1b[0m\x1b[36m--options\x1b[0m\x1b[39m.\x1b[0m
     """
-    assert parser.format_help().endswith(clean(expected_help_output))
+    assert parser.format_help().endswith(clean_argparse(expected_help_output))
 
 
 @pytest.mark.usefixtures("force_color")
@@ -830,7 +777,7 @@ def test_help_with_control_codes():
     with patch("rich.console.Console.is_terminal", return_value=True):
         colored_help_text = rich_parser.format_help()
     # cannot use textwrap.dedent because of the control codes
-    assert colored_help_text == clean(expected_help_text, dedent=False)
+    assert colored_help_text == clean_argparse(expected_help_text, dedent=False)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="windows-only test")
@@ -854,7 +801,7 @@ def test_legacy_windows():  # pragma: win32 cover
     parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     with patch("rich_argparse._common._initialize_win_colors", init_win_colors):
         help = parser.format_help()
-    assert help == clean(expected_colored_output)
+    assert help == clean_argparse(expected_colored_output)
     init_win_colors.assert_not_called()
 
     # Legacy windows console on new windows => colors: YES, initialization: YES
@@ -864,7 +811,7 @@ def test_legacy_windows():  # pragma: win32 cover
         "rich_argparse._common._initialize_win_colors", init_win_colors
     ):
         help = parser.format_help()
-    assert help == clean(expected_colored_output)
+    assert help == clean_argparse(expected_colored_output)
     init_win_colors.assert_called_once_with()
 
     # Legacy windows console on old windows => colors: NO, initialization: YES
@@ -874,7 +821,7 @@ def test_legacy_windows():  # pragma: win32 cover
         "rich_argparse._common._initialize_win_colors", init_win_colors
     ):
         help = parser.format_help()
-    assert help == clean(expected_output)
+    assert help == clean_argparse(expected_output)
     init_win_colors.assert_called_once_with()
 
     # Legacy windows, but colors disabled in formatter => colors: NO, initialization: NO
@@ -889,7 +836,7 @@ def test_legacy_windows():  # pragma: win32 cover
         "rich_argparse._common._initialize_win_colors", init_win_colors
     ):
         help = no_colors_parser.format_help()
-    assert help == clean(expected_output)
+    assert help == clean_argparse(expected_output)
     init_win_colors.assert_not_called()
 
 
@@ -947,7 +894,7 @@ def test_rich_renderables():
     └─────┴─────┘
     \x1b[31mThe end.\x1b[0m
     """
-    assert parser.format_help() == clean(expected_help)
+    assert parser.format_help() == clean_argparse(expected_help)
 
 
 def test_help_preview_generation(tmp_path):
@@ -1032,7 +979,7 @@ def test_disable_help_markup():
       -h, --help  show this help message and exit
       --foo FOO   [red]Help text (default: def).[/]
     """
-    assert help_text == clean(expected_help_text)
+    assert help_text == clean_argparse(expected_help_text)
 
 
 def test_disable_text_markup():
@@ -1051,7 +998,7 @@ def test_disable_text_markup():
       -h, --help  show this help message and exit
       --foo FOO   Help text.
     """
-    assert help_text == clean(expected_help_text)
+    assert help_text == clean_argparse(expected_help_text)
 
 
 @pytest.mark.usefixtures("force_color")
@@ -1070,7 +1017,7 @@ def test_arg_default_spans():
       \x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m   \x1b[39m(default: \x1b[0m\x1b[3;39m'def'\x1b[0m\x1b[39m) \x1b[0m\x1b[31m(default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[31m)\x1b[0m\x1b[39m (default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[39m)\x1b[0m
     """
     help_text = parser.format_help()
-    assert help_text == clean(expected_help_text)
+    assert help_text == clean_argparse(expected_help_text)
 
 
 @pytest.mark.usefixtures("force_color")
@@ -1137,4 +1084,4 @@ def test_metavar_spans():
       \x1b[36m--op6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m
       \x1b[36m--op7\x1b[0m \x1b[38;5;36mMET1\x1b[0m \x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36mMET3\x1b[0m
     """
-    assert help_text == clean(expected_help_text)
+    assert help_text == clean_argparse(expected_help_text)

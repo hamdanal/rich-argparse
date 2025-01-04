@@ -1,5 +1,7 @@
 # Source code: https://github.com/hamdanal/rich-argparse
 # MIT license: Copyright (c) Ali Hamdan <ali.hamdan.dev@gmail.com>
+
+# for internal use only
 from __future__ import annotations
 
 import argparse
@@ -7,7 +9,13 @@ import re
 import sys
 
 import rich_argparse._lazy_rich as r
-from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, rich_fill, rich_wrap
+from rich_argparse._common import (
+    _HIGHLIGHTS,
+    _fix_legacy_win_text,
+    rich_fill,
+    rich_strip,
+    rich_wrap,
+)
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -395,12 +403,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 text = text[:start] + space + text[end:]
             else:  # performance shortcut
                 text.plain = text.plain[:start] + " " + text.plain[end:]
-        # Text has no strip method yet
-        lstrip_at = len(text.plain) - len(text.plain.lstrip())
-        if lstrip_at:
-            text = text[lstrip_at:]
-        text.rstrip()
-        return text
+        return rich_strip(text)
 
     # =====================================
     # Rich version of HelpFormatter methods

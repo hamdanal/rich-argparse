@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Features
+- [GH-140](https://github.com/hamdanal/rich-argparse/issues/140),
+  [PR-147](https://github.com/hamdanal/rich-argparse/pull/147)
+  Add `rich_argparse.contrib` module to provide additional non-standard formatters. The new module
+  currently contains a single formatter `ParagraphRichHelpFormatter` that preserves paragraph breaks
+  (`\n\n`) in the descriptions, epilog, and help text.
+
 ### Fixes
 - [GH-141](https://github.com/hamdanal/rich-argparse/issues/141),
   [PR-142](https://github.com/hamdanal/rich-argparse/pull/142)

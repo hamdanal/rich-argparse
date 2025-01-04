@@ -31,7 +31,8 @@ changes to the code.
   * [Rich renderables](#rich-descriptions-and-epilog)
 * [Subparsers](#working-with-subparsers)
 * [Documenting your CLI](#generate-help-preview)
-* [Third party formatters](#working-with-third-party-formatters) (ft. django)
+* [Additional formatters](#additional-formatters)
+* [Third party formatters](#third-party-formatters) (ft. django)
 * [Optparse](#optparse-support) (experimental)
 * [Legacy Windows](#legacy-windows-support)
 
@@ -54,16 +55,18 @@ parser = argparse.ArgumentParser(..., formatter_class=RichHelpFormatter)
 ...
 ```
 
-*rich-argparse* defines equivalents to all argparse's [built-in formatters](
+*rich-argparse* defines equivalents to all [argparse's standard formatters](
 https://docs.python.org/3/library/argparse.html#formatter-class):
 
-| `rich_argparse` formatter | equivalent in `argparse` |
-|---------------------------|--------------------------|
-| `RichHelpFormatter` | `HelpFormatter` |
-| `RawDescriptionRichHelpFormatter` | `RawDescriptionHelpFormatter` |
-| `RawTextRichHelpFormatter` | `RawTextHelpFormatter` |
+| `rich_argparse` formatter           | equivalent in `argparse`        |
+|-------------------------------------|---------------------------------|
+| `RichHelpFormatter`                 | `HelpFormatter`                 |
+| `RawDescriptionRichHelpFormatter`   | `RawDescriptionHelpFormatter`   |
+| `RawTextRichHelpFormatter`          | `RawTextHelpFormatter`          |
 | `ArgumentDefaultsRichHelpFormatter` | `ArgumentDefaultsHelpFormatter` |
-| `MetavarTypeRichHelpFormatter` | `MetavarTypeHelpFormatter` |
+| `MetavarTypeRichHelpFormatter`      | `MetavarTypeHelpFormatter`      |
+
+Additional formatters are available in the `rich_argparse.contrib` [module](#additional-formatters).
 
 ## Output styles
 
@@ -239,7 +242,20 @@ python my_cli.py --generate-help-preview my-help.svg  # generates my-help.svg
 COLUMNS=120 python my_cli.py --generate-help-preview  # force the width of the output to 120 columns
 ```
 
-## Working with third party formatters
+## Additional formatters
+
+*rich-argparse* ships with additional non-standard argparse formatters for some common use cases in
+the `rich_argparse.contrib` module. They can be imported with the `from rich_argparse.contrib import`
+syntax.
+
+* `ParagraphRichHelpFormatter`: A formatter similar to `RichHelpFormatter` that preserves paragraph
+  breaks. A paragraph break is defined as two consecutive newlines (`\n\n`) in the help or
+  description text. Leading and trailing trailing whitespace are stripped similar to
+  `RichHelpFormatter`.
+
+_More formatters will be added in the future._
+
+## Third party formatters
 
 *rich-argparse* can be used with other custom formatters through multiple inheritance. For example,
 [django](https://pypi.org/project/django) defines a custom help formatter for its built in commands
