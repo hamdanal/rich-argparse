@@ -21,7 +21,7 @@ R = TypeVar("R")  # return type
 S = TypeVar("S")  # self type
 P = ParamSpec("P")  # other parameters type
 PT = TypeVar("PT", bound="ap.ArgumentParser | op.OptionParser")  # parser type
-GT = TypeVar("GT")  # group type
+GT = TypeVar("GT", bound="ap._ArgumentGroup | op.OptionGroup")  # group type
 
 
 def get_cmd_output(parser: ap.ArgumentParser | op.OptionParser, cmd: list[str]) -> str:
@@ -82,6 +82,24 @@ class ArgumentGroups(BaseGroups[ap._ArgumentGroup]):
             group.add_argument(*args, **kwds)
 
 
+class _SubParsersActions:
+    def __init__(self) -> None:
+        self.parents: list[ap.ArgumentParser] = []
+        self.subparsers: list[ap._SubParsersAction[ap.ArgumentParser]] = []
+
+    def append(self, p: ap.ArgumentParser, sp: ap._SubParsersAction[ap.ArgumentParser]) -> None:
+        self.parents.append(p)
+        self.subparsers.append(sp)
+
+    @copy_signature(ap._SubParsersAction.add_parser)  # type: ignore[arg-type]
+    def add_parser(self, /, *args, **kwds) -> ArgumentParsers:
+        parsers = ArgumentParsers()
+        for parent, subparser in zip(self.parents, self.subparsers):
+            sp = subparser.add_parser(*args, **kwds, formatter_class=parent.formatter_class)
+            parsers.parsers.append(sp)
+        return parsers
+
+
 class ArgumentParsers(BaseParsers[ap.ArgumentParser]):
     def __init__(
         self,
@@ -103,23 +121,6 @@ class ArgumentParsers(BaseParsers[ap.ArgumentParser]):
             for formatter_class in formatter_classes
         ]
 
-    class SubParsers:
-        def __init__(self) -> None:
-            self.parents: list[ap.ArgumentParser] = []
-            self.subparsers: list[ap._SubParsersAction[ap.ArgumentParser]] = []
-
-        def append(self, p: ap.ArgumentParser, sp: ap._SubParsersAction[ap.ArgumentParser]) -> None:
-            self.parents.append(p)
-            self.subparsers.append(sp)
-
-        @copy_signature(ap._SubParsersAction.add_parser)  # type: ignore[arg-type]
-        def add_parser(self, /, *args, **kwds) -> ArgumentParsers:
-            parsers = ArgumentParsers()
-            for parent, subparser in zip(self.parents, self.subparsers):
-                sp = subparser.add_parser(*args, **kwds, formatter_class=parent.formatter_class)
-                parsers.parsers.append(sp)
-            return parsers
-
     @copy_signature(ap.ArgumentParser.add_argument)  # type: ignore[arg-type]
     def add_argument(self, /, *args, **kwds) -> None:
         for parser in self.parsers:
@@ -133,8 +134,8 @@ class ArgumentParsers(BaseParsers[ap.ArgumentParser]):
         return groups
 
     @copy_signature(ap.ArgumentParser.add_subparsers)
-    def add_subparsers(self, /, *args, **kwds) -> SubParsers:
-        subparsers = self.SubParsers()
+    def add_subparsers(self, /, *args, **kwds) -> _SubParsersActions:
+        subparsers = _SubParsersActions()
         for parser in self.parsers:
             sp = parser.add_subparsers(*args, **kwds)
             subparsers.append(parser, sp)

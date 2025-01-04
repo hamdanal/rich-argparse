@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
     from typing import Any, ClassVar
     from typing_extensions import Self
-del TYPE_CHECKING
 
 
 class RichHelpFormatter(argparse.HelpFormatter):
