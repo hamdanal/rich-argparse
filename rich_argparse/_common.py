@@ -18,6 +18,15 @@ _HIGHLIGHTS = [
 _windows_console_fixed = None
 
 
+def rich_strip(text: r.Text) -> r.Text:
+    """Strip leading and trailing whitespace from `rich.text.Text`."""
+    lstrip_at = len(text.plain) - len(text.plain.lstrip())
+    if lstrip_at:  # rich.Text.lstrip() is not available yet!!
+        text = text[lstrip_at:]
+    text.rstrip()
+    return text
+
+
 def rich_wrap(console: r.Console, text: r.Text, width: int) -> r.Lines:
     """`textwrap.wrap()` equivalent for `rich.text.Text`."""
     text = text.copy()

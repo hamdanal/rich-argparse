@@ -6,13 +6,14 @@ from __future__ import annotations
 
 import rich_argparse._lazy_rich as r
 from rich_argparse._argparse import RichHelpFormatter
-from rich_argparse._common import rich_wrap
+from rich_argparse._common import rich_strip, rich_wrap
 
 
 class ParagraphRichHelpFormatter(RichHelpFormatter):
     """Rich help message formatter which retains paragraph separation."""
 
     def _rich_split_lines(self, text: r.Text, width: int) -> r.Lines:
+        text = rich_strip(text)
         lines = r.Lines()
         for paragraph in text.split("\n\n"):
             # Normalize whitespace in the paragraph

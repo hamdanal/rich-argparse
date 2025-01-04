@@ -7,7 +7,9 @@ from tests.helpers import clean_argparse
 
 
 def test_paragraph_rich_help_formatter():
-    long_text = "\n\n".join(["The quick brown fox jumps over the lazy dog. " * 3] * 2)
+    long_sentence = "The quick brown fox jumps over the lazy dog. " * 3
+    long_paragraphs = [long_sentence] * 2
+    long_text = "\n\n\r\n\t " + "\n\n".join(long_paragraphs) + "\n\n\r\n\t "
     parser = ArgumentParser(
         prog="PROG",
         description=long_text,
