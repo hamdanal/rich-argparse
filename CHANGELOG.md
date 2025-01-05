@@ -3,11 +3,14 @@
 ## Unreleased
 
 ### Features
+- [PR-148](https://github.com/hamdanal/rich-argparse/pull/148)
+  Add support for django commands in the new `rich_argparse.django` module. Read more at
+  https://github.com/hamdanal/rich-argparse#django-support
 - [GH-140](https://github.com/hamdanal/rich-argparse/issues/140),
   [PR-147](https://github.com/hamdanal/rich-argparse/pull/147)
-  Add `rich_argparse.contrib` module to provide additional non-standard formatters. The new module
-  currently contains a single formatter `ParagraphRichHelpFormatter` that preserves paragraph breaks
-  (`\n\n`) in the descriptions, epilog, and help text.
+  Add `ParagraphRichHelpFormatter`, a formatter that preserves paragraph breaks, in the new
+  `rich_argparse.contrib` module. Read more at
+  https://github.com/hamdanal/rich-argparse#additional-formatters
 
 ### Fixes
 - [GH-141](https://github.com/hamdanal/rich-argparse/issues/141),

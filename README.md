@@ -22,18 +22,18 @@ changes to the code.
 * [Installation](#installation)
 * [Usage](#usage)
 * [Output styles](#output-styles)
-  * [Colors](#customize-the-colors)
-  * [Group names](#customize-the-group-name-format)
-  * [Highlighting patterns](#special-text-highlighting)
-  * ["usage"](#colors-in-the-usage)
+  * [Customizing colors](#customize-the-colors)
+  * [Group name formatting](#customize-the-group-name-format)
+  * [Special text highlighting](#special-text-highlighting)
+  * [Customizing `usage`](#colors-in-the-usage)
   * [Console markup](#disable-console-markup)
-  * [--version](#colors-in---version)
+  * [Colors in `--version`](#colors-in---version)
   * [Rich renderables](#rich-descriptions-and-epilog)
-* [Subparsers](#working-with-subparsers)
+* [Working with subparsers](#working-with-subparsers)
 * [Documenting your CLI](#generate-help-preview)
 * [Additional formatters](#additional-formatters)
-* [Third party formatters](#third-party-formatters) (ft. django)
-* [Optparse](#optparse-support) (experimental)
+* [Django support](#django-support)
+* [Optparse support](#optparse-support) (experimental)
 * [Legacy Windows](#legacy-windows-support)
 
 ## Installation
@@ -244,9 +244,9 @@ COLUMNS=120 python my_cli.py --generate-help-preview  # force the width of the o
 
 ## Additional formatters
 
-*rich-argparse* ships with additional non-standard argparse formatters for some common use cases in
+*rich-argparse* defines additional non-standard argparse formatters for some common use cases in
 the `rich_argparse.contrib` module. They can be imported with the `from rich_argparse.contrib import`
-syntax.
+syntax. The following formatters are available:
 
 * `ParagraphRichHelpFormatter`: A formatter similar to `RichHelpFormatter` that preserves paragraph
   breaks. A paragraph break is defined as two consecutive newlines (`\n\n`) in the help or
@@ -255,25 +255,13 @@ syntax.
 
 _More formatters will be added in the future._
 
-## Third party formatters
+## Django support
 
-*rich-argparse* can be used with other custom formatters through multiple inheritance. For example,
-[django](https://pypi.org/project/django) defines a custom help formatter for its built in commands
-as well as extension libraries and user defined commands. To use *rich-argparse* in your django
-project, change your `manage.py` file as follows:
+*rich-argparse* provides support for django's custom help formatter. You can instruct django to use
+*rich-argparse* with all built-in, extension libraries, and user defined commands in a django
+project by adding these two lines to the `manage.py` file:
 
 ```diff
-diff --git a/my_project/manage.py b/my_project/manage.py
-index 7fb6855..5e5d48a 100755
---- a/my_project/manage.py
-+++ b/my_project/manage.py
-@@ -1,22 +1,38 @@
- #!/usr/bin/env python
- """Django's command-line utility for administrative tasks."""
- import os
- import sys
-
-
  def main():
      """Run administrative tasks."""
      os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'my_project.settings')
@@ -285,30 +273,29 @@ index 7fb6855..5e5d48a 100755
              "available on your PYTHONPATH environment variable? Did you "
              "forget to activate a virtual environment?"
          ) from exc
-+
-+    from django.core.management.base import BaseCommand, DjangoHelpFormatter
-+    from rich_argparse import RichHelpFormatter
-+
-+    class DjangoRichHelpFormatter(DjangoHelpFormatter, RichHelpFormatter):  # django first
-+        """A rich-based help formatter for django commands."""
-+
-+    original_create_parser = BaseCommand.create_parser
-+
-+    def create_parser(*args, **kwargs):
-+        parser = original_create_parser(*args, **kwargs)
-+        parser.formatter_class = DjangoRichHelpFormatter  # set the formatter_class
-+        return parser
-+
-+    BaseCommand.create_parser = create_parser
-+
++    from rich_argparse.django import patch_django_base_command
++    patch_django_base_command()
      execute_from_command_line(sys.argv)
-
-
- if __name__ == '__main__':
-     main()
 ```
 
-Now the output of all `python manage.py <COMMAND> --help` will be colored.
+Alternatively, you can use *rich-argparse* with specific commands using the `patch_django_command`
+decorator or using the `DjangoRichHelpFormatter` class directly:
+
+```python
+# In my_app/management/commands/my_command.py
+from django.core.management.base import BaseCommand
+from rich_argparse.django import DjangoRichHelpFormatter, patch_django_command
+
+# Option 1
+@patch_django_command
+class Command(BaseCommand): ...
+
+# Option 2
+class Command(BaseCommand):
+    def create_parser(self, *args, **kwargs):
+        kwargs.setdefault("formatter_class", DjangoRichHelpFormatter)
+        return super().create_parser(*args, **kwargs)
+```
 
 ## Optparse support
 
