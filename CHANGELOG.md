@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Features
-- [PR-148](https://github.com/hamdanal/rich-argparse/pull/148)
+- [PR-149](https://github.com/hamdanal/rich-argparse/pull/149)
   Add support for django commands in the new `rich_argparse.django` module. Read more at
   https://github.com/hamdanal/rich-argparse#django-support
 - [GH-140](https://github.com/hamdanal/rich-argparse/issues/140),
