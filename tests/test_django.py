@@ -1,25 +1,30 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser, HelpFormatter
+from types import ModuleType
 from unittest.mock import patch
 
+import pytest
 
-class DjangoHelpFormatter(HelpFormatter): ...
 
+@pytest.fixture(autouse=True)
+def patch_django_import():
+    class DjangoHelpFormatter(HelpFormatter): ...
 
-def create_base_command():
     class BaseCommand:
         def create_parser(self, *args, **kwargs):
             kwargs.setdefault("formatter_class", DjangoHelpFormatter)
             return ArgumentParser(*args, **kwargs)
 
-    return BaseCommand
+    module = ModuleType("django.core.management.base")
+    module.DjangoHelpFormatter = DjangoHelpFormatter
+    module.BaseCommand = BaseCommand
+    with patch.dict("sys.modules", {"django.core.management.base": module}, clear=False):
+        yield
 
 
-@patch("django.core.management.base.DjangoHelpFormatter", new=DjangoHelpFormatter)
-@patch("django.core.management.base.BaseCommand", new=create_base_command())
 def test_patch_django_base_command():
-    from django.core.management.base import BaseCommand
+    from django.core.management.base import BaseCommand, DjangoHelpFormatter
 
     from rich_argparse.django import DjangoRichHelpFormatter, patch_django_base_command
 
@@ -31,10 +36,8 @@ def test_patch_django_base_command():
     assert parser.formatter_class is DjangoRichHelpFormatter
 
 
-@patch("django.core.management.base.DjangoHelpFormatter", new=DjangoHelpFormatter)
-@patch("django.core.management.base.BaseCommand", new=create_base_command())
 def test_patch_django_command():
-    from django.core.management.base import BaseCommand
+    from django.core.management.base import BaseCommand, DjangoHelpFormatter
 
     from rich_argparse.django import DjangoRichHelpFormatter, patch_django_command
 
