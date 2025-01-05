@@ -1092,17 +1092,24 @@ def test_patching():
     class MyArgumentParser(ArgumentParser):
         not_callable = None
 
+    # Patch existing class
     patch_default_formatter_class(MyArgumentParser)
     assert MyArgumentParser().formatter_class is RichHelpFormatter
 
-    @patch_default_formatter_class(formatter_class=RichHelpFormatter)
+    # Override previous patch
+    patch_default_formatter_class(MyArgumentParser, formatter_class=MetavarTypeRichHelpFormatter)
+    assert MyArgumentParser().formatter_class is MetavarTypeRichHelpFormatter
+
+    # Patch new class
+    @patch_default_formatter_class(formatter_class=ArgumentDefaultsRichHelpFormatter)
     class MyArgumentParser2(ArgumentParser):
         pass
 
-    assert MyArgumentParser2().formatter_class is RichHelpFormatter
+    assert MyArgumentParser2().formatter_class is ArgumentDefaultsRichHelpFormatter
 
-    with pytest.raises(AttributeError):
-        patch_default_formatter_class(MyArgumentParser, method_name="unknown_method")
+    # Errors
+    with pytest.raises(AttributeError, match=r"'MyArgumentParser' has no attribute 'missing'"):
+        patch_default_formatter_class(MyArgumentParser, method_name="missing")
 
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match=r"'MyArgumentParser\.not_callable' is not callable"):
         patch_default_formatter_class(MyArgumentParser, method_name="not_callable")

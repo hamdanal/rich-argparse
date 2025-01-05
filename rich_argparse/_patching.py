@@ -49,7 +49,7 @@ def patch_default_formatter_class(
     def decorator(cls, /):
         method = getattr(cls, method_name)
         if not callable(method):
-            raise TypeError(f"{cls.__name__}.{method_name} is not callable")
+            raise TypeError(f"'{cls.__name__}.{method_name}' is not callable")
 
         @functools.wraps(method)
         def wrapper(*args, **kwargs):
