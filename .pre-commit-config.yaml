@@ -23,4 +23,6 @@ repos:
     rev: v1.14.1
     hooks:
       - id: mypy
-        additional_dependencies: ["rich"]
+        additional_dependencies: ["rich", "types-colorama", "django-stubs"]
+        pass_filenames: false
+        args: ["rich_argparse"]

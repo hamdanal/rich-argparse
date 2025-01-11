@@ -34,6 +34,7 @@ from rich_argparse import (
     RichHelpFormatter,
 )
 from rich_argparse._common import _fix_legacy_win_text
+from rich_argparse._patching import patch_default_formatter_class
 from tests.helpers import ArgumentParsers, clean_argparse, get_cmd_output
 
 
@@ -1085,3 +1086,30 @@ def test_metavar_spans():
       \x1b[36m--op7\x1b[0m \x1b[38;5;36mMET1\x1b[0m \x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36mMET3\x1b[0m
     """
     assert help_text == clean_argparse(expected_help_text)
+
+
+def test_patching():
+    class MyArgumentParser(ArgumentParser):
+        not_callable = None
+
+    # Patch existing class
+    patch_default_formatter_class(MyArgumentParser)
+    assert MyArgumentParser().formatter_class is RichHelpFormatter
+
+    # Override previous patch
+    patch_default_formatter_class(MyArgumentParser, formatter_class=MetavarTypeRichHelpFormatter)
+    assert MyArgumentParser().formatter_class is MetavarTypeRichHelpFormatter
+
+    # Patch new class
+    @patch_default_formatter_class(formatter_class=ArgumentDefaultsRichHelpFormatter)
+    class MyArgumentParser2(ArgumentParser):
+        pass
+
+    assert MyArgumentParser2().formatter_class is ArgumentDefaultsRichHelpFormatter
+
+    # Errors
+    with pytest.raises(AttributeError, match=r"'MyArgumentParser' has no attribute 'missing'"):
+        patch_default_formatter_class(MyArgumentParser, method_name="missing")
+
+    with pytest.raises(TypeError, match=r"'MyArgumentParser\.not_callable' is not callable"):
+        patch_default_formatter_class(MyArgumentParser, method_name="not_callable")
