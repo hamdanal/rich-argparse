@@ -59,6 +59,12 @@ flake8-tidy-imports.ban-relative-imports = "all"
 python_version = "3.8"
 strict = true
 
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

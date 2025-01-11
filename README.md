@@ -262,6 +262,7 @@ _More formatters will be added in the future._
 project by adding these two lines to the `manage.py` file:
 
 ```diff
+diff --git a/manage.py b/manage.py
  def main():
      """Run administrative tasks."""
      os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'my_project.settings')
@@ -273,28 +274,23 @@ project by adding these two lines to the `manage.py` file:
              "available on your PYTHONPATH environment variable? Did you "
              "forget to activate a virtual environment?"
          ) from exc
-+    from rich_argparse.django import patch_django_base_command
-+    patch_django_base_command()
++    from rich_argparse.django import richify_command_line_help
++    richify_command_line_help()
      execute_from_command_line(sys.argv)
 ```
 
-Alternatively, you can use *rich-argparse* with specific commands using the `patch_django_command`
-decorator or using the `DjangoRichHelpFormatter` class directly:
+Alternatively, you can use the `DjangoRichHelpFormatter` class directly in your commands:
 
-```python
-# In my_app/management/commands/my_command.py
+```diff
+diff --git a/my_app/management/commands/my_command.py b/my_app/management/commands/my_command.py
 from django.core.management.base import BaseCommand
-from rich_argparse.django import DjangoRichHelpFormatter, patch_django_command
++from rich_argparse.django import DjangoRichHelpFormatter
 
-# Option 1
-@patch_django_command
-class Command(BaseCommand): ...
-
-# Option 2
 class Command(BaseCommand):
-    def create_parser(self, *args, **kwargs):
-        kwargs.setdefault("formatter_class", DjangoRichHelpFormatter)
-        return super().create_parser(*args, **kwargs)
+    def add_arguments(self, parser):
++        parser.formatter_class = DjangoRichHelpFormatter
+        parser.add_argument("--option", action="store_true", help="An option")
+        ...
 ```
 
 ## Optparse support

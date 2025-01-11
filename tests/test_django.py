@@ -23,29 +23,14 @@ def patch_django_import():
         yield
 
 
-def test_patch_django_base_command():
+def test_richify_command_line_help():
     from django.core.management.base import BaseCommand, DjangoHelpFormatter
 
-    from rich_argparse.django import DjangoRichHelpFormatter, patch_django_base_command
+    from rich_argparse.django import DjangoRichHelpFormatter, richify_command_line_help
 
     parser = BaseCommand().create_parser("", "")
     assert parser.formatter_class is DjangoHelpFormatter
 
-    patch_django_base_command()
+    richify_command_line_help()
     parser = BaseCommand().create_parser("", "")
-    assert parser.formatter_class is DjangoRichHelpFormatter
-
-
-def test_patch_django_command():
-    from django.core.management.base import BaseCommand, DjangoHelpFormatter
-
-    from rich_argparse.django import DjangoRichHelpFormatter, patch_django_command
-
-    @patch_django_command
-    class Command(BaseCommand): ...
-
-    parser = BaseCommand().create_parser("", "")
-    assert parser.formatter_class is DjangoHelpFormatter
-
-    parser = Command().create_parser("", "")
     assert parser.formatter_class is DjangoRichHelpFormatter
