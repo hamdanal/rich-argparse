@@ -1,0 +1,34 @@
+name: nightly-tests
+
+on:
+  push:
+    branches: ["main", "python-nightly"]
+    paths-ignore:
+      - ".vscode/**"
+      - "scripts/**"
+      - ".pre-commit-config.yaml"
+      - "*.md"
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.14-dev"]
+    name: main
+    steps:
+      - uses: actions/checkout@v4
+      - uses: deadsnakes/action@v3.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python --version --version && which python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: |
+          uv venv --python $(which python)
+          uv pip install . -r tests/requirements.txt
+      - name: Run the test suite
+        run: uv run pytest -vv --color=yes --cov

@@ -42,9 +42,3 @@ jobs:
           uv pip install . -r tests/requirements.txt
       - name: Run the test suite
         run: uv run pytest -vv --color=yes --cov
-      - name: Upload coverage report if tests fail.
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report-${{ runner.os }}-python-${{ matrix.python-version }}
-          path: htmlcov
-        if: ${{ failure() }}
