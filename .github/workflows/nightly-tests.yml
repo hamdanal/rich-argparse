@@ -2,7 +2,7 @@ name: nightly-tests
 
 on:
   push:
-    branches: ["main", "py-nightly"]
+    branches: ["main", "python-nightly"]
     paths-ignore:
       - ".vscode/**"
       - "scripts/**"
@@ -31,6 +31,4 @@ jobs:
           uv venv --python $(which python)
           uv pip install . -r tests/requirements.txt
       - name: Run the test suite
-        run: |
-          uv run python --version --version
-          uv run pytest -vv --color=yes --cov
+        run: uv run pytest -vv --color=yes --cov
