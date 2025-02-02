@@ -283,14 +283,14 @@ Alternatively, you can use the `DjangoRichHelpFormatter` class directly in your 
 
 ```diff
 diff --git a/my_app/management/commands/my_command.py b/my_app/management/commands/my_command.py
-from django.core.management.base import BaseCommand
+ from django.core.management.base import BaseCommand
 +from rich_argparse.django import DjangoRichHelpFormatter
 
-class Command(BaseCommand):
-    def add_arguments(self, parser):
+ class Command(BaseCommand):
+     def add_arguments(self, parser):
 +        parser.formatter_class = DjangoRichHelpFormatter
-        parser.add_argument("--option", action="store_true", help="An option")
-        ...
+         parser.add_argument("--option", action="store_true", help="An option")
+         ...
 ```
 
 ## Optparse support

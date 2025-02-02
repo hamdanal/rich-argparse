@@ -18,22 +18,27 @@ typo fixes where an issue may not be needed).
 2. Clone the repository:
 
    ```sh
-   git clone git@github.com:<YOUR_USERNAME>/rich-argparse.git
-   cd rich_argparse
+   git clone git@github.com:<YOUR_USERNAME>/rich-argparse.git rich-argparse
+   cd rich-argparse
    ```
 3. Create and activate a virtual environment:
 
+   Linux and macOS:
    ```sh
-   python3 -m venv venv
-   . venv/bin/activate  # Linux and macOS
+   python3 -m venv .venv
+   . .venv/bin/activate
    ```
-   > **Note**
-   > Windows users follow [this guide][venv-guide] to create and activate a virtual environment.
+
+   Windows:
+   ```sh
+   py -m venv .venv
+   .venv\Scripts\activate
+   ```
 
 4. Install the project and its dependencies:
 
    ```sh
-   python3 -m pip install -r requirements-dev.txt
+   python -m pip install -r requirements-dev.txt
    ```
 
 ## Testing
@@ -60,4 +65,3 @@ your pull request, and link it to any relevant issues or discussions.
 [mypy]: https://mypy.readthedocs.io/en/stable/
 [ruff]: https://docs.astral.sh/ruff/
 [PR]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork
-[venv-guide]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
