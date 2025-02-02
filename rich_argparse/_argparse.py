@@ -422,7 +422,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
         help_string % params  # pyright: ignore[reportUnusedExpression]
         parts = []
         defaults: list[str] = []
-        default_repl = "rich-argparse-f3ae8b55df34d5d83a8189d2e4766e68-argparse-rich"
+        default_sub_template = "rich-argparse-f3ae8b55df34d5d83a8189d2e4766e68-{}-argparse-rich"
+        default_n = 0
         last = 0
         for m in self._printf_style_pattern.finditer(help_string):
             start, end = m.span()
@@ -430,7 +431,8 @@ class RichHelpFormatter(argparse.HelpFormatter):
             sub = help_string[start:end] % params
             if m.group("mapping") == "default":
                 defaults.append(sub)
-                sub = default_repl
+                sub = default_sub_template.format(default_n)
+                default_n += 1
             else:
                 sub = r.escape(sub)
             parts.append(sub)
@@ -441,13 +443,33 @@ class RichHelpFormatter(argparse.HelpFormatter):
             if self.help_markup
             else r.Text("".join(parts), style="argparse.help")
         )
-        default_repl_len = len(default_repl)
-        for default in reversed(defaults):
-            default_index = rich_help.plain.rindex(default_repl)
+        for i, default in reversed(list(enumerate(defaults))):
+            default_sub = default_sub_template.format(i)
+            try:
+                start = rich_help.plain.rindex(default_sub)
+            except ValueError:
+                # This could happen in cases like `[default: %(default)s]` with markup activated
+                import warnings
+
+                action_id = next(iter(action.option_strings), action.dest)
+                md = re.search(
+                    rf"\[([^\]]*{self._printf_style_pattern.pattern}[^\]]*)\]", help_string, re.X
+                )
+                repl = (
+                    repr(md.group(1))[1:-1]
+                    if md and md.group("mapping") == "default"
+                    else "default: %(default)s"
+                )
+                msg = (
+                    f"Failed to process default value in help string of argument {action_id!r}."
+                    f"\nHint: try disabling rich markup: `RichHelpFormatter.help_markup = False`"
+                    f"\n      or replace brackets by parenthesis: `[{repl}]` -> `({repl})`"
+                )
+                warnings.warn(msg, UserWarning, stacklevel=4)
+                continue
+            end = start + len(default_sub)
             rich_help = (
-                rich_help[:default_index]
-                .append(default, style="argparse.default")
-                .append(rich_help[default_index + default_repl_len :])
+                rich_help[:start].append(default, style="argparse.default").append(rich_help[end:])
             )
         for highlight in self.highlights:
             rich_help.highlight_regex(highlight, style_prefix="argparse.")

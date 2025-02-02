@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import string
 import sys
 import textwrap
@@ -1018,6 +1019,35 @@ def test_arg_default_spans():
       \x1b[36m--foo\x1b[0m \x1b[38;5;36mFOO\x1b[0m   \x1b[39m(default: \x1b[0m\x1b[3;39m'def'\x1b[0m\x1b[39m) \x1b[0m\x1b[31m(default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[31m)\x1b[0m\x1b[39m (default: \x1b[0m\x1b[3;39mdef\x1b[0m\x1b[39m)\x1b[0m
     """
     help_text = parser.format_help()
+    assert help_text == clean_argparse(expected_help_text)
+
+
+def test_arg_default_in_markup():
+    parser = ArgumentParser(prog="PROG", formatter_class=RichHelpFormatter)
+    parser.add_argument(
+        "--foo",
+        default="def",
+        help=(
+            "(default: %(default)r)[default wrong: %(default)r] text [default wrong: %(default)s]"
+            "(default: %(default)s) [link default wrong %(default)s] %(default)s"
+        ),
+    )
+    expected_help_text = """\
+    Usage: PROG [-h] [--foo FOO]
+
+    Optional Arguments:
+      -h, --help  show this help message and exit
+      --foo FOO   (default: 'def') text (default: def) def
+    """
+    with pytest.warns(
+        UserWarning,
+        match=re.escape(
+            "Failed to process default value in help string of argument '--foo'.\n"
+            "Hint: try disabling rich markup: `RichHelpFormatter.help_markup = False`\n"
+            "      or replace brackets by parenthesis: `[default wrong: %(default)r]` -> `(default wrong: %(default)r)`"
+        ),
+    ):
+        help_text = parser.format_help()
     assert help_text == clean_argparse(expected_help_text)
 
 
