@@ -459,7 +459,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                         for m in re.finditer(rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.X)
                         if m.group("mapping") == "default"
                     ),
-                    "default: %(default)s",
+                    "default: %(default)s",  # pragma: >=3.9 cover # fails on Python 3.8!
                 )
                 msg = (
                     f"Failed to process default value in help string of argument {action_id!r}."
