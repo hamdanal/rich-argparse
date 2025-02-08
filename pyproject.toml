@@ -67,6 +67,7 @@ flake8-tidy-imports.ban-relative-imports = "all"
 [tool.mypy]
 python_version = "3.8"
 strict = true
+local_partial_types = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]

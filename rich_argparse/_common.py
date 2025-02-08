@@ -15,7 +15,7 @@ _HIGHLIGHTS = [
     r"`(?P<syntax>[^`]*)`|(?:^|\s)(?P<args>-{1,2}[\w]+[\w-]*)",
 ]
 
-_windows_console_fixed = None
+_windows_console_fixed: bool | None = None
 
 
 def rich_strip(text: r.Text) -> r.Text:

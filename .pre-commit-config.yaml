@@ -14,15 +14,23 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.4
+    rev: v0.9.5
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.14.1
+    rev: v1.15.0
     hooks:
       - id: mypy
         additional_dependencies: ["rich", "types-colorama", "django-stubs"]
         pass_filenames: false
         args: ["rich_argparse"]
+  - repo: local
+    hooks:
+      - id: bad-gh-link
+        name: bad-gh-link
+        description: Detect PR/Issue GitHub links text that don't match their URL in CHANGELOG.md
+        language: pygrep
+        entry: '(?i)\[(?:PR|GH)-(\d+)\]\(https://github.com/hamdanal/rich-argparse/(?:pull|issues)/(?!\1/?\))\d+/?\)'
+        files: CHANGELOG.md

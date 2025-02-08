@@ -9,6 +9,10 @@ import optparse
 import rich_argparse._lazy_rich as r
 from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, rich_fill, rich_wrap
 
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import Literal
+
 GENERATE_USAGE = "==GENERATE_USAGE=="
 
 
@@ -47,7 +51,11 @@ class RichHelpFormatter(optparse.HelpFormatter):
     """
 
     def __init__(
-        self, indent_increment: int, max_help_position: int, width: int | None, short_first: int
+        self,
+        indent_increment: int,
+        max_help_position: int,
+        width: int | None,
+        short_first: bool | Literal[0, 1],
     ) -> None:
         super().__init__(indent_increment, max_help_position, width, short_first)
         self._console: r.Console | None = None
@@ -241,7 +249,7 @@ class IndentedRichHelpFormatter(RichHelpFormatter):
         indent_increment: int = 2,
         max_help_position: int = 24,
         width: int | None = None,
-        short_first: int = 1,
+        short_first: bool | Literal[0, 1] = 1,
     ) -> None:
         super().__init__(indent_increment, max_help_position, width, short_first)
 
@@ -265,7 +273,7 @@ class TitledRichHelpFormatter(RichHelpFormatter):
         indent_increment: int = 0,
         max_help_position: int = 24,
         width: int | None = None,
-        short_first: int = 0,
+        short_first: bool | Literal[0, 1] = 0,
     ) -> None:
         super().__init__(indent_increment, max_help_position, width, short_first)
 
