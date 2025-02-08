@@ -14,7 +14,8 @@
 
 ### Fixes
 - [GH-152](https://github.com/hamdanal/rich-argparse/issues/152),
-  [PR-153](https://github.com/hamdanal/rich-argparse/pull/153)
+  [PR-153](https://github.com/hamdanal/rich-argparse/pull/153),
+  [PR-154](https://github.com/hamdanal/rich-argparse/pull/154)
   Fix `ValueError` when using `%(default)s` inside square brackets and `help_markup` is enabled.
 - [GH-141](https://github.com/hamdanal/rich-argparse/issues/141),
   [PR-142](https://github.com/hamdanal/rich-argparse/pull/142)

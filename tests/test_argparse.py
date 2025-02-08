@@ -1028,8 +1028,8 @@ def test_arg_default_in_markup():
         "--foo",
         default="def",
         help=(
-            "(default: %(default)r)[default wrong: %(default)r] text [default wrong: %(default)s]"
-            "(default: %(default)s) [link default wrong %(default)s] %(default)s"
+            "[%(type)r type](good: %(default)r)[bad: %(default)r] text [bad: %(default)s]"
+            "(good: %(default)s) [link bad %(default)s] %(default)s"
         ),
     )
     expected_help_text = """\
@@ -1037,14 +1037,14 @@ def test_arg_default_in_markup():
 
     Optional Arguments:
       -h, --help  show this help message and exit
-      --foo FOO   (default: 'def') text (default: def) def
+      --foo FOO   [None type](good: 'def') text (good: def) def
     """
     with pytest.warns(
         UserWarning,
         match=re.escape(
             "Failed to process default value in help string of argument '--foo'.\n"
             "Hint: try disabling rich markup: `RichHelpFormatter.help_markup = False`\n"
-            "      or replace brackets by parenthesis: `[default wrong: %(default)r]` -> `(default wrong: %(default)r)`"
+            "      or replace brackets by parenthesis: `[bad: %(default)r]` -> `(bad: %(default)r)`"
         ),
     ):
         help_text = parser.format_help()
