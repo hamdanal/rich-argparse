@@ -452,13 +452,14 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 import warnings
 
                 action_id = next(iter(action.option_strings), action.dest)
-                md = re.search(
-                    rf"\[([^\]]*{self._printf_style_pattern.pattern}[^\]]*)\]", help_string, re.X
-                )
-                repl = (
-                    repr(md.group(1))[1:-1]
-                    if md and md.group("mapping") == "default"
-                    else "default: %(default)s"
+                printf_pat = self._printf_style_pattern.pattern
+                repl = next(
+                    (
+                        repr(m.group(1))[1:-1]
+                        for m in re.finditer(rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.X)
+                        if m.group("mapping") == "default"
+                    ),
+                    "default: %(default)s",
                 )
                 msg = (
                     f"Failed to process default value in help string of argument {action_id!r}."
