@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.7.0 - 2025-02-08
+
 ### Features
 - [PR-149](https://github.com/hamdanal/rich-argparse/pull/149)
   Add support for django commands in the new `rich_argparse.django` module. Read more at
