@@ -253,6 +253,10 @@ syntax. The following formatters are available:
   description text. Leading and trailing trailing whitespace are stripped similar to
   `RichHelpFormatter`.
 
+* `WrappedColorFormatter`: Extends `ParagraphRichHelpFormatter` to preserve paragraph but also
+  wrap lines reasonably even on wide terminal screens (at most 88 chars width, never less than 40).
+
+
 _More formatters will be added in the future._
 
 ## Django support

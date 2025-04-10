@@ -3,6 +3,9 @@
 
 # for internal use only
 from __future__ import annotations
+from typing import Any
+
+from rich import get_console
 
 import rich_argparse._lazy_rich as r
 from rich_argparse._argparse import RichHelpFormatter
@@ -31,3 +34,18 @@ class ParagraphRichHelpFormatter(RichHelpFormatter):
     def _rich_fill_text(self, text: r.Text, width: int, indent: r.Text) -> r.Text:
         lines = self._rich_split_lines(text, width)
         return r.Text("\n").join(indent + line for line in lines) + "\n"
+
+
+WRAPPED_MAX_WIDTH = 88
+WRAPPED_MIN_WIDTH = 40
+
+class WrappedColorFormatter(ParagraphRichHelpFormatter):
+    """
+    A colored formatter for argparse that retains paragraphs (unlike default
+    argparse formatters) and also wraps text to console width, which is better
+    for readability in both wide and narrow consoles.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        width = max(WRAPPED_MIN_WIDTH, min(WRAPPED_MAX_WIDTH, get_console().width))
+        super().__init__(*args, width=width, **kwargs)
