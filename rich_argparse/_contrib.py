@@ -39,6 +39,7 @@ class ParagraphRichHelpFormatter(RichHelpFormatter):
 WRAPPED_MAX_WIDTH = 88
 WRAPPED_MIN_WIDTH = 40
 
+
 class WrappedColorFormatter(ParagraphRichHelpFormatter):
     """
     A colored formatter for argparse that retains paragraphs (unlike default
