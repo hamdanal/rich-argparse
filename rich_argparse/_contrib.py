@@ -54,12 +54,6 @@ class WrappedColorFormatter(ParagraphRichHelpFormatter):
         width: int | None = None,
         console: r.Console | None = None,
     ) -> None:
-        if not width:       
+        if not width:
             width = max(WRAPPED_MIN_WIDTH, min(WRAPPED_MAX_WIDTH, get_console().width))
-        super().__init__(
-            prog,
-            indent_increment,
-            max_help_position,
-            width=width,
-            console=console
-        )
+        super().__init__(prog, indent_increment, max_help_position, width=width, console=console)
