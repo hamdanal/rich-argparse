@@ -3,7 +3,6 @@
 
 # for internal use only
 from __future__ import annotations
-from typing import Any
 
 from rich import get_console
 
@@ -47,6 +46,20 @@ class WrappedColorFormatter(ParagraphRichHelpFormatter):
     for readability in both wide and narrow consoles.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        width = max(WRAPPED_MIN_WIDTH, min(WRAPPED_MAX_WIDTH, get_console().width))
-        super().__init__(*args, width=width, **kwargs)
+    def __init__(
+        self,
+        prog: str,
+        indent_increment: int = 2,
+        max_help_position: int = 24,
+        width: int | None = None,
+        console: r.Console | None = None,
+    ) -> None:
+        if not width:       
+            width = max(WRAPPED_MIN_WIDTH, min(WRAPPED_MAX_WIDTH, get_console().width))
+        super().__init__(
+            prog,
+            indent_increment,
+            max_help_position,
+            width=width,
+            console=console
+        )
