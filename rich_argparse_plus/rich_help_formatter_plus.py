@@ -149,7 +149,7 @@ class RichHelpFormatterPlus(argparse.RawTextHelpFormatter):
         help_txt = Text.from_markup((self._get_help_string(action) or '') % format_specifiers)
 
         # Append (default: ___) and (choices: M-N) to help text
-        if default_value and default_value != argparse.SUPPRESS:
+        if default_value is not None and default_value != argparse.SUPPRESS:
             style = ARGPARSE_NUMBER if isinstance(default_value, Number) else ARGPARSE_ADDENDUM
             help_txt += self._help_addendum('default', Text(str(default_value), style))
         if choices and isinstance(choices, range):
