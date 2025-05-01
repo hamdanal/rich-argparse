@@ -301,8 +301,9 @@ def test_rich_lazy_import():
         if mod_name != "rich" and not mod_name.startswith("rich.")
     }
     lazy_rich = {k: v for k, v in r.__dict__.items() if k not in r.__all__}
-    with patch.dict(sys.modules, sys_modules_no_rich, clear=True), patch.dict(
-        r.__dict__, lazy_rich, clear=True
+    with (
+        patch.dict(sys.modules, sys_modules_no_rich, clear=True),
+        patch.dict(r.__dict__, lazy_rich, clear=True),
     ):
         parser = OptionParser(formatter=IndentedRichHelpFormatter())
         parser.add_option("--foo", help="foo help")
@@ -353,8 +354,9 @@ def test_legacy_windows(legacy_console, old_windows, colors):  # pragma: win32 c
 
     init_win_colors = Mock(return_value=not old_windows)
     parser = OptionParser(prog="PROG", formatter=IndentedRichHelpFormatter())
-    with patch("rich.console.detect_legacy_windows", return_value=legacy_console), patch(
-        "rich_argparse._common._initialize_win_colors", init_win_colors
+    with (
+        patch("rich.console.detect_legacy_windows", return_value=legacy_console),
+        patch("rich_argparse._common._initialize_win_colors", init_win_colors),
     ):
         assert parser.format_help() == dedent(expected_output)
     if legacy_console:
