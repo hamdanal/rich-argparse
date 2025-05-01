@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+- [GH-155](https://github.com/hamdanal/rich-argparse/issues/155),
+  [PR-160](https://github.com/hamdanal/rich-argparse/pull/160)
+  Python 3.8 is no longer supported (EOL since 7/10/2024)
+
 ## 1.7.0 - 2025-02-08
 
 ### Features

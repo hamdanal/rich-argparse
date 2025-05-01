@@ -17,7 +17,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -30,7 +29,7 @@ keywords = ["argparse", "rich", "help-formatter", "optparse"]
 dependencies = [
   "rich >= 11.0.0",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.urls]
 Homepage = "https://github.com/hamdanal/rich-argparse"
@@ -65,7 +64,7 @@ isort.extra-standard-library = ["typing_extensions"]
 flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 strict = true
 local_partial_types = true
 

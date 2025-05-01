@@ -362,18 +362,12 @@ def test_actions_spans_in_usage():
     mut_ex.add_argument("--opt", nargs="?")
     mut_ex.add_argument("--opts", nargs="+")
 
-    # https://github.com/python/cpython/issues/82619
-    if sys.version_info < (3, 9):  # pragma: <3.9 cover
-        zom_metavar = "[\x1b[36mzom\x1b[0m [\x1b[36mzom\x1b[0m \x1b[36m...\x1b[0m]]"
-    else:  # pragma: >=3.9 cover
-        zom_metavar = "[\x1b[36mzom\x1b[0m \x1b[36m...\x1b[0m]"
-
     usage_text = (
-        f"\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
-        f"[\x1b[36m--opt\x1b[0m [\x1b[38;5;36mOPT\x1b[0m] | "
-        f"\x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS\x1b[0m [\x1b[38;5;36mOPTS\x1b[0m \x1b[38;5;36m...\x1b[0m]]\n                "
-        f"\x1b[36mrequired\x1b[0m \x1b[36mint\x1b[0m \x1b[36mint\x1b[0m [\x1b[36moptional\x1b[0m] "
-        f"{zom_metavar} \x1b[36moom\x1b[0m [\x1b[36moom\x1b[0m \x1b[36m...\x1b[0m] \x1b[36m...\x1b[0m \x1b[36mparser\x1b[0m \x1b[36m...\x1b[0m"
+        "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
+        "[\x1b[36m--opt\x1b[0m [\x1b[38;5;36mOPT\x1b[0m] | "
+        "\x1b[36m--opts\x1b[0m \x1b[38;5;36mOPTS\x1b[0m [\x1b[38;5;36mOPTS\x1b[0m \x1b[38;5;36m...\x1b[0m]]\n                "
+        "\x1b[36mrequired\x1b[0m \x1b[36mint\x1b[0m \x1b[36mint\x1b[0m [\x1b[36moptional\x1b[0m] "
+        "[\x1b[36mzom\x1b[0m \x1b[36m...\x1b[0m] \x1b[36moom\x1b[0m [\x1b[36moom\x1b[0m \x1b[36m...\x1b[0m] \x1b[36m...\x1b[0m \x1b[36mparser\x1b[0m \x1b[36m...\x1b[0m"
     )
     expected_help_output = f"""\
     {usage_text}
@@ -396,9 +390,8 @@ def test_actions_spans_in_usage():
     assert parser.format_help() == clean_argparse(expected_help_output)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 9), reason="not available in 3.8")
 @pytest.mark.usefixtures("force_color")
-def test_boolean_optional_action_spans():  # pragma: >=3.9 cover
+def test_boolean_optional_action_spans():
     parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
     parser.add_argument("--bool", action=argparse.BooleanOptionalAction)
     expected_help_output = """\
@@ -732,8 +725,9 @@ def test_rich_lazy_import():
         if mod_name != "rich" and not mod_name.startswith("rich.")
     }
     lazy_rich = {k: v for k, v in r.__dict__.items() if k not in r.__all__}
-    with patch.dict(sys.modules, sys_modules_no_rich, clear=True), patch.dict(
-        r.__dict__, lazy_rich, clear=True
+    with (
+        patch.dict(sys.modules, sys_modules_no_rich, clear=True),
+        patch.dict(r.__dict__, lazy_rich, clear=True),
     ):
         parser = ArgumentParser(formatter_class=RichHelpFormatter)
         parser.add_argument("--foo", help="foo help")
@@ -809,8 +803,9 @@ def test_legacy_windows():  # pragma: win32 cover
     # Legacy windows console on new windows => colors: YES, initialization: YES
     init_win_colors = Mock(return_value=True)
     parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
-    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
-        "rich_argparse._common._initialize_win_colors", init_win_colors
+    with (
+        patch("rich.console.detect_legacy_windows", return_value=True),
+        patch("rich_argparse._common._initialize_win_colors", init_win_colors),
     ):
         help = parser.format_help()
     assert help == clean_argparse(expected_colored_output)
@@ -819,8 +814,9 @@ def test_legacy_windows():  # pragma: win32 cover
     # Legacy windows console on old windows => colors: NO, initialization: YES
     init_win_colors = Mock(return_value=False)
     parser = ArgumentParser("PROG", formatter_class=RichHelpFormatter)
-    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
-        "rich_argparse._common._initialize_win_colors", init_win_colors
+    with (
+        patch("rich.console.detect_legacy_windows", return_value=True),
+        patch("rich_argparse._common._initialize_win_colors", init_win_colors),
     ):
         help = parser.format_help()
     assert help == clean_argparse(expected_output)
@@ -834,8 +830,9 @@ def test_legacy_windows():  # pragma: win32 cover
 
     init_win_colors = Mock(return_value=True)
     no_colors_parser = ArgumentParser("PROG", formatter_class=fmt_no_color)
-    with patch("rich.console.detect_legacy_windows", return_value=True), patch(
-        "rich_argparse._common._initialize_win_colors", init_win_colors
+    with (
+        patch("rich.console.detect_legacy_windows", return_value=True),
+        patch("rich_argparse._common._initialize_win_colors", init_win_colors),
     ):
         help = no_colors_parser.format_help()
     assert help == clean_argparse(expected_output)
@@ -1067,10 +1064,6 @@ def test_metavar_spans():
     meg.add_argument("--op7", metavar=("MET1", "MET2", "MET3"), nargs=3)
     help_text = parser.format_help()
 
-    op3_metavar = "[\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]"
-    if sys.version_info < (3, 9):  # pragma: <3.9 cover
-        op3_metavar = f"[\x1b[38;5;36mOP3\x1b[0m {op3_metavar}]"
-
     if sys.version_info >= (3, 13):  # pragma: >=3.13 cover
         usage_tail = """ |
                 \x1b[36m--op2\x1b[0m [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]] |
@@ -1081,11 +1074,11 @@ def test_metavar_spans():
                 \x1b[36m--op7\x1b[0m \x1b[38;5;36mMET1\x1b[0m \x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36mMET3\x1b[0m]
         """
     else:  # pragma: <3.13 cover
-        usage_tail = f"""
+        usage_tail = """
                 | \x1b[36m--op2\x1b[0m
                 [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
                 | \x1b[36m--op3\x1b[0m
-                {op3_metavar}
+                [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]
                 | \x1b[36m--op4\x1b[0m
                 \x1b[38;5;36mMET1\x1b[0m
                 [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
@@ -1109,7 +1102,7 @@ def test_metavar_spans():
         \x1b[39mmessage and exit\x1b[0m
       \x1b[36m--op1\x1b[0m [\x1b[38;5;36mMET\x1b[0m]
       \x1b[36m--op2\x1b[0m [\x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]]
-      \x1b[36m--op3\x1b[0m {op3_metavar}
+      \x1b[36m--op3\x1b[0m [\x1b[38;5;36mOP3\x1b[0m \x1b[38;5;36m...\x1b[0m]
       \x1b[36m--op4\x1b[0m \x1b[38;5;36mMET1\x1b[0m [\x1b[38;5;36mMET2\x1b[0m \x1b[38;5;36m...\x1b[0m]
       \x1b[36m--op5\x1b[0m \x1b[38;5;36mOP5\x1b[0m [\x1b[38;5;36mOP5\x1b[0m \x1b[38;5;36m...\x1b[0m]
       \x1b[36m--op6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m \x1b[38;5;36mOP6\x1b[0m
