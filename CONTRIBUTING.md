@@ -11,7 +11,7 @@ typo fixes where an issue may not be needed).
 
 ## Getting started
 
-*python* version 3.8 or higher is required for development.
+*python* version 3.9 or higher is required for development.
 
 1. Fork the repository on GitHub.
 

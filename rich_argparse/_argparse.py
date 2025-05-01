@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 
 import rich_argparse._lazy_rich as r
 from rich_argparse._common import (
@@ -291,16 +290,13 @@ class RichHelpFormatter(argparse.HelpFormatter):
             return _start, _end
 
         for action in options:  # start with the options
-            if sys.version_info >= (3, 9):  # pragma: >=3.9 cover
-                usage = action.format_usage()
-                if isinstance(action, argparse.BooleanOptionalAction):
-                    for option_string in action.option_strings:
-                        start, end = find_span(option_string)
-                        yield r.Span(start, end, "argparse.args")
-                        pos = end + 1
-                    continue
-            else:  # pragma: <3.9 cover
-                usage = action.option_strings[0]
+            usage = action.format_usage()
+            if isinstance(action, argparse.BooleanOptionalAction):
+                for option_string in action.option_strings:
+                    start, end = find_span(option_string)
+                    yield r.Span(start, end, "argparse.args")
+                    pos = end + 1
+                continue
             start, end = find_span(usage)
             yield r.Span(start, end, "argparse.args")
             pos = end + 1
@@ -337,7 +333,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 ("]", False),
             )
         elif action.nargs == argparse.ZERO_OR_MORE:
-            if sys.version_info < (3, 9) or len(get_metavar(1)) == 2:  # pragma: <3.9 cover
+            if len(get_metavar(1)) == 2:
                 metavar = get_metavar(2)
                 # '[%s [%s ...]]' % metavar
                 yield from (
@@ -349,7 +345,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                     ("...", True),
                     ("]]", False),
                 )
-            else:  # pragma: >=3.9 cover
+            else:
                 # '[%s ...]' % metavar
                 yield from (
                     ("[", False),
@@ -459,7 +455,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
                         for m in re.finditer(rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.X)
                         if m.group("mapping") == "default"
                     ),
-                    "default: %(default)s",  # pragma: >=3.9 cover # fails on Python 3.8!
+                    "default: %(default)s",
                 )
                 msg = (
                     f"Failed to process default value in help string of argument {action_id!r}."
