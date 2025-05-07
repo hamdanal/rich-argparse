@@ -7,6 +7,11 @@
   [PR-160](https://github.com/hamdanal/rich-argparse/pull/160)
   Python 3.8 is no longer supported (EOL since 7/10/2024)
 
+### Fixes
+- [PR-162](https://github.com/hamdanal/rich-argparse/pull/162)
+  Fix TypeError on nightly builds (Python 3.14.0a7+) due to new `HelpFormatter` arguments.
+  The `console` parameter is now keyword-only.
+
 ## 1.7.0 - 2025-02-08
 
 ### Features
