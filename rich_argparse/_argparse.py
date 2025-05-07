@@ -83,9 +83,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
         indent_increment: int = 2,
         max_help_position: int = 24,
         width: int | None = None,
+        *,
         console: r.Console | None = None,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(prog, indent_increment, max_help_position, width)
+        super().__init__(prog, indent_increment, max_help_position, width, **kwargs)
         self._console = console
 
         # https://docs.python.org/3/library/stdtypes.html#printf-style-string-formatting
