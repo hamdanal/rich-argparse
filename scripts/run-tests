@@ -3,5 +3,5 @@
 set -euxo pipefail
 
 for python in 3.{8..14}; do
-    uvx --python=${python} --with=. --with-requirements=tests/requirements.txt pytest --cov
+    uvx --isolated --python=${python} --with=. --with-requirements=tests/requirements.txt pytest --cov
 done

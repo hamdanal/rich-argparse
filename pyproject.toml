@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rich-argparse"
-version = "1.7.0"
+version = "1.7.1"
 description = "Rich help formatters for argparse and optparse"
 authors = [
   {name="Ali Hamdan", email="ali.hamdan.dev@gmail.com"},

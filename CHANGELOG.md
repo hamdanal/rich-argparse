@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.7.1 - 2025-05-25
 
 ### Fixes
 - [PR-162](https://github.com/hamdanal/rich-argparse/pull/162)
