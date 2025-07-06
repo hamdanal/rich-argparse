@@ -710,8 +710,8 @@ def test_expand_help_format_specifier(ct):
     action = Action(["-t"], dest="test", help=f"%(prog){ct}")
     try:
         expected = help_formatter._expand_help(action)
-    except ValueError as e:
-        with pytest.raises(ValueError) as exc_info:
+    except (ValueError, TypeError) as e:  # pypy raises TypeError
+        with pytest.raises(type(e)) as exc_info:
             help_formatter._rich_expand_help(action)
         assert exc_info.value.args == e.args
     else:

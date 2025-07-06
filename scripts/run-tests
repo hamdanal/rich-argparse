@@ -2,6 +2,6 @@
 
 set -euxo pipefail
 
-for python in 3.{9..14}; do
-    uvx --python=${python} --with=. --with-requirements=tests/requirements.txt pytest --cov
+for python in "3.9" "3.10" "3.11" "3.12" "3.13" "3.14" "pypy3.11"; do
+    uvx --isolated --python=${python} --with=. --with-requirements=tests/requirements.txt pytest --cov
 done
