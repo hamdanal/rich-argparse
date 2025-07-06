@@ -6,6 +6,11 @@
 - [GH-155](https://github.com/hamdanal/rich-argparse/issues/155),
   [PR-160](https://github.com/hamdanal/rich-argparse/pull/160)
   Python 3.8 is no longer supported (EOL since 7/10/2024)
+- [GH-164](https://github.com/hamdanal/rich-argparse/issues/164),
+  [PR-165](https://github.com/hamdanal/rich-argparse/pull/165)
+  Add support for PyPy 3.11
+
+## 1.7.1 - 2025-05-25
 
 ### Fixes
 - [PR-162](https://github.com/hamdanal/rich-argparse/pull/162)
