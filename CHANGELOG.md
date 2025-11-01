@@ -10,6 +10,8 @@
   [PR-165](https://github.com/hamdanal/rich-argparse/pull/165)
   Add support for PyPy 3.11
 
+## 1.7.2 - 2025-11-01
+
 ### Fixes
 - [PR-171](https://github.com/hamdanal/rich-argparse/pull/171)
   Fix colors overlapping with Python 3.14.0+ which enabled colors by default in the help formatter.
