@@ -12,6 +12,7 @@ import rich_argparse._lazy_rich as r
 from rich_argparse._common import (
     _HIGHLIGHTS,
     _fix_legacy_win_text,
+    _strip_codes,
     rich_fill,
     rich_strip,
     rich_wrap,
@@ -113,6 +114,12 @@ class RichHelpFormatter(argparse.HelpFormatter):
     @console.setter
     def console(self, console: r.Console) -> None:
         self._console = console
+
+    if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
+
+        def _set_color(self, color: bool) -> None:
+            # Override to disable color setting in argparse.HelpFormatter for Python 3.14+
+            return super()._set_color(False)
 
     class _Section(argparse.HelpFormatter._Section):
         def __init__(
@@ -216,16 +223,15 @@ class RichHelpFormatter(argparse.HelpFormatter):
             return
         if prefix is None:
             prefix = self._format_usage(usage="", actions=(), groups=(), prefix=None).rstrip("\n")
+        prefix = _strip_codes(prefix)
         prefix_end = ": " if prefix.endswith(": ") else ""
         prefix = prefix[: len(prefix) - len(prefix_end)]
-        prefix = r.strip_control_codes(type(self).group_name_formatter(prefix)) + prefix_end
+        prefix = type(self).group_name_formatter(prefix) + prefix_end
 
         usage_spans = [r.Span(0, len(prefix.rstrip()), "argparse.groups")]
-        usage_text = r.strip_control_codes(
-            self._format_usage(usage, actions, groups, prefix=prefix)
-        )
+        usage_text = _strip_codes(self._format_usage(usage, actions, groups, prefix=prefix))
         if usage is None:  # get colour spans for generated usage
-            prog = r.strip_control_codes(f"{self._prog}")
+            prog = _strip_codes(f"{self._prog}")
             if actions:
                 prog_start = usage_text.index(prog, len(prefix))
                 usage_spans.append(r.Span(prog_start, prog_start + len(prog), "argparse.prog"))
@@ -287,7 +293,7 @@ class RichHelpFormatter(argparse.HelpFormatter):
         pos = start
 
         def find_span(_string: str) -> tuple[int, int]:
-            stripped = r.strip_control_codes(_string)
+            stripped = _strip_codes(_string)
             _start = text.index(stripped, pos)
             _end = _start + len(stripped)
             return _start, _end

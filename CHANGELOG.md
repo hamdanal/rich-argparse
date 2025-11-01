@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased
+
+### Fixes
+- [PR-171](https://github.com/hamdanal/rich-argparse/pull/171)
+  Fix colors overlapping with Python 3.14.0+ which enabled colors by default in the help formatter.
+
 ## 1.7.1 - 2025-05-25
 
 ### Fixes

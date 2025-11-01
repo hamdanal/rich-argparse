@@ -24,7 +24,7 @@ def turnoff_legacy_windows():
 
 @pytest.fixture()
 def force_color():
-    with patch("rich.console.Console.is_terminal", return_value=True):
+    with patch.dict(os.environ, {"FORCE_COLOR": "1"}):
         yield
 
 
