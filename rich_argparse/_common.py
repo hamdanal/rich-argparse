@@ -42,6 +42,11 @@ def rich_fill(console: r.Console, text: r.Text, width: int, indent: r.Text) -> r
     return r.Text("\n").join(indent + line for line in lines)
 
 
+def _strip_codes(text: str) -> str:
+    """Remove ANSI color codes and control codes from a string."""
+    return r.re_ansi.sub("", r.strip_control_codes(text))
+
+
 def _initialize_win_colors() -> bool:  # pragma: no cover
     global _windows_console_fixed
     assert sys.platform == "win32"

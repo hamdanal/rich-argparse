@@ -689,18 +689,38 @@ def test_subparsers_usage():
     assert rich_child1.format_usage() == (
         "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"
     )
-    assert rich_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+    if sys.version_info < (3, 14):  # pragma: <3.14 cover
+        assert rich_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+    else:  # pragma: >=3.14 cover
+        # Python 3.14 adds ANSI color codes to the default usage message
+        assert (
+            rich_child2.format_usage()
+            == "\x1b[1;34musage: \x1b[0m\x1b[1;35mPROG sp2\x1b[0m [\x1b[32m-h\x1b[0m]\n"
+        )
 
     # Parent uses original formatter
     orig_parent = ArgumentParser("PROG")
     orig_subparsers = orig_parent.add_subparsers()
     orig_child1 = orig_subparsers.add_parser("sp1", formatter_class=RichHelpFormatter)
     orig_child2 = orig_subparsers.add_parser("sp2")
-    assert orig_parent.format_usage() == ("usage: PROG [-h] {sp1,sp2} ...\n")
+    if sys.version_info < (3, 14):  # pragma: <3.14 cover
+        assert orig_parent.format_usage() == ("usage: PROG [-h] {sp1,sp2} ...\n")
+    else:  # pragma: >=3.14 cover
+        # Python 3.14 adds ANSI color codes to the default usage message
+        assert orig_parent.format_usage() == (
+            "\x1b[1;34musage: \x1b[0m\x1b[1;35mPROG\x1b[0m [\x1b[32m-h\x1b[0m] \x1b[32m{sp1,sp2} ...\x1b[0m\n"
+        )
     assert orig_child1.format_usage() == (
         "\x1b[38;5;208mUsage:\x1b[0m \x1b[38;5;244mPROG sp1\x1b[0m [\x1b[36m-h\x1b[0m]\n"
     )
-    assert orig_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+    if sys.version_info < (3, 14):  # pragma: <3.14 cover
+        assert orig_child2.format_usage() == "usage: PROG sp2 [-h]\n"
+    else:  # pragma: >=3.14 cover
+        # Python 3.14 adds ANSI color codes to the default usage message
+        assert (
+            orig_child2.format_usage()
+            == "\x1b[1;34musage: \x1b[0m\x1b[1;35m\x1b[1;34m\x1b[0m\x1b[1;35mPROG\x1b[0m sp2\x1b[0m [\x1b[32m-h\x1b[0m]\n"
+        )
 
 
 @pytest.mark.parametrize("ct", string.printable)
