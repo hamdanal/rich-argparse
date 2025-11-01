@@ -715,11 +715,19 @@ def test_subparsers_usage():
     )
     if sys.version_info < (3, 14):  # pragma: <3.14 cover
         assert orig_child2.format_usage() == "usage: PROG sp2 [-h]\n"
-    else:  # pragma: >=3.14 cover
-        # Python 3.14 adds ANSI color codes to the default usage message
+    elif sys.version_info[:3] == (3, 14, 0):  # pragma: no cover
+        # Subparsers prog broken in Python 3.14.0
+        # TODO: remove when Python 3.14.1 becomes available on GitHub Actions
         assert (
             orig_child2.format_usage()
             == "\x1b[1;34musage: \x1b[0m\x1b[1;35m\x1b[1;34m\x1b[0m\x1b[1;35mPROG\x1b[0m sp2\x1b[0m [\x1b[32m-h\x1b[0m]\n"
+        )
+    else:  # pragma: >=3.15 cover
+        # Python 3.14 adds ANSI color codes to the default usage message
+        # TODO: change to 'pragma: >=3.14 cover' when Python 3.14.1 becomes available on GitHub Actions
+        assert (
+            orig_child2.format_usage()
+            == "\x1b[1;34musage: \x1b[0m\x1b[1;35mPROG sp2\x1b[0m [\x1b[32m-h\x1b[0m]\n"
         )
 
 
