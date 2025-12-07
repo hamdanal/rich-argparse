@@ -411,6 +411,8 @@ def test_usage_spans_errors():
     groups = [parser._optionals]
 
     formatter = RichHelpFormatter("PROG")
+    if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
+        formatter._set_color(False)
     with patch.object(RichHelpFormatter, "_rich_usage_spans", side_effect=ValueError):
         formatter.add_usage(usage=None, actions=actions, groups=groups, prefix=None)
     (usage,) = formatter._root_section.rich_items
