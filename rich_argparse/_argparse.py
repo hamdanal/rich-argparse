@@ -117,9 +117,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
 
     if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
 
-        def _set_color(self, color: bool) -> None:
+        def _set_color(self, color: bool, *args, **kwargs) -> None:
             # Override to disable color setting in argparse.HelpFormatter for Python 3.14+
-            return super()._set_color(False)
+            return super()._set_color(False, *args, **kwargs)
 
     class _Section(argparse.HelpFormatter._Section):
         def __init__(
