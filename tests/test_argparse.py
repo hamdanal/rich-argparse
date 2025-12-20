@@ -198,6 +198,8 @@ def test_subparsers(title, description, dest, metavar, help, required):
     subparsers.assert_format_help_equal()
 
 
+# TODO: regression in Python 3.15.0a3: https://github.com/python/cpython/issues/142950
+@pytest.mark.xfail(sys.version_info >= (3, 15), reason="regression in Python 3.15.0a3")
 @pytest.mark.usefixtures("disable_group_name_formatter")
 def test_escape_params():
     # params such as %(prog)s and %(default)s must be escaped when substituted
@@ -733,6 +735,8 @@ def test_subparsers_usage():
         )
 
 
+# TODO: regression in Python 3.15.0a3: https://github.com/python/cpython/issues/142950
+@pytest.mark.xfail(sys.version_info >= (3, 15), reason="regression in Python 3.15.0a3")
 @pytest.mark.parametrize("ct", string.printable)
 def test_expand_help_format_specifier(ct):
     prog = 1 if ct in "cdeEfFgGiouxX*" else "PROG"
@@ -740,7 +744,7 @@ def test_expand_help_format_specifier(ct):
     action = Action(["-t"], dest="test", help=f"%(prog){ct}")
     try:
         expected = help_formatter._expand_help(action)
-    except (ValueError, TypeError) as e:  # pypy raises TypeError
+    except (ValueError, TypeError) as e:
         with pytest.raises(type(e)) as exc_info:
             help_formatter._rich_expand_help(action)
         assert exc_info.value.args == e.args

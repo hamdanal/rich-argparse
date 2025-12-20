@@ -28,4 +28,4 @@ jobs:
           uv venv --python $(which python)
           uv pip install . -r tests/requirements.txt
       - name: Run the test suite
-        run: uv run pytest -vv --color=yes --cov
+        run: uv run pytest -vv --color=yes
