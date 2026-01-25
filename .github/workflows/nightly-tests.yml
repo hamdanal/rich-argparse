@@ -10,11 +10,19 @@ on:
       - "*.md"
   schedule:
     - cron: '0 8 * * *'
+  workflow_dispatch:
+  pull_request:
+    types:
+      - labeled
+      - synchronize
+      - opened
+      - reopened
 
 jobs:
   build:
     runs-on: ubuntu-latest
     name: main
+    if: contains( github.event.pull_request.labels.*.name, 'nightly') || github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v6
       - uses: deadsnakes/action@v3.2.0
