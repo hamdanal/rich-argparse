@@ -2,7 +2,7 @@ name: nightly-tests
 
 on:
   push:
-    branches: ["main", "python-nightly"]
+    branches: ["main", '*nightly*']
     paths-ignore:
       - ".vscode/**"
       - "scripts/**"
