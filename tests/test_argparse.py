@@ -198,8 +198,6 @@ def test_subparsers(title, description, dest, metavar, help, required):
     subparsers.assert_format_help_equal()
 
 
-# TODO: regression in Python 3.15.0a3: https://github.com/python/cpython/issues/142950
-@pytest.mark.xfail(sys.version_info >= (3, 15), reason="regression in Python 3.15.0a3")
 @pytest.mark.usefixtures("disable_group_name_formatter")
 def test_escape_params():
     # params such as %(prog)s and %(default)s must be escaped when substituted
@@ -735,8 +733,6 @@ def test_subparsers_usage():
         )
 
 
-# TODO: regression in Python 3.15.0a3: https://github.com/python/cpython/issues/142950
-@pytest.mark.xfail(sys.version_info >= (3, 15), reason="regression in Python 3.15.0a3")
 @pytest.mark.parametrize("ct", string.printable)
 def test_expand_help_format_specifier(ct):
     prog = 1 if ct in "cdeEfFgGiouxX*" else "PROG"
@@ -910,11 +906,11 @@ def test_rich_renderables():
 
     This is a \x1b[1mdescription\x1b[0m
 
-    \x1b[33m──────────────────────────────────────────────────────────────────────────────────────────────────\x1b[0m
+    \x1b[2m--------------------------------------------------------------------------------------------------\x1b[0m
 
-     \x1b[1m \x1b[0m\x1b[1mfoo\x1b[0m\x1b[1m \x1b[0m \x1b[1m \x1b[0m\x1b[1mbar\x1b[0m
-     ━━━━━━━━━━━
-      1     2
+    \x1b[36m \x1b[0m\x1b[36mfoo\x1b[0m\x1b[1m \x1b[0m\x1b[36m \x1b[0m\x1b[36mbar\x1b[0m
+    \x1b[36m ────────\x1b[0m
+    \x1b[36m \x1b[0m1   \x1b[36m \x1b[0m2
 
     \x1b[38;5;208mOptional Arguments:\x1b[0m
       \x1b[36m-h\x1b[0m, \x1b[36m--help\x1b[0m  \x1b[39mshow this help message and exit\x1b[0m
