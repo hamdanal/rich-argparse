@@ -1,8 +1,4 @@
 {
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportInvalidStringEscapeSequence": "warning",
-        "reportUnusedImport": "warning",
-    },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "[python]": {
