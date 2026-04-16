@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 
-from rich_argparse.contrib import ParagraphRichHelpFormatter
+from rich_argparse.contrib import ExtendedParagraphRichHelpFormatter, ParagraphRichHelpFormatter
 from tests.helpers import clean_argparse
 
 
@@ -49,5 +49,46 @@ def test_paragraph_rich_help_formatter():
 
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The
     quick brown fox jumps over the lazy dog.
+    """
+    assert parser.format_help() == clean_argparse(expected_help_output)
+
+
+def test_extended_paragraph_rich_help_formatter():
+    text = "\n\n\r\n\t The quick brown fox jumps over the lazy dog.\n\n\n- Brown fox\n\n- Lazy dog\n\n\r\n\t "
+    parser = ArgumentParser(
+        prog="PROG",
+        description=text,
+        epilog=text,
+        formatter_class=ExtendedParagraphRichHelpFormatter,
+    )
+    group = parser.add_argument_group("group", description=text)
+    group.add_argument("--long", help=text)
+
+    expected_help_output = """\
+    Usage: PROG [-h] [--long LONG]
+
+    The quick brown fox jumps over the lazy dog.
+
+    - Brown fox
+    - Lazy dog
+
+    Optional Arguments:
+      -h, --help   show this help message and exit
+
+    Group:
+      The quick brown fox jumps over the lazy dog.
+
+      - Brown fox
+      - Lazy dog
+
+      --long LONG  The quick brown fox jumps over the lazy dog.
+
+                   - Brown fox
+                   - Lazy dog
+
+    The quick brown fox jumps over the lazy dog.
+
+    - Brown fox
+    - Lazy dog
     """
     assert parser.format_help() == clean_argparse(expected_help_output)

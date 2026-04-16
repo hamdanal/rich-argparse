@@ -252,8 +252,12 @@ syntax. The following formatters are available:
   breaks. A paragraph break is defined as two consecutive newlines (`\n\n`) in the help or
   description text. Leading and trailing trailing whitespace are stripped similar to
   `RichHelpFormatter`.
+* `ExtendedParagraphRichHelpFormatter`: A formatter that preserves paragraph breaks similar to
+  `ParagraphRichHelpFormatter` but with control over paragraph spacing. A paragraph break with
+  spacing is defined as three consecutive newlines (`\n\n\n`) and a paragraph break without spacing
+  is defined as two consecutive newlines (`\n\n`).
 
-_More formatters will be added in the future._
+_Your use case is not covered by the existing formatters? Please open an issue on GitHub!_
 
 ## Django support
 
