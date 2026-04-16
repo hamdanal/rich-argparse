@@ -9,8 +9,9 @@ because they do not translate directly to argparse formatters.
 
 from __future__ import annotations
 
-from rich_argparse._contrib import ParagraphRichHelpFormatter
+from rich_argparse._contrib import ExtendedParagraphRichHelpFormatter, ParagraphRichHelpFormatter
 
 __all__ = [
+    "ExtendedParagraphRichHelpFormatter",
     "ParagraphRichHelpFormatter",
 ]

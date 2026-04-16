@@ -9,6 +9,10 @@
 - [GH-164](https://github.com/hamdanal/rich-argparse/issues/164),
   [PR-165](https://github.com/hamdanal/rich-argparse/pull/165)
   Add support for PyPy 3.11
+- [GH-180](https://github.com/hamdanal/rich-argparse/issues/180),
+  [PR-182](https://github.com/hamdanal/rich-argparse/pull/182)
+  Add `ExtendedParagraphRichHelpFormatter` to `rich_argparse.contrib`. This is similar to
+  `ParagraphRichHelpFormatter` but with better support for paragraph spacing.
 
 ## 1.7.2 - 2025-11-01
 
