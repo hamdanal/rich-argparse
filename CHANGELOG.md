@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.0 - 2026-05-01
+
 ### Features
 - [GH-155](https://github.com/hamdanal/rich-argparse/issues/155),
   [PR-160](https://github.com/hamdanal/rich-argparse/pull/160)
