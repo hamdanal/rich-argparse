@@ -24,7 +24,7 @@ jobs:
     name: main
     if: contains( github.event.pull_request.labels.*.name, 'nightly') || github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: deadsnakes/action@v3.2.0
         with:
           python-version: "3.15-dev"
