@@ -33,7 +33,8 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Install dependencies
         run: |
-          uv venv --python $(which python)
+          python -m venv .venv
+          . .venv/bin/activate
           uv pip install . -r tests/requirements.txt
       - name: Run the test suite
         run: uv run pytest -vv --color=yes
