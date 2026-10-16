@@ -24,20 +24,20 @@ if TYPE_CHECKING:
     from rich.theme import Theme as Theme
 
 __all__ = [
-    "re_ansi",
     "Console",
     "ConsoleOptions",
-    "RenderableType",
-    "RenderResult",
     "Lines",
-    "strip_control_codes",
-    "escape",
     "Padding",
+    "RenderResult",
+    "RenderableType",
     "Segment",
-    "StyleType",
     "Span",
+    "StyleType",
     "Text",
     "Theme",
+    "escape",
+    "re_ansi",
+    "strip_control_codes",
 ]
 
 

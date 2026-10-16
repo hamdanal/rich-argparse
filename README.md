@@ -84,14 +84,14 @@ class. You can use any rich style as defined [here](https://rich.readthedocs.io/
 
 ```python
 {
-    'argparse.args': 'cyan',  # for positional-arguments and --options (e.g "--help")
-    'argparse.groups': 'dark_orange',  # for group names (e.g. "positional arguments")
-    'argparse.help': 'default',  # for argument's help text (e.g. "show this help message and exit")
-    'argparse.metavar': 'dark_cyan',  # for metavariables (e.g. "FILE" in "--file FILE")
-    'argparse.prog': 'grey50',  # for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
-    'argparse.syntax': 'bold',  # for highlights of back-tick quoted text (e.g. "`some text`")
-    'argparse.text': 'default',  # for descriptions, epilog, and --version (e.g. "A program to foo")
-    'argparse.default': 'italic',  # for %(default)s in the help (e.g. "Value" in "(default: Value)")
+    "argparse.args": "cyan",  # for positional-arguments and --options (e.g "--help")
+    "argparse.groups": "dark_orange",  # for group names (e.g. "positional arguments")
+    "argparse.help": "default",  # for argument's help text (e.g. "show this help message and exit")
+    "argparse.metavar": "dark_cyan",  # for metavariables (e.g. "FILE" in "--file FILE")
+    "argparse.prog": "grey50",  # for %(prog)s in the usage (e.g. "foo" in "Usage: foo [options]")
+    "argparse.syntax": "bold",  # for highlights of back-tick quoted text (e.g. "`some text`")
+    "argparse.text": "default",  # for descriptions, epilog, and --version (e.g. "A program to foo")
+    "argparse.default": "italic",  # for %(default)s in the help (e.g. "Value" in "(default: Value)")
 }
 ```
 

@@ -466,7 +466,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 repl = next(
                     (
                         repr(m.group(1))[1:-1]
-                        for m in re.finditer(rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.X)
+                        for m in re.finditer(
+                            rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.VERBOSE
+                        )
                         if m.group("mapping") == "default"
                     ),
                     "default: %(default)s",
