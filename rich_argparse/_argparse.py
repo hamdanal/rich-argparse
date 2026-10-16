@@ -161,11 +161,11 @@ class RichHelpFormatter(argparse.HelpFormatter):
                     yield from console.render(action_header, options)
                     continue
                 action_help_lines = self.formatter._rich_split_lines(action_help, help_width)
-                if len(action_header) > help_pos - 2:
+                if action_header.cell_len > help_pos - 2:
                     # the header is too long, put it on its own line
                     yield from console.render(action_header, options)
                     action_header = indent
-                action_header.set_length(help_pos)
+                action_header.pad_right(help_pos - action_header.cell_len)
                 action_help_lines[0].rstrip()
                 yield from console.render(action_header + action_help_lines[0], options)
                 for line in action_help_lines[1:]:
@@ -254,9 +254,14 @@ class RichHelpFormatter(argparse.HelpFormatter):
         self._root_section.rich_items.append(rich_usage)
 
     def add_argument(self, action: Action) -> None:
+        action_max_length = self._action_max_length
         super().add_argument(action)
         if action.help is not argparse.SUPPRESS:
-            self._current_section.rich_actions.extend(self._rich_format_action(action))
+            rich_actions = list(self._rich_format_action(action))
+            self._action_max_length = max(
+                action_max_length, *(header.cell_len for header, _ in rich_actions)
+            )
+            self._current_section.rich_actions.extend(rich_actions)
 
     def format_help(self) -> str:
         with self.console.capture() as capture:
@@ -461,7 +466,9 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 repl = next(
                     (
                         repr(m.group(1))[1:-1]
-                        for m in re.finditer(rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.X)
+                        for m in re.finditer(
+                            rf"\[([^\]]*{printf_pat}[^\]]*)\]", help_string, re.VERBOSE
+                        )
                         if m.group("mapping") == "default"
                     ),
                     "default: %(default)s",
