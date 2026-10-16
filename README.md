@@ -68,6 +68,9 @@ https://docs.python.org/3/library/argparse.html#formatter-class):
 
 Additional formatters are available in the `rich_argparse.contrib` [module](#additional-formatters).
 
+Argument help columns use terminal display widths, keeping wide characters and combining marks
+in option names and metavars aligned with wrapped help text.
+
 ## Output styles
 
 The default styles used by *rich-argparse* are carefully chosen to work in different light and dark

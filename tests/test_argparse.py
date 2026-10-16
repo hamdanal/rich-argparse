@@ -67,6 +67,53 @@ def test_params_substitution():
     assert get_cmd_output(parser, cmd=["--version"]) == "awesome_program 1.0.0\n"
 
 
+@pytest.mark.parametrize(
+    ("option", "metavar", "help_column"),
+    (
+        ("--short", "VALUE", 17),
+        ("--短", "名", 11),
+        ("--中文", "名", 13),
+        ("--e\u0301", "e\u0301", 11),
+        ("--e\u0301e\u0301e\u0301e\u0301", "e\u0301", 12),
+    ),
+)
+def test_argument_help_display_width(option, metavar, help_column):
+    from rich.cells import cell_len
+
+    parser = ArgumentParser(
+        "PROG",
+        add_help=False,
+        usage=SUPPRESS,
+        formatter_class=lambda prog: RichHelpFormatter(prog, width=44),
+    )
+    parser.add_argument(option, metavar=metavar, help="first words " * 5)
+    parser.add_argument("--other", action="store_true", help="second words " * 5)
+
+    lines = parser.format_help().splitlines()[1:]
+    for line in lines:
+        if line.startswith("  --"):
+            help_start = line.index("first") if "first" in line else line.index("second")
+        else:
+            help_start = len(line) - len(line.lstrip())
+        assert cell_len(line[:help_start]) == help_column
+        assert cell_len(line) <= 44
+
+
+def test_wide_argument_header_on_separate_line():
+    parser = ArgumentParser(
+        "PROG",
+        add_help=False,
+        usage=SUPPRESS,
+        formatter_class=lambda prog: RichHelpFormatter(prog, max_help_position=12),
+    )
+    parser.add_argument("--中文", metavar="名字", help="description")
+    assert parser.format_help().splitlines() == [
+        "Options:",
+        "  --中文 名字",
+        "            description",
+    ]
+
+
 @pytest.mark.parametrize("prog", (None, "PROG"), ids=("no_prog", "prog"))
 @pytest.mark.parametrize("usage", (None, "USAGE"), ids=("no_usage", "usage"))
 @pytest.mark.parametrize("description", (None, "A description."), ids=("no_desc", "desc"))
