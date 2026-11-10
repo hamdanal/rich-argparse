@@ -585,13 +585,16 @@ class HelpPreviewAction(argparse.Action):
         console = r.Console(file=io.StringIO(), record=True)
         console.print(text, crop=False)
 
-        if path.endswith(".svg"):
-            self.export_kwds.setdefault("title", "")
-            console.save_svg(path, **self.export_kwds)
-        elif path.endswith(".html"):
-            console.save_html(path, **self.export_kwds)
-        elif path.endswith(".txt"):
-            console.save_text(path, **self.export_kwds)
-        else:
-            raise AssertionError("unreachable")
+        try:
+            if path.endswith(".svg"):
+                self.export_kwds.setdefault("title", "")
+                console.save_svg(path, **self.export_kwds)
+            elif path.endswith(".html"):
+                console.save_html(path, **self.export_kwds)
+            elif path.endswith(".txt"):
+                console.save_text(path, **self.export_kwds)
+            else:
+                raise AssertionError("unreachable")
+        except OSError as exc:
+            parser.exit(1, f"error: cannot write help preview to {path}: {exc.strerror or exc}\n")
         parser.exit(0, f"Help preview saved to {path}\n")
