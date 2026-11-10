@@ -1166,3 +1166,28 @@ def test_patching():
 
     with pytest.raises(TypeError, match=r"'MyArgumentParser\.not_callable' is not callable"):
         patch_default_formatter_class(MyArgumentParser, method_name="not_callable")
+
+
+def test_help_preview_action_unwritable_path(tmp_path, capsys):
+    # A preview path inside a missing directory used to crash with a raw
+    # FileNotFoundError traceback; it now exits 1 with a clean error message.
+    parser = ArgumentParser(prog="preview-test", formatter_class=RichHelpFormatter)
+    parser.add_argument(
+        "--generate-preview",
+        action=HelpPreviewAction,
+        path=str(tmp_path / "no-such-dir" / "preview.svg"),
+    )
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate-preview"])
+    assert exc_info.value.code == 1
+    assert "error: cannot write help preview" in capsys.readouterr().err
+
+
+def test_help_preview_action_writes_file(tmp_path, capsys):
+    preview = tmp_path / "preview.svg"
+    parser = ArgumentParser(prog="preview-test", formatter_class=RichHelpFormatter)
+    parser.add_argument("--generate-preview", action=HelpPreviewAction, path=str(preview))
+    with pytest.raises(SystemExit) as exc_info:
+        parser.parse_args(["--generate-preview"])
+    assert exc_info.value.code == 0
+    assert preview.is_file()

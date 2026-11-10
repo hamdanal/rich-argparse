@@ -10,10 +10,10 @@ from rich_argparse._optparse import (
 )
 
 __all__ = [
-    "RichHelpFormatter",
-    "IndentedRichHelpFormatter",
-    "TitledRichHelpFormatter",
     "GENERATE_USAGE",
+    "IndentedRichHelpFormatter",
+    "RichHelpFormatter",
+    "TitledRichHelpFormatter",
 ]
 
 
