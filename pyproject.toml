@@ -16,19 +16,19 @@ classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Software Development :: User Interfaces",
 ]
 keywords = ["argparse", "rich", "help-formatter", "optparse"]
 dependencies = [
   "rich >= 11.0.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://github.com/hamdanal/rich-argparse"
@@ -36,11 +36,23 @@ Documentation = "https://github.com/hamdanal/rich-argparse#rich-argparse"
 Issue-Tracker = "https://github.com/hamdanal/rich-argparse/issues"
 Changelog = "https://github.com/hamdanal/rich-argparse/blob/main/CHANGELOG.md"
 
+[dependency-groups]
+tests = [
+  "pytest",
+  "coverage[toml]",
+  "covdefaults",
+  "pytest-cov",
+]
+dev = [
+  {include-group = "tests"},
+  "pre-commit",
+  "uv",
+]
+
 [tool.hatch.build.targets.sdist]
 include = [
   "CHANGELOG.md",
   "CONTRIBUTING.md",
-  "requirements-dev.txt",
   "rich_argparse",
   "tests",
   "LICENSE",
@@ -56,17 +68,16 @@ line-length = 100
 
 [tool.ruff.lint]
 extend-select = ["C4", "B", "UP", "RUF100", "TID", "T10"]
-extend-ignore = ["E501"]
+extend-ignore = ["E501", "PLC0414"]
 unfixable = ["B"]
 isort.required-imports = ["from __future__ import annotations"]
 isort.extra-standard-library = ["typing_extensions"]
 flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
-local_partial_types = true
-allow_redefinition_new = true
+allow_redefinition = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]

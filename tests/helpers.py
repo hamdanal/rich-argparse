@@ -5,17 +5,11 @@ import functools
 import io
 import optparse as op
 import sys
-import textwrap
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Any, Concatenate, Generic, ParamSpec, TypeVar
 from unittest.mock import patch
 
 import pytest
-
-if sys.version_info >= (3, 10):  # pragma: >=3.10 cover
-    from typing import Concatenate, ParamSpec
-else:  # pragma: <3.10 cover
-    from typing_extensions import Concatenate, ParamSpec
 
 R = TypeVar("R")  # return type
 S = TypeVar("S")  # self type
@@ -94,7 +88,7 @@ class _SubParsersActions:
     @copy_signature(ap._SubParsersAction.add_parser)  # type: ignore[arg-type]
     def add_parser(self, /, *args, **kwds) -> ArgumentParsers:
         parsers = ArgumentParsers()
-        for parent, subparser in zip(self.parents, self.subparsers):
+        for parent, subparser in zip(self.parents, self.subparsers, strict=True):
             sp = subparser.add_parser(*args, **kwds, formatter_class=parent.formatter_class)
             parsers.parsers.append(sp)
         return parsers
@@ -140,18 +134,6 @@ class ArgumentParsers(BaseParsers[ap.ArgumentParser]):
             sp = parser.add_subparsers(*args, **kwds)
             subparsers.append(parser, sp)
         return subparsers
-
-
-def clean_argparse(text: str, dedent: bool = True) -> str:
-    """Clean argparse help text."""
-    # Can be replaced with textwrap.dedent(text) when Python 3.10 is the minimum version
-    if sys.version_info >= (3, 10):  # pragma: >=3.10 cover
-        # replace "optional arguments:" with "options:"
-        pos = text.lower().index("optional arguments:")
-        text = text[: pos + 6] + text[pos + 17 :]
-    if dedent:
-        text = textwrap.dedent(text)
-    return text
 
 
 # optparse

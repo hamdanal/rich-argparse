@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import textwrap
 from argparse import ArgumentParser
 
 from rich_argparse.contrib import ExtendedParagraphRichHelpFormatter, ParagraphRichHelpFormatter
-from tests.helpers import clean_argparse
 
 
 def test_paragraph_rich_help_formatter():
@@ -28,7 +28,7 @@ def test_paragraph_rich_help_formatter():
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The
     quick brown fox jumps over the lazy dog.
 
-    Optional Arguments:
+    Options:
       -h, --help   show this help message and exit
 
     Group:
@@ -50,7 +50,7 @@ def test_paragraph_rich_help_formatter():
     The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The
     quick brown fox jumps over the lazy dog.
     """
-    assert parser.format_help() == clean_argparse(expected_help_output)
+    assert parser.format_help() == textwrap.dedent(expected_help_output)
 
 
 def test_extended_paragraph_rich_help_formatter():
@@ -72,7 +72,7 @@ def test_extended_paragraph_rich_help_formatter():
     - Brown fox
     - Lazy dog
 
-    Optional Arguments:
+    Options:
       -h, --help   show this help message and exit
 
     Group:
@@ -91,4 +91,4 @@ def test_extended_paragraph_rich_help_formatter():
     - Brown fox
     - Lazy dog
     """
-    assert parser.format_help() == clean_argparse(expected_help_output)
+    assert parser.format_help() == textwrap.dedent(expected_help_output)

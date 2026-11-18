@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+- [PR-190](https://github.com/hamdanal/rich-argparse/pull/190)
+  Add support for Python 3.15 and drop support for Python 3.9 (EOL since 31/10/2025)
+
 ## 1.8.0 - 2026-05-01
 
 ### Features
