@@ -275,14 +275,12 @@ def test_generated_usage():
 
     usage_text = (
         "\x1b[38;5;244mPROG\x1b[0m [\x1b[36m-h\x1b[0m] "
-        "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m]  "
+        "[\x1b[36m--weird\x1b[0m \x1b[38;5;36my)\x1b[0m] "
         "\x1b[36m--required\x1b[0m \x1b[38;5;36mREQ\x1b[0m "
         "[\x1b[36m--flag\x1b[0m | \x1b[36m--not-flag\x1b[0m] "
         "(\x1b[36m-y\x1b[0m \x1b[38;5;36mY\x1b[0m | \x1b[36m-n\x1b[0m \x1b[38;5;36mN\x1b[0m) "
         "\x1b[36mfile\x1b[0m"
     )
-    if sys.version_info >= (3, 11):  # pragma: >=3.11 cover
-        usage_text = usage_text.replace("  ", " ")
 
     expected_help_output = f"""\
     \x1b[38;5;208mUsage:\x1b[0m {usage_text}

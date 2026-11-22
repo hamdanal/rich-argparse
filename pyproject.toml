@@ -16,7 +16,6 @@ classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -28,7 +27,7 @@ keywords = ["argparse", "rich", "help-formatter", "optparse"]
 dependencies = [
   "rich >= 11.0.0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [project.urls]
 Homepage = "https://github.com/hamdanal/rich-argparse"
@@ -71,11 +70,10 @@ extend-select = ["C4", "B", "UP", "RUF100", "TID", "T10"]
 extend-ignore = ["E501", "PLC0414"]
 unfixable = ["B"]
 isort.required-imports = ["from __future__ import annotations"]
-isort.extra-standard-library = ["typing_extensions"]
 flake8-tidy-imports.ban-relative-imports = "all"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 allow_redefinition = true
 

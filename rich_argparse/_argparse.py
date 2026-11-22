@@ -22,8 +22,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from argparse import Action, ArgumentParser, Namespace, _MutuallyExclusiveGroup
     from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
-    from typing import Any, ClassVar
-    from typing_extensions import Self
+    from typing import Any, ClassVar, Self
 
 
 class RichHelpFormatter(argparse.HelpFormatter):
