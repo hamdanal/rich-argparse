@@ -11,7 +11,7 @@ from rich_argparse._common import _HIGHLIGHTS, _fix_legacy_win_text, rich_fill, 
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import ClassVar, Literal
 
 GENERATE_USAGE = "==GENERATE_USAGE=="
 
@@ -19,7 +19,7 @@ GENERATE_USAGE = "==GENERATE_USAGE=="
 class RichHelpFormatter(optparse.HelpFormatter):
     """An optparse HelpFormatter class that renders using rich."""
 
-    styles: dict[str, r.StyleType] = {
+    styles: ClassVar[dict[str, r.StyleType]] = {
         "optparse.args": "cyan",
         "optparse.groups": "dark_orange",
         "optparse.help": "default",
@@ -36,11 +36,11 @@ class RichHelpFormatter(optparse.HelpFormatter):
     - ``optparse.groups``: for group names (e.g. "Options")
     - ``optparse.help``: for options's help text (e.g. "show this help message and exit")
     - ``optparse.metavar``: for meta variables (e.g. "FILE" in "--file=FILE")
-    - ``argparse.prog``: for %prog in generated usage (e.g. "foo" in "Usage: foo [options]")
+    - ``optparse.prog``: for %prog in generated usage (e.g. "foo" in "Usage: foo [options]")
     - ``optparse.syntax``: for highlights of back-tick quoted text (e.g. "``` `some text` ```"),
     - ``optparse.text``: for the descriptions and epilog (e.g. "A foo program")
     """
-    highlights: list[str] = _HIGHLIGHTS[:]
+    highlights: ClassVar[list[str]] = _HIGHLIGHTS[:]
     """A list of regex patterns to highlight in the help text.
 
     It is used in the description, epilog, groups descriptions, and arguments' help. By default,

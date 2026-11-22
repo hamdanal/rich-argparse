@@ -12,10 +12,10 @@ from rich_argparse._argparse import (
 )
 
 __all__ = [
-    "RichHelpFormatter",
+    "ArgumentDefaultsRichHelpFormatter",
+    "HelpPreviewAction",
+    "MetavarTypeRichHelpFormatter",
     "RawDescriptionRichHelpFormatter",
     "RawTextRichHelpFormatter",
-    "ArgumentDefaultsRichHelpFormatter",
-    "MetavarTypeRichHelpFormatter",
-    "HelpPreviewAction",
+    "RichHelpFormatter",
 ]

@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "pypy3.11"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15", "pypy3.11"]
         include:
           - os: windows-latest
             python-version: "3.13"
@@ -36,6 +36,6 @@ jobs:
       - name: Install dependencies
         run: |
           uv venv --python ${{ matrix.python-version }}
-          uv pip install . -r tests/requirements.txt
+          uv pip install . --group tests
       - name: Run the test suite
         run: uv run pytest -vv --color=yes --cov

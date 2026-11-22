@@ -11,7 +11,7 @@ typo fixes where an issue may not be needed).
 
 ## Getting started
 
-*python* version 3.9 or higher is required for development.
+*python* version 3.10 or higher is required for development.
 
 1. Fork the repository on GitHub.
 
@@ -38,7 +38,7 @@ typo fixes where an issue may not be needed).
 4. Install the project and its dependencies:
 
    ```sh
-   python -m pip install -r requirements-dev.txt
+   python -m pip install --group dev
    ```
 
 ## Testing
